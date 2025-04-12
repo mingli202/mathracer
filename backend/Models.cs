@@ -4,22 +4,19 @@ namespace models;
 
 public class Player
 {
-    public int id { get; set; }
-    public int progress { get; set; }
+    public int playerId { get; set; }
     public int score { get; set; }
     public bool isHost { get; set; }
     public string name { get; set; }
-
     public bool hasComplete { get; set; }
 
-    public Player(string name)
+    public Player()
     {
-        id = 0;
-        progress = 0;
+        playerId = 0;
         score = 0;
         isHost = false;
-        this.name = name;
-        hasComplete = true;
+        name = "Player";
+        hasComplete = false;
     }
 }
 
@@ -41,34 +38,39 @@ public class GameMode
     }
 }
 
-public class Game
-{
-    public string id { get; set; }
-    public GameMode gameMode { get; set; }
-    public Equation[] equations { get; set; }
-
-    public Game(string id, Equation[] eq, GameMode gameMode)
-    {
-        this.id = id;
-        this.gameMode = gameMode;
-        this.equations = eq;
-    }
-}
-
 public class Lobby
 {
     public Dictionary<int, Player> players { get; set; }
     public GameMode gameMode { get; set; }
+    public Equation[] equations { get; set; }
+    public string lobbyId { get; set; }
 
     public Lobby()
     {
         players = new Dictionary<int, Player>();
         gameMode = new GameMode();
+        equations = [];
+        lobbyId = "";
     }
 
-    public Lobby(string mode, int count)
+    public Lobby(string lobbyId, Equation[] equations, GameMode gameMode)
     {
-        players = new Dictionary<int, Player>();
-        gameMode = new GameMode(mode, count);
+        this.players = new Dictionary<int, Player>();
+        this.gameMode = gameMode;
+        this.lobbyId = lobbyId;
+        this.equations = equations;
+    }
+
+    public Player newPlayer()
+    {
+        Player player = new Player();
+        player.playerId = this.players.Count;
+
+        while (this.players.ContainsKey(player.playerId))
+        {
+            player.playerId++;
+        }
+
+        return player;
     }
 }

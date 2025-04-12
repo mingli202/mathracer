@@ -1,7 +1,8 @@
 import { z } from "zod";
+import { HubConnection } from "@microsoft/signalr";
 
 export const Player = z.object({
-  id: z.number(),
+  playerId: z.number(),
   name: z.string(),
   score: z.number(),
   isHost: z.boolean(),
@@ -19,15 +20,20 @@ export const GameMode = z.object({
   count: z.number(),
 });
 
-export const GameState = z.object({
-  id: z.string(),
+export const Lobby = z.object({
+  lobbyId: z.string(),
   gameMode: GameMode,
-  questions: z.array(Equation),
-  currentPlayer: Player,
+  equations: z.array(Equation),
   players: z.array(Player),
 });
 
 export type Player = z.infer<typeof Player>;
 export type Equation = z.infer<typeof Equation>;
 export type GameMode = z.infer<typeof GameMode>;
-export type GameState = z.infer<typeof GameState>;
+export type Lobby = z.infer<typeof Lobby>;
+
+export type GameState = {
+  lobby: Lobby;
+  currentPlayer: Player;
+  connection: HubConnection | null;
+};
