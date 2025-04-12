@@ -100,8 +100,8 @@ export default function Wrapper({ gameId, isJoining }: Props) {
     console.log("gameOps.gameId:", gameOps.gameId);
 
     await withConnection(async (c) => {
-      await c.send("ClearStats", gameOps.gameId);
-      await c.send(
+      await c.invoke("ClearStats", gameOps.gameId);
+      await c.invoke(
         "StartGame",
         gameOps.gameId,
         JSON.stringify(gameOps.gameMode),
@@ -113,7 +113,7 @@ export default function Wrapper({ gameId, isJoining }: Props) {
     console.log("gameOps.gameId:", gameOps.gameId);
 
     await connection
-      .send("RemovePlayer", gameOps.gameId, gameOps.currentPlayer.id)
+      .invoke("RemovePlayer", gameOps.gameId, gameOps.currentPlayer.id)
       .catch();
 
     dispatch({ type: "exitLobby" });
@@ -137,24 +137,22 @@ export default function Wrapper({ gameId, isJoining }: Props) {
                   setScreen("lobby");
                 }}
                 onStartSinglePlayer={async () => {
+                  await connection.invoke(
+                    "JoinLobby",
+                    gameOps.gameId,
+                    gameOps.currentPlayer.name,
+                    gameOps.gameMode.type,
+                    gameOps.gameMode.count,
+                  );
+
                   dispatch({
                     type: "setCurrentPlayer",
-                    player: { ...gameOps.currentPlayer, isSinglePlayer: true },
+                    player: {
+                      ...gameOps.currentPlayer,
+                      isSinglePlayer: true,
+                    },
                   });
-
-                  const countDownId = setInterval(() => {
-                    setCountDown((c) => c - 1);
-
-                    if (countDown == 0) {
-                      clearInterval(countDownId);
-
-                      const timerId = setInterval(() => {
-                        setTimeElapsed(timeElapsed + 1);
-                      }, 1000);
-                    }
-                  }, 1000);
-
-                  setScreen("playing");
+                  await play();
                 }}
               />
             );
