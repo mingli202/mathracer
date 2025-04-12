@@ -19,8 +19,15 @@ export const GameMode = z.object({
   count: z.number(),
 });
 
-export const Game = z.object({
+export const GameState = z.object({
   id: z.string(),
   gameMode: GameMode,
-  questions: Equation,
+  questions: z.array(Equation),
+  currentPlayer: Player,
+  players: z.array(Player),
 });
+
+export type Player = z.infer<typeof Player>;
+export type Equation = z.infer<typeof Equation>;
+export type GameMode = z.infer<typeof GameMode>;
+export type GameState = z.infer<typeof GameState>;
