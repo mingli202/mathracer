@@ -16,19 +16,24 @@ import EquationStack from "./EquationStack";
 import { GameOps, GameOpsAction } from "@/app/gameOps";
 import { Progress } from "./ui/progress";
 import { ConnectionContext } from "@/app/connectionContext";
-import { GameMode } from "@/types/game";
 
 interface Props {
   gameOps: GameOps;
   dispatch: ActionDispatch<[action: GameOpsAction]>;
   onGameEnd: () => void;
+  countDown: number;
+  timeElapsed: number;
 }
 
-function GameScreen({ gameOps, dispatch, onGameEnd }: Props) {
+function GameScreen({
+  gameOps,
+  dispatch,
+  onGameEnd,
+  countDown,
+  timeElapsed,
+}: Props) {
   const { gameMode, currentPlayer, players, equations, gameId } = gameOps;
 
-  const [countDown, setCountDown] = useState(3);
-  const [timeElapsed, setTimeElapsed] = useState(0);
   const connection = use(ConnectionContext)!;
 
   const [boxStyle, setBoxStyle] = useState("math-button-primary");
@@ -39,19 +44,6 @@ function GameScreen({ gameOps, dispatch, onGameEnd }: Props) {
   const inputRef = useRef<HTMLInputElement>(null!);
 
   const now = useMemo(() => Math.round(Date.now() / 1000), []);
-
-  useEffect(() => {
-    connection.on("CountDown", (count: number) => {
-      setCountDown(count);
-    });
-
-    connection.on("TimeElapsed", (time) => setTimeElapsed(time));
-
-    return () => {
-      connection.off("CountDown");
-      connection.off("TimeElapsed");
-    };
-  }, []);
 
   // Handle time-based game end
   useEffect(() => {
@@ -66,9 +58,11 @@ function GameScreen({ gameOps, dispatch, onGameEnd }: Props) {
           hasComplete: true,
         });
 
-        await connection
-          .send("UpdatePlayerState", gameId, currentPlayer.id, true)
-          .catch();
+        if (!currentPlayer.isSinglePlayer) {
+          await connection
+            .send("UpdatePlayerState", gameId, currentPlayer.id, true)
+            .catch();
+        }
       }
       setPlayerComplete().then(() => onGameEnd());
     }
@@ -99,9 +93,17 @@ function GameScreen({ gameOps, dispatch, onGameEnd }: Props) {
 
     inputRef.current.value = "";
 
-    await connection
-      .send("UpdateScore", gameId, currentPlayer.id, score)
-      .catch();
+    if (currentPlayer.isSinglePlayer) {
+      dispatch({
+        type: "setScore",
+        score: currentPlayer.score + 1,
+        playerId: currentPlayer.id,
+      });
+    } else {
+      await connection
+        .send("UpdateScore", gameId, currentPlayer.id, score)
+        .catch();
+    }
   }
 
   async function submitIfCorrect(answer: string) {

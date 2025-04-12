@@ -10,6 +10,7 @@ public class Player
     public bool isHost { get; set; }
     public string name { get; set; }
 
+    public bool isSinglePlayer { get; set; }
     public bool hasComplete { get; set; }
 
     public Player(string name)
@@ -20,6 +21,7 @@ public class Player
         isHost = false;
         this.name = name;
         hasComplete = true;
+        isSinglePlayer = false;
     }
 }
 

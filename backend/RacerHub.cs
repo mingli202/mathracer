@@ -70,10 +70,10 @@ public class RacerHub : Hub
 
         var lobby = lobbies[gameId].players;
 
-        /*if (!lobby.ContainsKey(id))*/
-        /*{*/
-        /*    return;*/
-        /*}*/
+        if (!lobby.ContainsKey(id))
+        {
+            return;
+        }
 
         Player p = lobby[id];
         lobby.Remove(id);
@@ -121,14 +121,17 @@ public class RacerHub : Hub
 
     public async Task StartGame(string gameId, string mode)
     {
+        System.Console.WriteLine(
+            "StartGame {0}",
+            JsonSerializer.Serialize(lobbies, new JsonSerializerOptions { WriteIndented = true })
+        );
+
         GameMode selectedMode = JsonSerializer.Deserialize<GameMode>(mode)!;
         Equation[] equations = Equation.GenerateAllEquations(
             selectedMode.count * (selectedMode.type == "time" ? 10 : 1)
         );
 
-        await Clients
-            .Groups(gameId)
-            .SendAsync("StartCountdown", JsonSerializer.Serialize(equations));
+        await Clients.Groups(gameId).SendAsync("StartGame", JsonSerializer.Serialize(equations));
 
         int count = 3;
         DateTime now = DateTime.Now;
@@ -147,11 +150,6 @@ public class RacerHub : Hub
         }
 
         await Clients.Groups(gameId).SendAsync("GameStart");
-
-        // if (selectedMode.type != "time")
-        // {
-        //     return;
-        // }
 
         int time = 0;
         elapsed = 0;

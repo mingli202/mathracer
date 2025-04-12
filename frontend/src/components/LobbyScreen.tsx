@@ -8,7 +8,9 @@ import { Player, GameMode } from "@/types/game";
 import { GameOpsAction } from "@/app/gameOps";
 import { ConnectionContext } from "@/app/connectionContext";
 
-type LobbyScreenProps = LobbyProps;
+type LobbyScreenProps = LobbyProps & {
+  dispatch: ActionDispatch<[action: GameOpsAction]>;
+};
 
 function LobbyScreen({
   gameId,
@@ -36,7 +38,6 @@ function LobbyScreen({
           selectedMode={selectedMode}
           onStartGame={onStartGame}
           onBackToMenu={onBackToMenu}
-          dispatch={dispatch}
         />
       )}
     </div>
@@ -86,7 +87,6 @@ type LobbyProps = {
   selectedMode: GameMode;
   onStartGame: () => void;
   onBackToMenu: () => void;
-  dispatch: ActionDispatch<[action: GameOpsAction]>;
 };
 function Lobby({
   gameId,
@@ -95,35 +95,11 @@ function Lobby({
   onBackToMenu,
   currentPlayer,
   onStartGame,
-  dispatch,
 }: LobbyProps) {
   const gameUrl = `http://localhost:3000?join=${gameId}`;
   const connection = use(ConnectionContext)!;
 
   useEffect(() => {
-    connection.on("SetGameMode", (mode: string) => {
-      dispatch({
-        type: "setGameMode",
-        gameMode: JSON.parse(mode),
-      });
-    });
-
-    connection.on("AddUnloadEventListener", (player: string) => {
-      const p: Player = JSON.parse(player);
-
-      const f = async () => {
-        await connection.send("RemovePlayer", gameId, p.id);
-        window.removeEventListener("beforeunload", f);
-      };
-
-      window.addEventListener("beforeunload", f);
-
-      dispatch({
-        type: "setCurrentPlayer",
-        player: p,
-      });
-    });
-
     if (!currentPlayer.hasComplete) {
       connection
         .send(
@@ -135,10 +111,6 @@ function Lobby({
         )
         .catch();
     }
-
-    return () => {
-      connection.off("AddUnloadEventListener");
-    };
   }, []);
 
   const copyInviteLink = () => {

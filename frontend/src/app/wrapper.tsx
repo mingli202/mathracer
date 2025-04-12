@@ -25,6 +25,7 @@ export default function Wrapper({ gameId, isJoining }: Props) {
     isHost: false,
     progress: 0,
     hasComplete: false,
+    isSinglePlayer: false,
   };
 
   const [screen, setScreen] = useState<GameState>(isJoining ? "lobby" : "menu");
@@ -36,43 +37,72 @@ export default function Wrapper({ gameId, isJoining }: Props) {
     equations: [],
   });
 
+  const [countDown, setCountDown] = useState(3);
+  const [timeElapsed, setTimeElapsed] = useState(0);
+
   const connection = use(ConnectionContext)!;
   const router = useRouter();
 
   useEffect(() => {
-    connection.on("StartCountdown", (req: string) => {
+    connection.on("StartGame", (req: string) => {
+      console.log("game started!!!");
       dispatch({ type: "setEquations", equations: JSON.parse(req) });
       setScreen("playing");
     });
 
     connection.on("SyncPlayers", (players: string) => {
+      console.log("sync players");
       dispatch({
         type: "setPlayers",
         players: JSON.parse(players),
       });
     });
 
+    connection.on("SetGameMode", (mode: string) => {
+      dispatch({
+        type: "setGameMode",
+        gameMode: JSON.parse(mode),
+      });
+    });
+
+    connection.on("AddUnloadEventListener", (player: string) => {
+      const p: Player = JSON.parse(player);
+
+      const f = async () => {
+        await connection.send("RemovePlayer", gameId, p.id);
+      };
+
+      window.addEventListener("beforeunload", f, { once: true });
+
+      dispatch({
+        type: "setCurrentPlayer",
+        player: p,
+      });
+    });
+
+    connection.on("CountDown", (count: number) => {
+      setCountDown(count);
+    });
+
+    connection.on("TimeElapsed", (time) => setTimeElapsed(time));
+
     return () => {
-      connection.off("StartCountdown");
+      connection.off("CountDown");
+      connection.off("TimeElapsed");
+      connection.off("StartGame");
       connection.off("SyncPlayers");
+      connection.off("SetGameMode");
+      connection.off("AddUnloadEventListener");
     };
   }, []);
 
   async function play() {
     console.log("gameOps.gameId:", gameOps.gameId);
 
-    await connection
-      .send("ClearStats", gameOps.gameId)
-      .then(() => {
-        withConnection(async (c) => {
-          await c
-            .send("StartGame", gameId, JSON.stringify(gameOps.gameMode))
-            .catch();
-        }).catch();
-      })
-      .catch();
-
-    setScreen("playing");
+    await withConnection(async (c) => {
+      await c.send("ClearStats", gameOps.gameId);
+      await c.send("StartGame", gameId, JSON.stringify(gameOps.gameMode));
+    });
   }
 
   async function exitLobby() {
@@ -103,17 +133,24 @@ export default function Wrapper({ gameId, isJoining }: Props) {
                   setScreen("lobby");
                 }}
                 onStartSinglePlayer={async () => {
-                  await connection
-                    .send(
-                      "JoinLobby",
-                      gameOps.gameId,
-                      gameOps.currentPlayer.name,
-                      gameOps.gameMode.type,
-                      gameOps.gameMode.count,
-                    )
-                    .catch();
+                  dispatch({
+                    type: "setCurrentPlayer",
+                    player: { ...gameOps.currentPlayer, isSinglePlayer: true },
+                  });
 
-                  await play();
+                  const countDownId = setInterval(() => {
+                    setCountDown((c) => c - 1);
+
+                    if (countDown == 0) {
+                      clearInterval(countDownId);
+
+                      const timerId = setInterval(() => {
+                        setTimeElapsed(timeElapsed + 1);
+                      }, 1000);
+                    }
+                  }, 1000);
+
+                  setScreen("playing");
                 }}
               />
             );
@@ -147,6 +184,8 @@ export default function Wrapper({ gameId, isJoining }: Props) {
                 }}
                 gameOps={gameOps}
                 dispatch={dispatch}
+                countDown={countDown}
+                timeElapsed={timeElapsed}
               />
             );
           case "results":
@@ -157,7 +196,7 @@ export default function Wrapper({ gameId, isJoining }: Props) {
                 gameMode={gameOps.gameMode}
                 onBackToMenu={exitLobby}
                 onPlayAgain={() => {
-                  if (gameOps.players.length == 1) {
+                  if (gameOps.currentPlayer.isSinglePlayer) {
                     play();
                   } else {
                     setScreen("lobby");

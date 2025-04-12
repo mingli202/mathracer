@@ -5,6 +5,7 @@ export interface Player {
   isHost: boolean;
   progress: number;
   hasComplete: boolean;
+  isSinglePlayer: boolean;
 }
 
 export interface Equation {

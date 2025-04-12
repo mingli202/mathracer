@@ -14,14 +14,27 @@ export default function Page() {
   const [conn, setConn] = useState<HubConnection | null>(null);
 
   useEffect(() => {
-    const connection = new HubConnectionBuilder()
-      .withUrl("http://localhost:5103/hub")
-      .build();
+    const id = setInterval(() => {
+      const connection = new HubConnectionBuilder()
+        .withUrl("http://localhost:5103/hub")
+        .build();
 
-    connection
-      .start()
-      .then(() => setConn(connection))
-      .catch(() => setConn(null));
+      connection
+        .start()
+        .then(() => {
+          clearInterval(id);
+          setConn(connection);
+        })
+        .catch(() => {
+          setConn(null);
+        });
+    }, 1000);
+
+    return () => {
+      if (conn) {
+        conn.stop();
+      }
+    };
   }, []);
 
   return !conn ? (
