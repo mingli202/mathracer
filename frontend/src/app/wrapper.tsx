@@ -101,7 +101,11 @@ export default function Wrapper({ gameId, isJoining }: Props) {
 
     await withConnection(async (c) => {
       await c.send("ClearStats", gameOps.gameId);
-      await c.send("StartGame", gameId, JSON.stringify(gameOps.gameMode));
+      await c.send(
+        "StartGame",
+        gameOps.gameId,
+        JSON.stringify(gameOps.gameMode),
+      );
     });
   }
 
