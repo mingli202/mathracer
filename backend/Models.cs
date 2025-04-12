@@ -71,6 +71,8 @@ public class Lobby
             player.playerId++;
         }
 
+        this.players.Add(player.playerId, player);
+
         return player;
     }
 }

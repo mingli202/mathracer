@@ -30,6 +30,8 @@ public class RacerHub : Hub
         Lobby lobby = new Lobby(lobbyId, equations, gameMode);
         Player player = lobby.newPlayer();
 
+        lobbies.Add(lobbyId, lobby);
+
         return JsonSerializer.Serialize(new { player = player, lobby = lobby });
     }
 }
