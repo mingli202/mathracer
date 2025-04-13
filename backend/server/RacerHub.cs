@@ -14,7 +14,7 @@ public class RacerHub : Hub
         return JsonSerializer.Serialize(lobbies);
     }
 
-    public string CreateLobby(string gmode)
+    public async Task<string> CreateLobby(string gmode, string name)
     {
         GameMode gameMode = JsonSerializer.Deserialize<GameMode>(gmode)!;
 
@@ -36,6 +36,7 @@ public class RacerHub : Hub
         Player player = lobby.newPlayer();
 
         lobbies.Add(lobbyId, lobby);
+        await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
 
         return JsonSerializer.Serialize(new { player = player, lobby = lobby });
     }
