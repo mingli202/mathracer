@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { exitLobby, GameStateContext } from "@/gameState";
 import { Home, RotateCcw, Trophy } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { use } from "react";
 
 export default function ResultsPage() {
   const { gameState, dispatch } = use(GameStateContext);
-  const { lobby, currentPlayer } = gameState;
+  const { lobby, currentPlayer, connection } = gameState;
   const { gameMode, players, lobbyId } = lobby;
+  const router = useRouter();
 
   const highestScore =
     gameMode.type === "equations"
@@ -90,12 +92,19 @@ export default function ResultsPage() {
       </div>
 
       <div className="flex flex-col gap-3 pt-4 sm:flex-row">
-        <Link href="/lobby" className="w-full">
-          <Button className="math-button-primary flex w-full flex-1 items-center justify-center gap-2">
-            <RotateCcw size={18} />
-            <span>Play Again</span>
-          </Button>
-        </Link>
+        <Button
+          className="math-button-primary flex w-full flex-1 items-center justify-center gap-2"
+          onClick={() => {
+            if (players.length > 1) {
+              router.push("/lobby");
+            } else {
+              connection!.send("MoveToGameScreen", lobbyId);
+            }
+          }}
+        >
+          <RotateCcw size={18} />
+          <span>Play Again</span>
+        </Button>
 
         <Link href="/" className="w-full">
           <Button

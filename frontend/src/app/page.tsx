@@ -6,10 +6,12 @@ import GameModeCard from "@/components/GameModeCard";
 import Link from "next/link";
 import { GameMode } from "@/types";
 import { use } from "react";
-import { GameStateContext } from "@/gameState";
+import { createLobby, GameStateContext } from "@/gameState";
 
 export default function Page() {
-  const { dispatch } = use(GameStateContext);
+  const { dispatch, gameState } = use(GameStateContext);
+  const { connection, lobby } = gameState;
+  const { lobbyId, gameMode } = lobby;
 
   function onSelectMode(mode: GameMode) {
     dispatch({ type: "selectMode", mode });
@@ -32,6 +34,10 @@ export default function Page() {
             variant="outline"
             size="lg"
             className="math-button-accent flex h-16 w-full items-center justify-center gap-2"
+            onClick={async () => {
+              await createLobby("Player", gameMode, connection!, dispatch);
+              connection!.send("MoveToGameScreen", lobbyId);
+            }}
           >
             <User size={20} />
             <span>Single Player</span>
