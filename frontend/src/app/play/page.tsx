@@ -131,8 +131,6 @@ export default function PlayPage() {
     return 0;
   };
 
-  console.log("progress: ", calculateProgress());
-
   // Format progress text based on game mode
   const getProgressText = () => {
     if (gameMode.type === "equations") {

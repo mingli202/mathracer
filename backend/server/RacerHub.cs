@@ -128,6 +128,10 @@ public class RacerHub : Hub
 
     public async Task MoveToGameScreen(string lobbyId)
     {
+        if (!lobbies.ContainsKey(lobbyId))
+        {
+            return;
+        }
         lobbies[lobbyId].ClearStats(lobbyId);
         await SyncPlayers(lobbyId);
         await Clients.Groups(lobbyId).SendAsync("MoveToGameScreen");
