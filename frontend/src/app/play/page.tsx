@@ -4,9 +4,9 @@ import EquationStack from "@/components/EquationStack";
 import PlayerList from "@/components/PlayerList";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import { GameStateContext, updatePlayerState } from "@/gameState";
 import { withConnection } from "@/utils/connection";
-import { Progress } from "@radix-ui/react-progress";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useMemo, useRef, useState } from "react";
 
@@ -95,12 +95,6 @@ export default function PlayPage() {
       score = Math.round(Date.now() / 1000) - now;
     }
 
-    //dispatch({
-    //  type: "setScore",
-    //  playerId: currentPlayer.playerId,
-    //  score,
-    //});
-
     inputRef.current.value = "";
 
     await connection
@@ -136,6 +130,8 @@ export default function PlayPage() {
     }
     return 0;
   };
+
+  console.log("progress: ", calculateProgress());
 
   // Format progress text based on game mode
   const getProgressText = () => {
