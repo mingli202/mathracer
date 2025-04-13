@@ -9,6 +9,11 @@ public class RacerHub : Hub
 {
     private static Dictionary<string, Lobby> lobbies = new Dictionary<string, Lobby>();
 
+    public string GetLobbies()
+    {
+        return JsonSerializer.Serialize(lobbies);
+    }
+
     public string CreateLobby(string gmode)
     {
         GameMode gameMode = JsonSerializer.Deserialize<GameMode>(gmode)!;
