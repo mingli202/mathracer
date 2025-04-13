@@ -2,16 +2,11 @@
 
 import PlayerList from "@/components/PlayerList";
 import { Button } from "@/components/ui/button";
-import {
-  createLobby,
-  exitLobby,
-  GameStateContext,
-  joinLobby,
-} from "@/gameState";
+import { createLobby, GameStateContext, joinLobby } from "@/gameState";
 import { ArrowLeft, Copy, Play, Share2 } from "lucide-react";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { use, useState } from "react";
 
 export default function LobbyPage() {
   const urlSearchParams = useSearchParams();
@@ -23,27 +18,6 @@ export default function LobbyPage() {
 
   const [showNameDialogue, setShowNameDialogue] = useState(true);
   const router = useRouter();
-
-  useEffect(() => {
-    (async function () {
-      if (!showNameDialogue) {
-        if (joinId) {
-          if (
-            !(await joinLobby(
-              joinId,
-              gameState.currentPlayer.name,
-              gameState.connection!,
-              dispatch,
-            ))
-          ) {
-            router.push("/");
-          }
-        } else {
-          await createLobby(gameState, gameState.connection!, dispatch);
-        }
-      }
-    })();
-  }, [showNameDialogue]);
 
   const gameUrl = `http://localhost:3000/lobby?join=${lobbyId}`;
   const copyInviteLink = () => {
@@ -86,11 +60,33 @@ export default function LobbyPage() {
           <p>Join as...</p>
           <form
             className="w-60"
-            action={(formdata) => {
+            action={async (formdata) => {
+              const name = formdata.get("name")?.toString() ?? "Guest";
               dispatch({
                 type: "setName",
-                name: formdata.get("name")?.toString() ?? "Guest",
+                name,
               });
+
+              if (joinId) {
+                if (
+                  !(await joinLobby(
+                    joinId,
+                    name,
+                    gameState.connection!,
+                    dispatch,
+                  ))
+                ) {
+                  return router.push("/");
+                }
+              } else {
+                await createLobby(
+                  name,
+                  gameMode,
+                  gameState.connection!,
+                  dispatch,
+                );
+              }
+
               setShowNameDialogue(false);
             }}
           >

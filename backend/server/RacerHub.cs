@@ -102,7 +102,7 @@ public class RacerHub : Hub
 
     public async Task ExitLobby(string lobbyId, string playerId)
     {
-        Console.WriteLine("ExitLobby");
+        Console.WriteLine("lobbyId: {0}, playerId: {1}", lobbyId, playerId);
         if (!lobbies.ContainsKey(lobbyId))
         {
             return;
@@ -110,8 +110,15 @@ public class RacerHub : Hub
         Lobby lobby = lobbies[lobbyId];
         lobby.RemovePlayer(playerId);
 
+        if (lobby.players.Count == 0)
+        {
+            lobbies.Remove(lobbyId);
+        }
+
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, lobbyId);
         await SyncPlayers(lobbyId);
+
+        PrintLobbies("ExitLobby");
     }
 
     public void StopConnection()

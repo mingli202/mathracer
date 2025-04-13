@@ -64,6 +64,7 @@ export function GameStateWrapper({ children }: { children: React.ReactNode }) {
         "beforeunload",
         () => {
           exitLobby(c, lobbyId, playerId, dispatch);
+          // c.stop();
         },
         { once: true },
       );
@@ -189,7 +190,8 @@ export function gameStateReducer(
 }
 
 export async function createLobby(
-  gameState: GameState,
+  name: string,
+  gameMode: GameMode,
   conn: HubConnection,
   dispatch: ActionDispatch<[action: GameStateAction]>,
 ) {
@@ -197,11 +199,7 @@ export async function createLobby(
     .object({ player: Player, lobby: Lobby })
     .parse(
       JSON.parse(
-        await conn.invoke(
-          "CreateLobby",
-          JSON.stringify(gameState.lobby.gameMode),
-          gameState.currentPlayer.name,
-        ),
+        await conn.invoke("CreateLobby", JSON.stringify(gameMode), name),
       ),
     );
 
