@@ -14,7 +14,7 @@ const defaultState = {
   },
   currentPlayer: {
     playerId: "",
-    hasComplete: false,
+    state: "lobby",
     isHost: false,
     name: "Player",
     score: 0,
@@ -180,7 +180,7 @@ export function gameStateReducer(
         },
         currentPlayer: {
           playerId: "",
-          hasComplete: false,
+          state: "lobby",
           isHost: false,
           name: "Player",
           score: 0,

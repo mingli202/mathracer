@@ -4,13 +4,22 @@ using equation;
 
 namespace models;
 
+public enum PlayerState
+{
+    playing,
+    lobby,
+    completed,
+}
+
 public class Player
 {
     public string playerId { get; set; }
     public int score { get; set; }
     public bool isHost { get; set; }
     public string name { get; set; }
-    public bool hasComplete { get; set; }
+
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public PlayerState state { get; set; }
 
     public Player()
     {
@@ -18,7 +27,7 @@ public class Player
         score = 0;
         isHost = false;
         name = "Player";
-        hasComplete = false;
+        state = PlayerState.lobby;
     }
 
     public Player(string name, string id)
@@ -27,7 +36,7 @@ public class Player
         score = 0;
         isHost = false;
         this.name = name;
-        hasComplete = false;
+        state = PlayerState.lobby;
     }
 }
 
@@ -136,7 +145,7 @@ public class LobbyPlayersConverter : JsonConverter<Dictionary<string, Player>>
             writer.WriteNumber("score", p.score);
             writer.WriteBoolean("isHost", p.isHost);
             writer.WriteString("name", p.name);
-            writer.WriteBoolean("hasComplete", p.hasComplete);
+            writer.WriteString("state", p.state.ToString());
 
             writer.WriteEndObject();
         }

@@ -22,10 +22,10 @@ const PlayerList: React.FC<PlayerListProps> = ({
   const sortedPlayers =
     gameMode.type === "equations"
       ? [...players].sort((a, b) => {
-          if (a.hasComplete && !b.hasComplete) return -1;
-          if (!a.hasComplete && b.hasComplete) return 1;
+          if (a.state && !b.state) return -1;
+          if (!a.state && b.state) return 1;
 
-          if (a.hasComplete && b.hasComplete) {
+          if (a.state && b.state) {
             return a.score - b.score;
           }
           return b.score - a.score;
@@ -64,9 +64,7 @@ const PlayerList: React.FC<PlayerListProps> = ({
             <div className="ml-auto flex items-center">
               <div className="text-xl font-bold">{player.score}</div>
               <div className="text-muted-foreground ml-1 text-xs">
-                {gameMode.type === "equations" && player.hasComplete
-                  ? "s"
-                  : "pts"}
+                {gameMode.type === "equations" && player.state ? "s" : "pts"}
               </div>
             </div>
           )}

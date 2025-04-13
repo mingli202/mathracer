@@ -6,7 +6,7 @@ export const Player = z.object({
   name: z.string(),
   score: z.number(),
   isHost: z.boolean(),
-  hasComplete: z.boolean(),
+  state: z.enum(["playing", "lobby", "completed"]),
 });
 
 export const Equation = z.object({

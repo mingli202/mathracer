@@ -48,7 +48,7 @@ export default function LobbyPage() {
     }
   };
   const canStart = (): boolean => {
-    return !players.some((p) => !p.hasComplete);
+    return !players.some((p) => !p.state);
   };
   // Display game mode info
   const getModeDescription = () => {
@@ -61,7 +61,7 @@ export default function LobbyPage() {
 
   return (
     <div className="animate-fade-in flex max-w-2xl flex-col items-center justify-center space-y-6">
-      {showNameDialogue && !currentPlayer.hasComplete ? (
+      {showNameDialogue && currentPlayer.state === "lobby" ? (
         <div className="flex h-full w-full flex-col items-center justify-center">
           <p>Join as...</p>
           <form
@@ -191,7 +191,7 @@ export default function LobbyPage() {
 
             {(players.length < 2 || !canStart()) && (
               <p className="text-muted-foreground mt-4 text-center text-sm">
-                Waiting for more players to join...
+                Waiting for players...
               </p>
             )}
           </div>
