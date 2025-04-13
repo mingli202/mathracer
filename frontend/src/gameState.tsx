@@ -1,3 +1,5 @@
+"use client";
+
 import { GameMode, GameState, Lobby, Player } from "@/types";
 import { newConnection } from "@/utils/connection";
 import { HubConnection } from "@microsoft/signalr";

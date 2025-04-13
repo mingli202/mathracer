@@ -31,7 +31,7 @@ export default function Page() {
           <Button
             variant="outline"
             size="lg"
-            className="math-button-accent flex h-16 items-center justify-center gap-2"
+            className="math-button-accent flex h-16 w-full items-center justify-center gap-2"
           >
             <User size={20} />
             <span>Single Player</span>
@@ -42,7 +42,7 @@ export default function Page() {
           <Button
             variant="outline"
             size="lg"
-            className="math-button-primary flex h-16 items-center justify-center gap-2"
+            className="math-button-primary flex h-16 w-full items-center justify-center gap-2"
           >
             <PlusCircle size={20} />
             <span>Create Game</span>
@@ -53,7 +53,7 @@ export default function Page() {
           <Button
             variant="outline"
             size="lg"
-            className="math-button-secondary flex h-16 items-center justify-center gap-2"
+            className="math-button-secondary flex h-16 w-full items-center justify-center gap-2"
           >
             <Users size={20} />
             <span>Join Game</span>
