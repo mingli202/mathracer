@@ -1,12 +1,12 @@
 import React from "react";
 import { User } from "lucide-react";
-import { GameMode, Player } from "@/types/game";
+import { GameMode, Player } from "@/types";
 import { cn } from "@/lib/utils";
 
 interface PlayerListProps {
   players: Player[];
   showScores?: boolean;
-  currentPlayerId: number;
+  currentPlayerId: string;
   gameMode: GameMode;
   //isResults: boolean;
 }
@@ -36,10 +36,10 @@ const PlayerList: React.FC<PlayerListProps> = ({
     <div className="space-y-2">
       {sortedPlayers.map((player) => (
         <div
-          key={player.id}
+          key={player.playerId}
           className={cn(
             "player-card",
-            player.id === currentPlayerId && "border-primary border-2",
+            player.playerId === currentPlayerId && "border-primary border-2",
             showScores &&
               player.score === Math.max(...players.map((p) => p.score)) &&
               "bg-accent/30",

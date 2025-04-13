@@ -20,7 +20,7 @@ const defaultState = {
     score: 0,
   },
   connection: null,
-} as GameState;
+} satisfies GameState;
 
 export const GameStateContext = createContext<{
   gameState: GameState;
@@ -59,8 +59,19 @@ export function GameStateWrapper({ children }: { children: React.ReactNode }) {
       dispatch({ type: "setPlayers", players });
     });
 
+    c.on("AddUnloadEventListener", (lobbyId: string, playerId: string) => {
+      window.addEventListener(
+        "beforeunload",
+        () => {
+          exitLobby(c, lobbyId, playerId, dispatch);
+        },
+        { once: true },
+      );
+    });
+
     return () => {
       c.off("SyncPlayers");
+      c.off("AddUnloadEventListener");
     };
   }, [gameState.connection]);
 
@@ -88,6 +99,13 @@ export type GameStateAction =
   | {
       type: "setConnection";
       connection: HubConnection | null;
+    }
+  | {
+      type: "setName";
+      name: string;
+    }
+  | {
+      type: "exitLobby";
     };
 
 export function gameStateReducer(
@@ -130,6 +148,43 @@ export function gameStateReducer(
         ...state,
         connection: action.connection,
       };
+
+    case "setName":
+      return {
+        ...state,
+        currentPlayer: {
+          ...currentPlayer,
+          name: action.name,
+        },
+        lobby: {
+          ...lobby,
+          players: lobby.players.map((p) =>
+            p.playerId === currentPlayer.playerId
+              ? {
+                  ...currentPlayer,
+                  name: action.name,
+                }
+              : p,
+          ),
+        },
+      };
+
+    case "exitLobby":
+      return {
+        ...state,
+        lobby: {
+          ...lobby,
+          players: [],
+          equations: [],
+        },
+        currentPlayer: {
+          playerId: "",
+          hasComplete: false,
+          isHost: false,
+          name: "Player",
+          score: 0,
+        },
+      };
   }
 }
 
@@ -162,7 +217,7 @@ export async function joinLobby(
   name: string,
   conn: HubConnection,
   dispatch: ActionDispatch<[action: GameStateAction]>,
-) {
+): Promise<boolean> {
   try {
     const res: { player: Player; lobby: Lobby } = z
       .object({
@@ -176,19 +231,20 @@ export async function joinLobby(
       lobby: res.lobby,
       currentPlayer: res.player,
     });
+    return true;
   } catch (e) {
+    console.log(e);
     alert("this lobby doesn't exist!");
+    return false;
   }
 }
 
 export async function exitLobby(
-  gameState: GameState,
+  connection: HubConnection,
+  lobbyId: string,
+  playerId: string,
   dispatch: ActionDispatch<[action: GameStateAction]>,
 ) {
-  const c = gameState.connection;
-  const { lobby, currentPlayer } = gameState;
-  if (c) {
-    await c.invoke("RemovePlayer", lobby.lobbyId, currentPlayer.playerId);
-    await c.stop();
-  }
+  await connection.invoke("ExitLobby", lobbyId, playerId);
+  dispatch({ type: "exitLobby" });
 }

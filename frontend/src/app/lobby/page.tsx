@@ -1,54 +1,190 @@
 "use client";
 
-import { createLobby, GameStateContext, joinLobby } from "@/gameState";
+import PlayerList from "@/components/PlayerList";
+import { Button } from "@/components/ui/button";
+import {
+  createLobby,
+  exitLobby,
+  GameStateContext,
+  joinLobby,
+} from "@/gameState";
+import { ArrowLeft, Copy, Play, Share2 } from "lucide-react";
 
-import { useSearchParams } from "next/navigation";
-import { use, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { use, useEffect, useState } from "react";
 
 export default function LobbyPage() {
   const urlSearchParams = useSearchParams();
   const joinId = urlSearchParams.get("join");
 
   const { gameState, dispatch } = use(GameStateContext);
-
   const { currentPlayer, lobby } = gameState;
+  const { lobbyId, players, gameMode } = lobby;
+
+  const [showNameDialogue, setShowNameDialogue] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    if (joinId) {
-      joinLobby(
-        joinId,
-        gameState.currentPlayer.name,
-        gameState.connection!,
-        dispatch,
-      );
+    (async function () {
+      if (!showNameDialogue) {
+        if (joinId) {
+          if (
+            !(await joinLobby(
+              joinId,
+              gameState.currentPlayer.name,
+              gameState.connection!,
+              dispatch,
+            ))
+          ) {
+            router.push("/");
+          }
+        } else {
+          await createLobby(gameState, gameState.connection!, dispatch);
+        }
+      }
+    })();
+  }, [showNameDialogue]);
+
+  const gameUrl = `http://localhost:3000/lobby?join=${lobbyId}`;
+  const copyInviteLink = () => {
+    navigator.clipboard.writeText(gameUrl);
+    //toast.success("Invite link copied to clipboard");
+  };
+
+  const shareInviteLink = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Join my Math Race Quest game!",
+          text: "Join me for a math racing challenge!",
+          url: gameUrl,
+        });
+      } catch (err) {
+        console.error("Error sharing:", err);
+        copyInviteLink();
+      }
     } else {
-      createLobby(gameState, gameState.connection!, dispatch);
+      copyInviteLink();
     }
-  }, []);
+  };
+  const canStart = (): boolean => {
+    return !players.some((p) => !p.hasComplete);
+  };
+  // Display game mode info
+  const getModeDescription = () => {
+    if (gameMode.type === "equations") {
+      return `First to solve ${gameMode.count} equations wins`;
+    } else {
+      return `Solve the most equations in ${gameMode.count} seconds`;
+    }
+  };
 
   return (
-    <div>
-      <p>
-        isHost:
-        {currentPlayer.isHost ? "true" : "false"}
-      </p>
-      <p>
-        id:
-        {currentPlayer.playerId}
-      </p>
-      <p>
-        lobbyId:
-        {lobby.lobbyId}
-      </p>
-      <div>
-        players:
-        {lobby.players.map((p) => (
-          <p key={p.playerId}>
-            {p.isHost ? "true" : "false"}
-            {p.playerId} {p.name}
-          </p>
-        ))}
-      </div>
+    <div className="animate-fade-in flex max-w-2xl flex-col items-center justify-center space-y-6">
+      {showNameDialogue && !currentPlayer.hasComplete ? (
+        <div className="flex h-full w-full flex-col items-center justify-center">
+          <p>Join as...</p>
+          <form
+            className="w-60"
+            action={(formdata) => {
+              dispatch({
+                type: "setName",
+                name: formdata.get("name")?.toString() ?? "Guest",
+              });
+              setShowNameDialogue(false);
+            }}
+          >
+            <label htmlFor="name" />
+            <input
+              className="w-full p-2 outline-none placeholder:italic"
+              placeholder="name..."
+              id="name"
+              name="name"
+              type="text"
+              autoFocus
+            />
+            <div className="bg-secondary h-0.5 w-full rounded-full" />
+            <Button className="mt-2 w-full" type="submit">
+              Ok
+            </Button>
+          </form>
+        </div>
+      ) : (
+        <>
+          <div className="w-full">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mb-4 flex items-center gap-2"
+            >
+              <ArrowLeft size={16} />
+              <span>Back to Menu</span>
+            </Button>
+
+            <h1 className="mb-2 text-center text-3xl font-bold">Game Lobby</h1>
+            <p className="text-muted-foreground mb-6 text-center">
+              {getModeDescription()}
+            </p>
+          </div>
+
+          <div className="bg-secondary/30 border-secondary w-full rounded-lg border p-4">
+            <div className="mb-2 flex flex-col items-center justify-between gap-3 md:flex-row">
+              <div className="text-sm font-medium">
+                Share this link to invite players:
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={copyInviteLink}
+                  className="flex items-center gap-1"
+                >
+                  <Copy size={14} />
+                  <span>Copy</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={shareInviteLink}
+                  className="flex items-center gap-1"
+                >
+                  <Share2 size={14} />
+                  <span>Share</span>
+                </Button>
+              </div>
+            </div>
+            <div className="bg-background truncate rounded border p-2 text-xs">
+              {gameUrl}
+            </div>
+          </div>
+
+          <div className="w-full">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">
+                Players ({players.length})
+              </h2>
+              {currentPlayer.isHost && players.length > 1 && canStart() && (
+                <Button className="math-button-primary flex items-center gap-2">
+                  <Play size={16} />
+                  <span>Start Game</span>
+                </Button>
+              )}
+            </div>
+
+            <PlayerList
+              players={players}
+              currentPlayerId={currentPlayer.playerId}
+              gameMode={gameMode}
+            />
+
+            {(players.length < 2 || !canStart()) && (
+              <p className="text-muted-foreground mt-4 text-center text-sm">
+                Waiting for more players to join...
+              </p>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -83,6 +83,14 @@ public class Lobby
 
         return player;
     }
+
+    public void RemovePlayer(string id)
+    {
+        if (this.players.ContainsKey(id))
+        {
+            this.players.Remove(id);
+        }
+    }
 }
 
 public class LobbyPlayersConverter : JsonConverter<Dictionary<string, Player>>

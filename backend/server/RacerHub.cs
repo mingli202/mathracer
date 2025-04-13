@@ -67,9 +67,12 @@ public class RacerHub : Hub
 
         lobbies.Add(lobbyId, lobby);
         await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
-        Console.WriteLine(Context.ConnectionId);
 
         PrintLobbies("CreateLobby");
+
+        await Clients
+            .Client(Context.ConnectionId)
+            .SendAsync("AddUnloadEventListener", lobbyId, player.playerId);
 
         return JsonSerializer.Serialize(new { player = player, lobby = lobby });
     }
@@ -85,16 +88,31 @@ public class RacerHub : Hub
         Player player = lobby.NewPlayer(name, Context.ConnectionId);
 
         await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
-        Console.WriteLine(Context.ConnectionId);
 
         await SyncPlayers(lobbyId);
 
         PrintLobbies("JoinLobby");
 
+        await Clients
+            .Client(Context.ConnectionId)
+            .SendAsync("AddUnloadEventListener", lobbyId, player.playerId);
+
         return JsonSerializer.Serialize(new { player = player, lobby = lobby });
     }
 
-    // public async Task ExitLobby(string lobbyId, string playerId) { }
+    public async Task ExitLobby(string lobbyId, string playerId)
+    {
+        Console.WriteLine("ExitLobby");
+        if (!lobbies.ContainsKey(lobbyId))
+        {
+            return;
+        }
+        Lobby lobby = lobbies[lobbyId];
+        lobby.RemovePlayer(playerId);
+
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, lobbyId);
+        await SyncPlayers(lobbyId);
+    }
 
     public void StopConnection()
     {
