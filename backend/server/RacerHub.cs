@@ -14,6 +14,19 @@ public class RacerHub : Hub
         return JsonSerializer.Serialize(lobbies);
     }
 
+    public async Task SyncPlayers(string lobbyId)
+    {
+        string json = "[]";
+
+        if (lobbies.ContainsKey(lobbyId))
+        {
+            Dictionary<int, Player> lobby = lobbies[lobbyId].players;
+            json = JsonSerializer.Serialize(lobby.Values);
+        }
+
+        await Clients.Groups(lobbyId).SendAsync("SyncPlayers", json);
+    }
+
     public async Task<string> CreateLobby(string gmode, string name)
     {
         GameMode gameMode = JsonSerializer.Deserialize<GameMode>(gmode)!;
@@ -33,10 +46,27 @@ public class RacerHub : Hub
         );
 
         Lobby lobby = new Lobby(lobbyId, equations, gameMode);
-        Player player = lobby.newPlayer();
+        Player player = lobby.NewPlayer(name);
+        player.isHost = true;
 
         lobbies.Add(lobbyId, lobby);
         await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
+
+        return JsonSerializer.Serialize(new { player = player, lobby = lobby });
+    }
+
+    public async Task<string> JoinLobby(string lobbyId, string name)
+    {
+        if (lobbies.ContainsKey(lobbyId) == false)
+        {
+            return "";
+        }
+
+        Lobby lobby = lobbies[lobbyId];
+        Player player = lobby.NewPlayer(name);
+
+        await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
+        await SyncPlayers(lobbyId);
 
         return JsonSerializer.Serialize(new { player = player, lobby = lobby });
     }

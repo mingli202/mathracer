@@ -18,6 +18,15 @@ public class Player
         name = "Player";
         hasComplete = false;
     }
+
+    public Player(string name)
+    {
+        playerId = 0;
+        score = 0;
+        isHost = false;
+        this.name = name;
+        hasComplete = false;
+    }
 }
 
 public class GameMode
@@ -61,9 +70,9 @@ public class Lobby
         this.equations = equations;
     }
 
-    public Player newPlayer()
+    public Player NewPlayer(string name)
     {
-        Player player = new Player();
+        Player player = new Player(name);
         player.playerId = this.players.Count;
 
         while (this.players.ContainsKey(player.playerId))
