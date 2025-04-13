@@ -2,6 +2,7 @@
 
 import { GameMode, GameState, Lobby, Player } from "@/types";
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
+import { useRouter } from "next/navigation";
 import { ActionDispatch, createContext, useEffect, useReducer } from "react";
 import { z } from "zod";
 
@@ -32,6 +33,7 @@ export const GameStateContext = createContext<{
 
 export function GameStateWrapper({ children }: { children: React.ReactNode }) {
   const [gameState, dispatch] = useReducer(gameStateReducer, defaultState);
+  const router = useRouter();
 
   useEffect(() => {
     (async function () {
@@ -70,9 +72,12 @@ export function GameStateWrapper({ children }: { children: React.ReactNode }) {
       );
     });
 
+    c.on("MoveToGameScreen", () => router.push("/play"));
+
     return () => {
       c.off("SyncPlayers");
       c.off("AddUnloadEventListener");
+      c.off("MoveToGameScreen");
     };
   }, [gameState.connection]);
 

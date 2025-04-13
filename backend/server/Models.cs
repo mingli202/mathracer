@@ -118,6 +118,14 @@ public class Lobby
         // check if all players are playing
         return this.players.Values.All(p => p.state == PlayerState.playing);
     }
+
+    public void ClearStats(string lobbyId)
+    {
+        foreach (var player in players.Values)
+        {
+            player.score = 0;
+        }
+    }
 }
 
 public class LobbyPlayersConverter : JsonConverter<Dictionary<string, Player>>

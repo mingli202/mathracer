@@ -126,6 +126,13 @@ public class RacerHub : Hub
         Console.WriteLine("left the app");
     }
 
+    public async Task MoveToGameScreen(string lobbyId)
+    {
+        lobbies[lobbyId].ClearStats(lobbyId);
+        await SyncPlayers(lobbyId);
+        await Clients.Groups(lobbyId).SendAsync("MoveToGameScreen");
+    }
+
     public async Task UpdatePlayerState(string lobbyId, string playerId, string state)
     {
         Lobby lobby = lobbies[lobbyId];

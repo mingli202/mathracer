@@ -19,7 +19,7 @@ export default function LobbyPage() {
   const joinId = urlSearchParams.get("join");
 
   const { gameState, dispatch } = use(GameStateContext);
-  const { currentPlayer, lobby } = gameState;
+  const { currentPlayer, lobby, connection } = gameState;
   const { lobbyId, players, gameMode } = lobby;
 
   const [showNameDialogue, setShowNameDialogue] = useState(true);
@@ -48,7 +48,7 @@ export default function LobbyPage() {
     }
   };
   const canStart = (): boolean => {
-    return !players.some((p) => !p.state);
+    return !players.some((p) => p.state === "playing");
   };
   // Display game mode info
   const getModeDescription = () => {
@@ -176,7 +176,12 @@ export default function LobbyPage() {
                 Players ({players.length})
               </h2>
               {currentPlayer.isHost && players.length > 1 && canStart() && (
-                <Button className="math-button-primary flex items-center gap-2">
+                <Button
+                  className="math-button-primary flex items-center gap-2"
+                  onClick={async () => {
+                    connection!.send("MoveToGameScreen", lobbyId);
+                  }}
+                >
                   <Play size={16} />
                   <span>Start Game</span>
                 </Button>
