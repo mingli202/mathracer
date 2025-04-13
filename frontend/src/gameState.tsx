@@ -3,7 +3,7 @@
 import { GameMode, GameState, Lobby, Player } from "@/types";
 import { newConnection } from "@/utils/connection";
 import { HubConnection } from "@microsoft/signalr";
-import { ActionDispatch, createContext, useReducer } from "react";
+import { ActionDispatch, createContext, useEffect, useReducer } from "react";
 import { z } from "zod";
 
 const defaultState = {
@@ -34,9 +34,34 @@ export const GameStateContext = createContext<{
 export function GameStateWrapper({ children }: { children: React.ReactNode }) {
   const [gameState, dispatch] = useReducer(gameStateReducer, defaultState);
 
+  useEffect(() => {
+    (async function () {
+      await new Promise((res) => setTimeout(res, 5000));
+
+      const connection = await newConnection();
+      dispatch({ type: "setConnection", connection });
+    })();
+  }, []);
+
+  useEffect(() => {
+    const c = gameState.connection;
+
+    if (!c) {
+      return;
+    }
+
+    c.on("SyncPlayers", (res: string) =>
+      dispatch({ type: "setPlayers", players: z.array(Player).parse(res) }),
+    );
+
+    return () => {
+      c.off("SyncPlayers");
+    };
+  }, [gameState.connection]);
+
   return (
     <GameStateContext.Provider value={{ gameState, dispatch }}>
-      {children}
+      {gameState.connection ? children : <div>Connecting...</div>}
     </GameStateContext.Provider>
   );
 }
@@ -48,13 +73,16 @@ export type GameStateAction =
     }
   | {
       type: "joinLobby";
-      connection: HubConnection;
       lobby: Lobby;
       currentPlayer: Player;
     }
   | {
       type: "selectMode";
       mode: GameMode;
+    }
+  | {
+      type: "setConnection";
+      connection: HubConnection | null;
     };
 
 export function gameStateReducer(
@@ -79,8 +107,8 @@ export function gameStateReducer(
     case "joinLobby":
       return {
         ...state,
-        connection: action.connection,
         lobby: action.lobby,
+        currentPlayer: action.currentPlayer,
       };
 
     case "selectMode":
@@ -91,14 +119,20 @@ export function gameStateReducer(
           gameMode: action.mode,
         },
       };
+
+    case "setConnection":
+      return {
+        ...state,
+        connection: action.connection,
+      };
   }
 }
 
 export async function createLobby(
   gameState: GameState,
+  conn: HubConnection,
   dispatch: ActionDispatch<[action: GameStateAction]>,
 ) {
-  const conn = await newConnection();
   const res: { player: Player; lobby: Lobby } = z
     .object({ player: Player, lobby: Lobby })
     .parse(
@@ -113,7 +147,6 @@ export async function createLobby(
 
   dispatch({
     type: "joinLobby",
-    connection: conn,
     lobby: res.lobby,
     currentPlayer: res.player,
   });
@@ -122,10 +155,9 @@ export async function createLobby(
 export async function joinLobby(
   joinId: string,
   name: string,
+  conn: HubConnection,
   dispatch: ActionDispatch<[action: GameStateAction]>,
 ) {
-  const conn = await newConnection();
-
   try {
     const res: { player: Player; lobby: Lobby } = z
       .object({
@@ -136,11 +168,22 @@ export async function joinLobby(
 
     dispatch({
       type: "joinLobby",
-      connection: conn,
       lobby: res.lobby,
       currentPlayer: res.player,
     });
   } catch (e) {
     alert("this lobby doesn't exist!");
+  }
+}
+
+export async function exitLobby(
+  gameState: GameState,
+  dispatch: ActionDispatch<[action: GameStateAction]>,
+) {
+  const c = gameState.connection;
+  const { lobby, currentPlayer } = gameState;
+  if (c) {
+    await c.invoke("RemovePlayer", lobby.lobbyId, currentPlayer.playerId);
+    await c.stop();
   }
 }
