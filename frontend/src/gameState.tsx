@@ -1,8 +1,7 @@
 "use client";
 
 import { GameMode, GameState, Lobby, Player } from "@/types";
-import { newConnection } from "@/utils/connection";
-import { HubConnection } from "@microsoft/signalr";
+import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { ActionDispatch, createContext, useEffect, useReducer } from "react";
 import { z } from "zod";
 
@@ -14,7 +13,7 @@ const defaultState = {
     equations: [],
   },
   currentPlayer: {
-    playerId: 0,
+    playerId: "",
     hasComplete: false,
     isHost: false,
     name: "Player",
@@ -36,10 +35,15 @@ export function GameStateWrapper({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     (async function () {
-      await new Promise((res) => setTimeout(res, 5000));
+      // await new Promise((res) => setTimeout(res, 5000));
 
-      const connection = await newConnection();
-      dispatch({ type: "setConnection", connection });
+      const c = new HubConnectionBuilder()
+        .withUrl("http://localhost:5103/hub")
+        .build();
+
+      c.start()
+        .then(() => dispatch({ type: "setConnection", connection: c }))
+        .catch((e) => console.log(e));
     })();
   }, []);
 
@@ -50,9 +54,10 @@ export function GameStateWrapper({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    c.on("SyncPlayers", (res: string) =>
-      dispatch({ type: "setPlayers", players: z.array(Player).parse(res) }),
-    );
+    c.on("SyncPlayers", (res: string) => {
+      const players = z.array(Player).parse(JSON.parse(res));
+      dispatch({ type: "setPlayers", players });
+    });
 
     return () => {
       c.off("SyncPlayers");

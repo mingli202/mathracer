@@ -2,7 +2,7 @@ import { z } from "zod";
 import { HubConnection } from "@microsoft/signalr";
 
 export const Player = z.object({
-  playerId: z.number(),
+  playerId: z.string(),
   name: z.string(),
   score: z.number(),
   isHost: z.boolean(),

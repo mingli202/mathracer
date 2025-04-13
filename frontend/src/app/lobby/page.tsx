@@ -10,7 +10,6 @@ export default function LobbyPage() {
   const joinId = urlSearchParams.get("join");
 
   const { gameState, dispatch } = use(GameStateContext);
-  console.log("gameState:", gameState);
 
   const { currentPlayer, lobby } = gameState;
 

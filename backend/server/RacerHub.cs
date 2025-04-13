@@ -17,9 +17,9 @@ public class RacerHub : Hub
         );
     }
 
-    public void PrintLobbies()
+    public void PrintLobbies(string name)
     {
-        Console.WriteLine(GetLobbies());
+        Console.WriteLine("{0} {1}", name, GetLobbies());
     }
 
     public async Task SyncPlayers(string lobbyId)
@@ -28,8 +28,11 @@ public class RacerHub : Hub
 
         if (lobbies.ContainsKey(lobbyId))
         {
-            Dictionary<int, Player> players = lobbies[lobbyId].players;
-            json = JsonSerializer.Serialize(players.Values);
+            Dictionary<string, Player> players = lobbies[lobbyId].players;
+            json = JsonSerializer.Serialize(
+                players.Values,
+                new JsonSerializerOptions { WriteIndented = true }
+            );
         }
 
         await Clients.Groups(lobbyId).SendAsync("SyncPlayers", json);
@@ -58,13 +61,15 @@ public class RacerHub : Hub
         );
 
         Lobby lobby = new Lobby(lobbyId, [], gameMode); // FIX: replace this by equations
-        Player player = lobby.NewPlayer(name);
+        Player player = lobby.NewPlayer(name, Context.ConnectionId);
+
         player.isHost = true;
 
         lobbies.Add(lobbyId, lobby);
         await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
+        Console.WriteLine(Context.ConnectionId);
 
-        PrintLobbies();
+        PrintLobbies("CreateLobby");
 
         return JsonSerializer.Serialize(new { player = player, lobby = lobby });
     }
@@ -77,13 +82,22 @@ public class RacerHub : Hub
         }
 
         Lobby lobby = lobbies[lobbyId];
-        Player player = lobby.NewPlayer(name);
+        Player player = lobby.NewPlayer(name, Context.ConnectionId);
 
         await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
+        Console.WriteLine(Context.ConnectionId);
+
         await SyncPlayers(lobbyId);
 
-        PrintLobbies();
+        PrintLobbies("JoinLobby");
 
         return JsonSerializer.Serialize(new { player = player, lobby = lobby });
+    }
+
+    // public async Task ExitLobby(string lobbyId, string playerId) { }
+
+    public void StopConnection()
+    {
+        Console.WriteLine("left the app");
     }
 }

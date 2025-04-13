@@ -6,7 +6,7 @@ namespace models;
 
 public class Player
 {
-    public int playerId { get; set; }
+    public string playerId { get; set; }
     public int score { get; set; }
     public bool isHost { get; set; }
     public string name { get; set; }
@@ -14,16 +14,16 @@ public class Player
 
     public Player()
     {
-        playerId = 0;
+        playerId = "";
         score = 0;
         isHost = false;
         name = "Player";
         hasComplete = false;
     }
 
-    public Player(string name)
+    public Player(string name, string id)
     {
-        playerId = 0;
+        playerId = id;
         score = 0;
         isHost = false;
         this.name = name;
@@ -52,7 +52,7 @@ public class GameMode
 public class Lobby
 {
     [JsonConverter(typeof(LobbyPlayersConverter))]
-    public Dictionary<int, Player> players { get; set; }
+    public Dictionary<string, Player> players { get; set; }
 
     public GameMode gameMode { get; set; }
     public Equation[] equations { get; set; }
@@ -60,7 +60,7 @@ public class Lobby
 
     public Lobby()
     {
-        players = new Dictionary<int, Player>();
+        players = new Dictionary<string, Player>();
         gameMode = new GameMode();
         equations = [];
         lobbyId = "";
@@ -68,22 +68,16 @@ public class Lobby
 
     public Lobby(string lobbyId, Equation[] equations, GameMode gameMode)
     {
-        this.players = new Dictionary<int, Player>();
+        this.players = new Dictionary<string, Player>();
 
         this.gameMode = gameMode;
         this.lobbyId = lobbyId;
         this.equations = equations;
     }
 
-    public Player NewPlayer(string name)
+    public Player NewPlayer(string name, string id)
     {
-        Player player = new Player(name);
-        player.playerId = this.players.Count;
-
-        while (this.players.ContainsKey(player.playerId))
-        {
-            player.playerId++;
-        }
+        Player player = new Player(name, id);
 
         this.players.Add(player.playerId, player);
 
@@ -91,16 +85,16 @@ public class Lobby
     }
 }
 
-public class LobbyPlayersConverter : JsonConverter<Dictionary<int, Player>>
+public class LobbyPlayersConverter : JsonConverter<Dictionary<string, Player>>
 {
-    public override Dictionary<int, Player> Read(
+    public override Dictionary<string, Player> Read(
         ref Utf8JsonReader reader,
         Type typeToConvert,
         JsonSerializerOptions options
     )
     {
         Player[] arr = JsonSerializer.Deserialize<Player[]>(reader.GetString()!) ?? [];
-        Dictionary<int, Player> lobby = new();
+        Dictionary<string, Player> lobby = new();
 
         foreach (Player p in arr)
         {
@@ -112,7 +106,7 @@ public class LobbyPlayersConverter : JsonConverter<Dictionary<int, Player>>
 
     public override void Write(
         Utf8JsonWriter writer,
-        Dictionary<int, Player> lobby,
+        Dictionary<string, Player> lobby,
         JsonSerializerOptions options
     )
     {
@@ -122,7 +116,7 @@ public class LobbyPlayersConverter : JsonConverter<Dictionary<int, Player>>
         {
             writer.WriteStartObject();
 
-            writer.WriteNumber("playerId", p.playerId);
+            writer.WriteString("playerId", p.playerId);
             writer.WriteNumber("score", p.score);
             writer.WriteBoolean("isHost", p.isHost);
             writer.WriteString("name", p.name);
