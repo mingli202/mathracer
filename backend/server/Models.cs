@@ -86,9 +86,17 @@ public class Lobby
 
     public void RemovePlayer(string id)
     {
-        if (this.players.ContainsKey(id))
+        if (!this.players.ContainsKey(id))
         {
-            this.players.Remove(id);
+            return;
+        }
+        Player p = this.players[id];
+        this.players.Remove(id);
+
+        if (p.isHost && this.players.Count > 0)
+        {
+            Player newHost = this.players.Values.First();
+            newHost.isHost = true;
         }
     }
 }

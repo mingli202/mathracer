@@ -2,8 +2,14 @@
 
 import PlayerList from "@/components/PlayerList";
 import { Button } from "@/components/ui/button";
-import { createLobby, GameStateContext, joinLobby } from "@/gameState";
+import {
+  createLobby,
+  exitLobby,
+  GameStateContext,
+  joinLobby,
+} from "@/gameState";
 import { ArrowLeft, Copy, Play, Share2 } from "lucide-react";
+import Link from "next/link";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { use, useState } from "react";
@@ -108,14 +114,24 @@ export default function LobbyPage() {
       ) : (
         <>
           <div className="w-full">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="mb-4 flex items-center gap-2"
-            >
-              <ArrowLeft size={16} />
-              <span>Back to Menu</span>
-            </Button>
+            <Link href="/">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mb-4 flex items-center gap-2"
+                onClick={() =>
+                  exitLobby(
+                    gameState.connection!,
+                    lobbyId,
+                    currentPlayer.playerId,
+                    dispatch,
+                  )
+                }
+              >
+                <ArrowLeft size={16} />
+                <span>Back to Menu</span>
+              </Button>
+            </Link>
 
             <h1 className="mb-2 text-center text-3xl font-bold">Game Lobby</h1>
             <p className="text-muted-foreground mb-6 text-center">

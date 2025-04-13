@@ -243,6 +243,9 @@ export async function exitLobby(
   playerId: string,
   dispatch: ActionDispatch<[action: GameStateAction]>,
 ) {
-  await connection.invoke("ExitLobby", lobbyId, playerId);
   dispatch({ type: "exitLobby" });
+
+  if (connection.state === "Connected") {
+    await connection.send("ExitLobby", lobbyId, playerId);
+  }
 }
