@@ -120,7 +120,8 @@ export async function createLobby(
 }
 
 export async function joinLobby(
-  gameState: GameState,
+  joinId: string,
+  name: string,
   dispatch: ActionDispatch<[action: GameStateAction]>,
 ) {
   const conn = await newConnection();
@@ -131,15 +132,7 @@ export async function joinLobby(
         player: Player,
         lobby: Lobby,
       })
-      .parse(
-        JSON.parse(
-          await conn.invoke(
-            "JoinLobby",
-            gameState.lobby.lobbyId,
-            gameState.currentPlayer.name,
-          ),
-        ),
-      );
+      .parse(JSON.parse(await conn.invoke("JoinLobby", joinId, name)));
 
     dispatch({
       type: "joinLobby",
