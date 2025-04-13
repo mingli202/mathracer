@@ -60,7 +60,7 @@ public class RacerHub : Hub
             gameMode.count * (gameMode.type == "time" ? 10 : 1)
         );
 
-        Lobby lobby = new Lobby(lobbyId, [], gameMode); // FIX: replace this by equations
+        Lobby lobby = new Lobby(lobbyId, equations, gameMode);
         Player player = lobby.NewPlayer(name, Context.ConnectionId);
 
         player.isHost = true;
@@ -124,5 +124,81 @@ public class RacerHub : Hub
     public void StopConnection()
     {
         Console.WriteLine("left the app");
+    }
+
+    public async Task UpdatePlayerState(string lobbyId, string playerId, string state)
+    {
+        Lobby lobby = lobbies[lobbyId];
+        if (lobby.UpdatePlayerState(playerId, state))
+        {
+            // the last one who joins will start the game
+            await Clients.Client(Context.ConnectionId).SendAsync("StartGame");
+        }
+    }
+
+    public async Task StartGame(string gameId)
+    {
+        Lobby lobby = lobbies[gameId];
+        GameMode selectedMode = lobby.gameMode;
+        Equation[] equations = lobby.equations;
+
+        int count = 3;
+        DateTime now = DateTime.Now;
+        int elapsed = 1;
+        while (count >= 0)
+        {
+            if (elapsed >= 1)
+            {
+                await Clients.Groups(gameId).SendAsync("CountDown", count);
+                elapsed = 0;
+                now = DateTime.Now;
+                count--;
+            }
+
+            elapsed = (DateTime.Now - now).Seconds;
+        }
+
+        int time = 0;
+        elapsed = 0;
+        bool run = true;
+        while (run)
+        {
+            if (elapsed >= 1)
+            {
+                time++;
+                await Clients.Groups(gameId).SendAsync("TimeElapsed", time);
+                elapsed = 0;
+                now = DateTime.Now;
+            }
+
+            elapsed = (DateTime.Now - now).Seconds;
+
+            if (time > selectedMode.count)
+            {
+                run = false;
+            }
+        }
+    }
+
+    public async Task UpdateScore(string lobbyId, string playerId, int score)
+    {
+        var lobby = lobbies[lobbyId].players;
+        var player = lobby[playerId];
+        player.score = score;
+
+        await SyncPlayers(lobbyId);
+
+        PrintLobbies("UpdateScore");
+    }
+
+    public async Task PlayerCompleted(string lobbyId, string playerId)
+    {
+        var lobby = lobbies[lobbyId].players;
+        var player = lobby[playerId];
+        player.state = PlayerState.completed;
+
+        await SyncPlayers(lobbyId);
+
+        PrintLobbies("PlayerCompleted");
     }
 }

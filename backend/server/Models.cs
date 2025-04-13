@@ -108,6 +108,16 @@ public class Lobby
             newHost.isHost = true;
         }
     }
+
+    public bool UpdatePlayerState(string id, string state)
+    {
+        Player p = this.players[id];
+        PlayerState s = (PlayerState)Enum.Parse(typeof(PlayerState), state);
+        p.state = s;
+
+        // check if all players are playing
+        return this.players.Values.All(p => p.state == PlayerState.playing);
+    }
 }
 
 public class LobbyPlayersConverter : JsonConverter<Dictionary<string, Player>>

@@ -107,6 +107,10 @@ export type GameStateAction =
     }
   | {
       type: "exitLobby";
+    }
+  | {
+      type: "setCurrentPlayerState";
+      state: Player["state"];
     };
 
 export function gameStateReducer(
@@ -186,6 +190,15 @@ export function gameStateReducer(
           score: 0,
         },
       };
+
+    case "setCurrentPlayerState":
+      return {
+        ...state,
+        currentPlayer: {
+          ...currentPlayer,
+          state: action.state,
+        },
+      };
   }
 }
 
@@ -248,4 +261,15 @@ export async function exitLobby(
   if (connection.state === "Connected") {
     await connection.send("ExitLobby", lobbyId, playerId);
   }
+}
+
+export async function updatePlayerState(
+  connection: HubConnection,
+  lobbyId: string,
+  playerId: string,
+  state: Player["state"],
+  dispatch: ActionDispatch<[action: GameStateAction]>,
+) {
+  dispatch({ type: "setCurrentPlayerState", state });
+  await connection.send("UpdatePlayerState", lobbyId, playerId, state);
 }
