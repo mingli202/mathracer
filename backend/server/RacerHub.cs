@@ -9,14 +9,6 @@ public class RacerHub : Hub
 {
     private static Dictionary<string, Lobby> lobbies = new Dictionary<string, Lobby>();
 
-    // private JsonSerializerOptions jsonOps;
-
-    /*public RacerHub()*/
-    /*{*/
-    /*    jsonOps = new JsonSerializerOptions { WriteIndented = true };*/
-    /*    jsonOps.Converters.Add(new LobbyPlayersConverter());*/
-    /*}*/
-
     public string GetLobbies()
     {
         return JsonSerializer.Serialize(
@@ -55,7 +47,7 @@ public class RacerHub : Hub
         {
             for (int i = 0; i < 6; i++)
             {
-                buffer[i] = (char)rand.Next((int)'A', (int)'B');
+                buffer[i] = (char)rand.Next((int)'a', (int)'z' + 1);
             }
 
             lobbyId = String.Join("", buffer);

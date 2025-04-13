@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using equation;
@@ -117,6 +116,21 @@ public class LobbyPlayersConverter : JsonConverter<Dictionary<int, Player>>
         JsonSerializerOptions options
     )
     {
-        writer.WriteStringValue(JsonSerializer.Serialize(lobby.Values));
+        writer.WriteStartArray();
+
+        foreach (Player p in lobby.Values)
+        {
+            writer.WriteStartObject();
+
+            writer.WriteNumber("playerId", p.playerId);
+            writer.WriteNumber("score", p.score);
+            writer.WriteBoolean("isHost", p.isHost);
+            writer.WriteString("name", p.name);
+            writer.WriteBoolean("hasComplete", p.hasComplete);
+
+            writer.WriteEndObject();
+        }
+
+        writer.WriteEndArray();
     }
 }
