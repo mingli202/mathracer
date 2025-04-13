@@ -1,3 +1,6 @@
+using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using equation;
 
 namespace models;
@@ -49,7 +52,9 @@ public class GameMode
 
 public class Lobby
 {
+    [JsonConverter(typeof(LobbyPlayersConverter))]
     public Dictionary<int, Player> players { get; set; }
+
     public GameMode gameMode { get; set; }
     public Equation[] equations { get; set; }
     public string lobbyId { get; set; }
@@ -65,6 +70,7 @@ public class Lobby
     public Lobby(string lobbyId, Equation[] equations, GameMode gameMode)
     {
         this.players = new Dictionary<int, Player>();
+
         this.gameMode = gameMode;
         this.lobbyId = lobbyId;
         this.equations = equations;
@@ -83,5 +89,34 @@ public class Lobby
         this.players.Add(player.playerId, player);
 
         return player;
+    }
+}
+
+public class LobbyPlayersConverter : JsonConverter<Dictionary<int, Player>>
+{
+    public override Dictionary<int, Player> Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options
+    )
+    {
+        Player[] arr = JsonSerializer.Deserialize<Player[]>(reader.GetString()!) ?? [];
+        Dictionary<int, Player> lobby = new();
+
+        foreach (Player p in arr)
+        {
+            lobby.Add(p.playerId, p);
+        }
+
+        return lobby;
+    }
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        Dictionary<int, Player> lobby,
+        JsonSerializerOptions options
+    )
+    {
+        writer.WriteStringValue(JsonSerializer.Serialize(lobby.Values));
     }
 }

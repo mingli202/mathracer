@@ -9,9 +9,25 @@ public class RacerHub : Hub
 {
     private static Dictionary<string, Lobby> lobbies = new Dictionary<string, Lobby>();
 
+    // private JsonSerializerOptions jsonOps;
+
+    /*public RacerHub()*/
+    /*{*/
+    /*    jsonOps = new JsonSerializerOptions { WriteIndented = true };*/
+    /*    jsonOps.Converters.Add(new LobbyPlayersConverter());*/
+    /*}*/
+
     public string GetLobbies()
     {
-        return JsonSerializer.Serialize(lobbies);
+        return JsonSerializer.Serialize(
+            lobbies,
+            new JsonSerializerOptions { WriteIndented = true }
+        );
+    }
+
+    public void PrintLobbies()
+    {
+        Console.WriteLine(GetLobbies());
     }
 
     public async Task SyncPlayers(string lobbyId)
@@ -32,13 +48,17 @@ public class RacerHub : Hub
         GameMode gameMode = JsonSerializer.Deserialize<GameMode>(gmode)!;
 
         Random rand = new Random();
-        byte[] buffer = new byte[6];
+        char[] buffer = new char[6];
         string lobbyId = "";
 
         do
         {
-            rand.NextBytes(buffer);
-            lobbyId = System.Text.Encoding.Default.GetString(buffer);
+            for (int i = 0; i < 6; i++)
+            {
+                buffer[i] = (char)rand.Next((int)'A', (int)'B');
+            }
+
+            lobbyId = String.Join("", buffer);
         } while (lobbies.ContainsKey(lobbyId));
 
         Equation[] equations = Equation.GenerateAllEquations(
@@ -51,6 +71,8 @@ public class RacerHub : Hub
 
         lobbies.Add(lobbyId, lobby);
         await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
+
+        PrintLobbies();
 
         return JsonSerializer.Serialize(new { player = player, lobby = lobby });
     }
@@ -67,6 +89,8 @@ public class RacerHub : Hub
 
         await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
         await SyncPlayers(lobbyId);
+
+        PrintLobbies();
 
         return JsonSerializer.Serialize(new { player = player, lobby = lobby });
     }
