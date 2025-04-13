@@ -47,13 +47,10 @@ export type GameStateAction =
       players: Player[];
     }
   | {
-      type: "createLobby";
+      type: "joinLobby";
       connection: HubConnection;
       lobby: Lobby;
       currentPlayer: Player;
-    }
-  | {
-      type: "joinLobby";
     }
   | {
       type: "selectMode";
@@ -79,15 +76,12 @@ export function gameStateReducer(
           currentPlayer,
       };
 
-    case "createLobby":
+    case "joinLobby":
       return {
         ...state,
         connection: action.connection,
         lobby: action.lobby,
       };
-
-    case "joinLobby":
-      return state;
 
     case "selectMode":
       return {
@@ -101,18 +95,59 @@ export function gameStateReducer(
 }
 
 export async function createLobby(
-  gameMode: GameMode,
+  gameState: GameState,
   dispatch: ActionDispatch<[action: GameStateAction]>,
 ) {
   const conn = await newConnection();
   const res: { player: Player; lobby: Lobby } = z
     .object({ player: Player, lobby: Lobby })
-    .parse(await conn.invoke("CreateLobby", JSON.stringify(gameMode)));
+    .parse(
+      JSON.parse(
+        await conn.invoke(
+          "CreateLobby",
+          JSON.stringify(gameState.lobby.gameMode),
+          gameState.currentPlayer.name,
+        ),
+      ),
+    );
 
   dispatch({
-    type: "createLobby",
+    type: "joinLobby",
     connection: conn,
     lobby: res.lobby,
     currentPlayer: res.player,
   });
+}
+
+export async function joinLobby(
+  gameState: GameState,
+  dispatch: ActionDispatch<[action: GameStateAction]>,
+) {
+  const conn = await newConnection();
+
+  try {
+    const res: { player: Player; lobby: Lobby } = z
+      .object({
+        player: Player,
+        lobby: Lobby,
+      })
+      .parse(
+        JSON.parse(
+          await conn.invoke(
+            "JoinLobby",
+            gameState.lobby.lobbyId,
+            gameState.currentPlayer.name,
+          ),
+        ),
+      );
+
+    dispatch({
+      type: "joinLobby",
+      connection: conn,
+      lobby: res.lobby,
+      currentPlayer: res.player,
+    });
+  } catch (e) {
+    alert("this lobby doesn't exist!");
+  }
 }
