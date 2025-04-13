@@ -28,8 +28,8 @@ public class RacerHub : Hub
 
         if (lobbies.ContainsKey(lobbyId))
         {
-            Dictionary<int, Player> lobby = lobbies[lobbyId].players;
-            json = JsonSerializer.Serialize(lobby.Values);
+            Dictionary<int, Player> players = lobbies[lobbyId].players;
+            json = JsonSerializer.Serialize(players.Values);
         }
 
         await Clients.Groups(lobbyId).SendAsync("SyncPlayers", json);
@@ -57,7 +57,7 @@ public class RacerHub : Hub
             gameMode.count * (gameMode.type == "time" ? 10 : 1)
         );
 
-        Lobby lobby = new Lobby(lobbyId, equations, gameMode);
+        Lobby lobby = new Lobby(lobbyId, [], gameMode); // FIX: replace this by equations
         Player player = lobby.NewPlayer(name);
         player.isHost = true;
 
@@ -71,7 +71,7 @@ public class RacerHub : Hub
 
     public async Task<string> JoinLobby(string lobbyId, string name)
     {
-        if (lobbies.ContainsKey(lobbyId) == false)
+        if (!lobbies.ContainsKey(lobbyId))
         {
             return "";
         }
