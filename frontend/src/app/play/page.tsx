@@ -8,7 +8,14 @@ import { Progress } from "@/components/ui/progress";
 import { GameStateContext, updatePlayerState } from "@/gameState";
 import { withConnection } from "@/utils/connection";
 import { useRouter } from "next/navigation";
-import { use, useEffect, useMemo, useRef, useState } from "react";
+import {
+  use,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 export default function PlayPage() {
   const { gameState, dispatch } = use(GameStateContext);
@@ -28,6 +35,12 @@ export default function PlayPage() {
 
   const now = useMemo(() => Math.round(Date.now() / 1000), []);
   const router = useRouter();
+
+  useLayoutEffect(() => {
+    if (lobbyId === "") {
+      router.push("/");
+    }
+  }, []);
 
   useEffect(() => {
     updatePlayerState(
@@ -69,10 +82,10 @@ export default function PlayPage() {
           lobbyId,
           currentPlayer.playerId,
         );
-        dispatch({
-          type: "setCurrentPlayerState",
-          state: "completed",
-        });
+        //dispatch({
+        //  type: "setCurrentPlayerState",
+        //  state: "completed",
+        //});
         router.push("/results");
       })();
     }

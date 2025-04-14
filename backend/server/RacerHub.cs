@@ -139,6 +139,10 @@ public class RacerHub : Hub
 
     public async Task UpdatePlayerState(string lobbyId, string playerId, string state)
     {
+        if (!lobbies.ContainsKey(lobbyId))
+        {
+            return;
+        }
         Lobby lobby = lobbies[lobbyId];
         if (lobby.UpdatePlayerState(playerId, state))
         {

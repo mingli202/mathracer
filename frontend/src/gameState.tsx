@@ -56,8 +56,6 @@ export function GameStateWrapper({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    router.push("/");
-
     c.on("SyncPlayers", (res: string) => {
       const players = z.array(Player).parse(JSON.parse(res));
       dispatch({ type: "setPlayers", players });
@@ -68,7 +66,7 @@ export function GameStateWrapper({ children }: { children: React.ReactNode }) {
         "beforeunload",
         () => {
           exitLobby(c, lobbyId, playerId, dispatch);
-          c.stop();
+          // c.stop();
         },
         { once: true },
       );
@@ -188,6 +186,7 @@ export function gameStateReducer(
           ...lobby,
           players: [],
           equations: [],
+          lobbyId: "",
         },
         currentPlayer: {
           playerId: "",

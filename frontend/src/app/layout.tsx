@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} overflow-none flex h-[100dvh] w-[100dvw] items-center justify-center antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} overflow-none flex h-[100dvh] w-[100dvw] items-center justify-center p-4 antialiased`}
       >
         <GameStateWrapper>{children}</GameStateWrapper>
       </body>

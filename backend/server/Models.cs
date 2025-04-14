@@ -111,6 +111,11 @@ public class Lobby
 
     public bool UpdatePlayerState(string id, string state)
     {
+        if (!this.players.ContainsKey(id))
+        {
+            return false;
+        }
+
         Player p = this.players[id];
         PlayerState s = (PlayerState)Enum.Parse(typeof(PlayerState), state);
         p.state = s;

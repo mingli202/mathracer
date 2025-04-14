@@ -6,13 +6,19 @@ import { exitLobby, GameStateContext } from "@/gameState";
 import { Home, RotateCcw, Trophy } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { use } from "react";
+import { use, useLayoutEffect } from "react";
 
 export default function ResultsPage() {
   const { gameState, dispatch } = use(GameStateContext);
   const { lobby, currentPlayer, connection } = gameState;
   const { gameMode, players, lobbyId } = lobby;
   const router = useRouter();
+
+  useLayoutEffect(() => {
+    if (lobbyId === "") {
+      router.push("/");
+    }
+  }, []);
 
   const highestScore =
     gameMode.type === "equations"

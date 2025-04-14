@@ -11,3 +11,6 @@ Frontend:
 Backend:
 - C#
 - .NET, SignalR
+
+### Demo
+[![Demo](https://img.youtube.com/vi/xfg4ZZ54hCs/0.jpg)](https://youtu.be/xfg4ZZ54hCs)
