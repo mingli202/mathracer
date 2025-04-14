@@ -104,7 +104,6 @@ export default function PlayPage() {
 
   async function submitIfCorrect(answer: string) {
     answer = answer.replace(/\D/g, "");
-    console.log("answer:", answer);
 
     if (answer === equations[currentEquationIndex].answer.toString()) {
       setAnimation("animate-scale-in");
