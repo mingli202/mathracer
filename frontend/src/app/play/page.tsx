@@ -103,6 +103,9 @@ export default function PlayPage() {
   }
 
   async function submitIfCorrect(answer: string) {
+    answer = answer.replace(/\D/g, "");
+    console.log("answer:", answer);
+
     if (answer === equations[currentEquationIndex].answer.toString()) {
       setAnimation("animate-scale-in");
       setTimeout(() => setAnimation(""), 300);
@@ -188,7 +191,7 @@ export default function PlayPage() {
             >
               <Input
                 ref={inputRef}
-                type="number"
+                type="text"
                 onChange={(e) => submitIfCorrect(e.target.value)}
                 placeholder="Enter your answer"
                 className={`mb-4 h-14 text-center text-xl ${formStyle}`}
