@@ -31,59 +31,52 @@ export const GameStateContext = createContext<{
   dispatch: () => {},
 });
 
-export function GameStateWrapper({ children }: { children: React.ReactNode }) {
+type Props = {
+  children: React.ReactNode;
+};
+
+export function GameStateWrapper({ children }: Props) {
   const [gameState, dispatch] = useReducer(gameStateReducer, defaultState);
   const router = useRouter();
 
   useEffect(() => {
-    (async function () {
-      // await new Promise((res) => setTimeout(res, 5000));
+    (async () => {
+      const url = process.env.NEXT_PUBLIC_HUB_URL!;
 
       const c = new HubConnectionBuilder()
-        .withUrl("http://localhost:5103/hub")
+        .withUrl(url)
+        .withAutomaticReconnect()
         .build();
 
-      c.start()
-        .then(() => dispatch({ type: "setConnection", connection: c }))
-        .catch((e) => console.log(e));
+      await c.start();
+
+      dispatch({ type: "setConnection", connection: c });
+
+      c.on("SyncPlayers", (res: string) => {
+        const players = z.array(Player).parse(JSON.parse(res));
+        dispatch({ type: "setPlayers", players });
+      });
+
+      c.on("AddUnloadEventListener", (lobbyId: string, playerId: string) => {
+        window.addEventListener(
+          "beforeunload",
+          () => {
+            exitLobby(c, lobbyId, playerId, dispatch);
+            // c.stop();
+          },
+          { once: true },
+        );
+      });
+
+      c.on("MoveToGameScreen", () => router.push("/play"));
     })();
   }, []);
 
-  useEffect(() => {
-    const c = gameState.connection;
-
-    if (!c) {
-      return;
-    }
-
-    c.on("SyncPlayers", (res: string) => {
-      const players = z.array(Player).parse(JSON.parse(res));
-      dispatch({ type: "setPlayers", players });
-    });
-
-    c.on("AddUnloadEventListener", (lobbyId: string, playerId: string) => {
-      window.addEventListener(
-        "beforeunload",
-        () => {
-          exitLobby(c, lobbyId, playerId, dispatch);
-          // c.stop();
-        },
-        { once: true },
-      );
-    });
-
-    c.on("MoveToGameScreen", () => router.push("/play"));
-
-    return () => {
-      c.off("SyncPlayers");
-      c.off("AddUnloadEventListener");
-      c.off("MoveToGameScreen");
-    };
-  }, [gameState.connection]);
+  if (!gameState.connection) return <div>Connecting...</div>;
 
   return (
     <GameStateContext.Provider value={{ gameState, dispatch }}>
-      {gameState.connection ? children : <div>Connecting...</div>}
+      {children}
     </GameStateContext.Provider>
   );
 }
