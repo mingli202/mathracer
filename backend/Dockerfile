@@ -7,7 +7,7 @@ COPY ["server/server.csproj", "./server/"]
 RUN dotnet restore "server/server.csproj"
 
 COPY server/. ./server/
-WORKDIR "/source/server"
+WORKDIR "/app/server"
 
 EXPOSE 5103
 
