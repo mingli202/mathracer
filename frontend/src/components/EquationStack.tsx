@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { cn } from "@/lib/utils";
-import { Equation } from "@/types/game";
+import { cn } from "@/utils/cn";
+import { Equation } from "@/types";
 
 interface EquationStackProps {
   equations: Equation[];
