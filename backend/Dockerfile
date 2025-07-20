@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /source
+WORKDIR /app
 
 COPY ["server/server.csproj", "./server/"]
 RUN dotnet restore "server/server.csproj"
