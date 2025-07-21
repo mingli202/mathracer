@@ -2,7 +2,7 @@ import * as signalR from "@microsoft/signalr";
 
 export async function newConnection() {
   const c = new signalR.HubConnectionBuilder()
-    .withUrl(process.env.NEXT_PUBLIC_HUB_URL!)
+    .withUrl(process.env.NEXT_PUBLIC_HUB_URL!, { withCredentials: true })
     .build();
 
   await c.start();

@@ -5,6 +5,7 @@ import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { useRouter } from "next/navigation";
 import { ActionDispatch, createContext, useEffect, useReducer } from "react";
 import { z } from "zod";
+import { newConnection } from "./utils/connection";
 
 const defaultState = {
   lobby: {
@@ -41,14 +42,7 @@ export function GameStateWrapper({ children }: Props) {
 
   useEffect(() => {
     (async () => {
-      const url = process.env.NEXT_PUBLIC_HUB_URL!;
-
-      const c = new HubConnectionBuilder()
-        .withUrl(url)
-        .withAutomaticReconnect()
-        .build();
-
-      await c.start();
+      const c = await newConnection();
 
       dispatch({ type: "setConnection", connection: c });
 
