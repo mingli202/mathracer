@@ -141,7 +141,24 @@ public class LobbyPlayersConverter : JsonConverter<Dictionary<string, Player>>
         JsonSerializerOptions options
     )
     {
-        Player[] arr = JsonSerializer.Deserialize<Player[]>(reader.GetString()!) ?? [];
+        if (reader.TokenType != JsonTokenType.StartArray)
+        {
+            throw new JsonException();
+        }
+
+        Player[] arr = [];
+
+        while (reader.Read())
+        {
+            if (reader.TokenType == JsonTokenType.EndArray)
+            {
+                break;
+            }
+
+            Player p = JsonSerializer.Deserialize<Player>(ref reader, options)!;
+            arr.Append(p);
+        }
+
         Dictionary<string, Player> lobby = new();
 
         foreach (Player p in arr)
