@@ -9,17 +9,45 @@ public class RacerHub : Hub
 {
     private static Dictionary<string, Lobby> lobbies = new Dictionary<string, Lobby>();
 
+    public string GenerateNewLobbyId()
+    {
+        Random rand = new Random();
+        char[] buffer = new char[6];
+        string lobbyId = "";
+
+        do
+        {
+            for (int i = 0; i < 6; i++)
+            {
+                buffer[i] = (char)rand.Next((int)'a', (int)'z' + 1);
+            }
+
+            lobbyId = String.Join("", buffer);
+        } while (lobbies.ContainsKey(lobbyId));
+
+        return lobbyId;
+    }
+
     public string GetLobbies()
     {
+        string json = JsonSerializer.Serialize(lobbies);
+
+        Dictionary<string, Lobby> lobbiesCopy = JsonSerializer.Deserialize<Dictionary<string, Lobby>>(json)!;
+
+        foreach (Lobby lobby in lobbiesCopy.Values)
+        {
+            lobby.equations = [];
+        }
+
         return JsonSerializer.Serialize(
-            lobbies,
+            lobbiesCopy,
             new JsonSerializerOptions { WriteIndented = true }
         );
     }
 
-    public void PrintLobbies(string name)
+    public async void PrintLobbies(string name)
     {
-        Console.WriteLine("{0} {1}", name, GetLobbies());
+        await Task.Run(() => Console.WriteLine("{0} {1}", name, GetLobbies()));
     }
 
     public async Task SyncPlayers(string lobbyId)
@@ -42,19 +70,7 @@ public class RacerHub : Hub
     {
         GameMode gameMode = JsonSerializer.Deserialize<GameMode>(gmode)!;
 
-        Random rand = new Random();
-        char[] buffer = new char[6];
-        string lobbyId = "";
-
-        do
-        {
-            for (int i = 0; i < 6; i++)
-            {
-                buffer[i] = (char)rand.Next((int)'a', (int)'z' + 1);
-            }
-
-            lobbyId = String.Join("", buffer);
-        } while (lobbies.ContainsKey(lobbyId));
+        string lobbyId = GenerateNewLobbyId();
 
         Equation[] equations = Equation.GenerateAllEquations(
             gameMode.count * (gameMode.type == "time" ? 10 : 1)
