@@ -21,8 +21,6 @@ const EquationStack: React.FC<EquationStackProps> = ({
     Math.min(currentIndex + stackSize, equations.length),
   );
 
-  let height = 0;
-
   return (
     <div className="flex h-full w-full max-w-md flex-col items-center justify-center gap-1">
       {visibleEquations.map((equation, index) => {
