@@ -5,15 +5,12 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { RefObject, useRef } from "react";
 
 export default function JoinPage() {
   const router = useRouter();
 
-  const ref: RefObject<HTMLInputElement> = useRef(null!);
-
   return (
-    <div className="animate-fade-in mx-auto max-w-md space-y-6">
+    <div className="animate-fade-in w-sm space-y-6">
       <Link href="/">
         <Button
           variant="ghost"
@@ -42,7 +39,6 @@ export default function JoinPage() {
             Lobby ID
           </label>
           <Input
-            ref={ref}
             id="lobbyId"
             name="lobbyId"
             placeholder="Enter game code"
