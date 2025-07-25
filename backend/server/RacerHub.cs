@@ -7,56 +7,15 @@ namespace hub;
 
 public class RacerHub : Hub
 {
-    private static Dictionary<string, Lobby> lobbies = new Dictionary<string, Lobby>();
-
-    public string GenerateNewLobbyId()
-    {
-        Random rand = new Random();
-        char[] buffer = new char[6];
-        string lobbyId = "";
-
-        do
-        {
-            for (int i = 0; i < 6; i++)
-            {
-                buffer[i] = (char)rand.Next((int)'a', (int)'z' + 1);
-            }
-
-            lobbyId = String.Join("", buffer);
-        } while (lobbies.ContainsKey(lobbyId));
-
-        return lobbyId;
-    }
-
-    public string GetLobbies()
-    {
-        string json = JsonSerializer.Serialize(lobbies);
-
-        Dictionary<string, Lobby> lobbiesCopy = JsonSerializer.Deserialize<Dictionary<string, Lobby>>(json)!;
-
-        foreach (Lobby lobby in lobbiesCopy.Values)
-        {
-            lobby.equations = [];
-        }
-
-        return JsonSerializer.Serialize(
-            lobbiesCopy,
-            new JsonSerializerOptions { WriteIndented = true }
-        );
-    }
-
-    public async void PrintLobbies(string name)
-    {
-        await Task.Run(() => Console.WriteLine("{0} {1}", name, GetLobbies()));
-    }
+    private static Lobbies _lobbies = new Lobbies();
 
     public async Task SyncPlayers(string lobbyId)
     {
         string json = "[]";
 
-        if (lobbies.ContainsKey(lobbyId))
+        if (_lobbies.LobbyExists(lobbyId))
         {
-            Dictionary<string, Player> players = lobbies[lobbyId].players;
+            Dictionary<string, Player> players = _lobbies.GetLobby(lobbyId).players;
             json = JsonSerializer.Serialize(
                 players.Values,
                 new JsonSerializerOptions { WriteIndented = true }
@@ -70,9 +29,9 @@ public class RacerHub : Hub
     {
         string json = "[]";
 
-        if (lobbies.ContainsKey(lobbyId))
+        if (_lobbies.LobbyExists(lobbyId))
         {
-            Equation[] equations = lobbies[lobbyId].equations;
+            Equation[] equations = _lobbies.GetLobby(lobbyId).equations;
             json = JsonSerializer.Serialize(
                 equations,
                 new JsonSerializerOptions { WriteIndented = true }
@@ -86,7 +45,7 @@ public class RacerHub : Hub
     {
         GameMode gameMode = JsonSerializer.Deserialize<GameMode>(gmode)!;
 
-        string lobbyId = GenerateNewLobbyId();
+        string lobbyId = _lobbies.GenerateNewLobbyId();
 
         Equation[] equations = Equation.GenerateAllEquations(
             gameMode.count * (gameMode.type == "time" ? 10 : 1)
@@ -97,10 +56,10 @@ public class RacerHub : Hub
 
         player.isHost = true;
 
-        lobbies.Add(lobbyId, lobby);
+        _lobbies.AddLobby(lobby);
         await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
 
-        PrintLobbies("CreateLobby");
+        _lobbies.PrintLobbies("CreateLobby");
 
         await Clients
             .Client(Context.ConnectionId)
@@ -111,19 +70,19 @@ public class RacerHub : Hub
 
     public async Task<string> JoinLobby(string lobbyId, string name)
     {
-        if (!lobbies.ContainsKey(lobbyId))
+        if (!_lobbies.LobbyExists(lobbyId))
         {
             return "";
         }
 
-        Lobby lobby = lobbies[lobbyId];
+        Lobby lobby = _lobbies.GetLobby(lobbyId);
         Player player = lobby.NewPlayer(name, Context.ConnectionId);
 
         await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
 
         await SyncPlayers(lobbyId);
 
-        PrintLobbies("JoinLobby");
+        _lobbies.PrintLobbies("JoinLobby");
 
         await Clients
             .Client(Context.ConnectionId)
@@ -135,31 +94,31 @@ public class RacerHub : Hub
     public async Task ExitLobby(string lobbyId, string playerId)
     {
         Console.WriteLine("lobbyId: {0}, playerId: {1}", lobbyId, playerId);
-        if (!lobbies.ContainsKey(lobbyId))
+        if (!_lobbies.LobbyExists(lobbyId))
         {
             return;
         }
-        Lobby lobby = lobbies[lobbyId];
+        Lobby lobby = _lobbies.GetLobby(lobbyId);
         lobby.RemovePlayer(playerId);
 
         if (lobby.players.Count == 0)
         {
-            lobbies.Remove(lobbyId);
+            _lobbies.RemoveLobby(lobbyId);
         }
 
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, lobbyId);
         await SyncPlayers(lobbyId);
 
-        PrintLobbies("ExitLobby");
+        _lobbies.PrintLobbies("ExitLobby");
     }
 
     public async Task MoveToGameScreen(string lobbyId)
     {
-        if (!lobbies.ContainsKey(lobbyId))
+        if (!_lobbies.LobbyExists(lobbyId))
         {
             return;
         }
-        lobbies[lobbyId].ClearStats();
+        _lobbies.GetLobby(lobbyId).ClearStats();
         await SyncPlayers(lobbyId);
         await SyncEquations(lobbyId);
         await Clients.Groups(lobbyId).SendAsync("MoveToGameScreen");
@@ -167,11 +126,11 @@ public class RacerHub : Hub
 
     public async Task UpdatePlayerState(string lobbyId, string playerId, string state)
     {
-        if (!lobbies.ContainsKey(lobbyId))
+        if (!_lobbies.LobbyExists(lobbyId))
         {
             return;
         }
-        Lobby lobby = lobbies[lobbyId];
+        Lobby lobby = _lobbies.GetLobby(lobbyId);
         if (lobby.UpdatePlayerState(playerId, state))
         {
             // the last one who joins will start the game
@@ -179,9 +138,9 @@ public class RacerHub : Hub
         }
     }
 
-    public async Task StartGame(string gameId)
+    public async Task StartGame(string lobbyId)
     {
-        Lobby lobby = lobbies[gameId];
+        Lobby lobby = _lobbies.GetLobby(lobbyId);
         GameMode selectedMode = lobby.gameMode;
         Equation[] equations = lobby.equations;
 
@@ -192,7 +151,7 @@ public class RacerHub : Hub
         {
             if (elapsed >= 1)
             {
-                await Clients.Groups(gameId).SendAsync("CountDown", count);
+                await Clients.Groups(lobbyId).SendAsync("CountDown", count);
                 elapsed = 0;
                 now = DateTime.Now;
                 count--;
@@ -209,7 +168,7 @@ public class RacerHub : Hub
             if (elapsed >= 1)
             {
                 time++;
-                await Clients.Groups(gameId).SendAsync("TimeElapsed", time);
+                await Clients.Groups(lobbyId).SendAsync("TimeElapsed", time);
                 elapsed = 0;
                 now = DateTime.Now;
             }
@@ -225,29 +184,23 @@ public class RacerHub : Hub
 
     public async Task UpdateScore(string lobbyId, string playerId, int score)
     {
-        var lobby = lobbies[lobbyId].players;
+        var lobby = _lobbies.GetLobby(lobbyId).players;
         var player = lobby[playerId];
         player.score = score;
 
         await SyncPlayers(lobbyId);
 
-        PrintLobbies("UpdateScore");
+        _lobbies.PrintLobbies("UpdateScore");
     }
 
     public async Task PlayerCompleted(string lobbyId, string playerId)
     {
-        var lobby = lobbies[lobbyId].players;
+        var lobby = _lobbies.GetLobby(lobbyId).players;
         var player = lobby[playerId];
         player.state = PlayerState.completed;
 
         await SyncPlayers(lobbyId);
 
-        PrintLobbies("PlayerCompleted");
-    }
-
-    public string LobbyExists(string lobbyId)
-    {
-        bool exists = lobbies.ContainsKey(lobbyId);
-        return JsonSerializer.Serialize(exists);
+        _lobbies.PrintLobbies("PlayerCompleted");
     }
 }
