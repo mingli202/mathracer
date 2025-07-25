@@ -232,4 +232,13 @@ public class RacerHub : Hub
 
         PrintLobbies("PlayerCompleted");
     }
+
+    public string LobbyExists(string lobbyId)
+    {
+        if (lobbies.ContainsKey(lobbyId))
+        {
+            return "true";
+        }
+        return "false";
+    }
 }

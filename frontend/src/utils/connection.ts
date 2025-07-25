@@ -16,7 +16,6 @@ export async function withConnection(
 ) {
   const c = await newConnection();
 
-  await c.start();
   await f(c);
   await c.stop();
 }
