@@ -2,20 +2,16 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { GameStateContext } from "@/gameState";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { use, useState } from "react";
+import { useState } from "react";
 
 export default function JoinPage() {
   const router = useRouter();
 
   const [error, setError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  const { gameState } = use(GameStateContext);
-  const { connection } = gameState;
 
   return (
     <div className="animate-fade-in flex w-sm flex-col gap-4 space-y-6">
@@ -34,8 +30,10 @@ export default function JoinPage() {
           const lobbyId = formData.get("lobbyId") as string;
           let lobbyExists = false;
 
-          const r = await connection.invoke("LobbyExists", lobbyId);
-          lobbyExists = r === "true";
+          const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/lobby/exists/${lobbyId}`,
+          );
+          lobbyExists = (await res.text()) === "true";
 
           if (lobbyExists) {
             router.push(`/lobby?join=${lobbyId}`);

@@ -1,7 +1,7 @@
 import * as signalR from "@microsoft/signalr";
 
 export async function newConnection() {
-  const url = process.env.NEXT_PUBLIC_HUB_URL ?? "http://localhost:5103/hub";
+  const url = `${process.env.NEXT_PUBLIC_API_URL}/hub`;
 
   const c = new signalR.HubConnectionBuilder()
     .withUrl(url, { withCredentials: true })
