@@ -35,5 +35,5 @@ export type Lobby = z.infer<typeof Lobby>;
 export type GameState = {
   lobby: Lobby;
   currentPlayer: Player;
-  connection: HubConnection | null;
+  connection: HubConnection;
 };

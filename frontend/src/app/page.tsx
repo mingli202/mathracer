@@ -35,8 +35,8 @@ export default function Page() {
             size="lg"
             className="math-button-accent flex h-16 w-full items-center justify-center gap-2"
             onClick={async () => {
-              await createLobby("Player", gameMode, connection!, dispatch);
-              connection!.send("MoveToGameScreen", lobbyId);
+              await createLobby("Player", gameMode, connection, dispatch);
+              connection.send("MoveToGameScreen", lobbyId);
             }}
           >
             <User size={20} />

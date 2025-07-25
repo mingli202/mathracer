@@ -28,7 +28,6 @@ export default function LobbyPage() {
   const gameUrl = `http://localhost:3000/lobby?join=${lobbyId}`;
   const copyInviteLink = () => {
     navigator.clipboard.writeText(gameUrl);
-    //toast.success("Invite link copied to clipboard");
   };
 
   const shareInviteLink = async () => {
@@ -78,7 +77,7 @@ export default function LobbyPage() {
                   !(await joinLobby(
                     joinId,
                     name,
-                    gameState.connection!,
+                    gameState.connection,
                     dispatch,
                   ))
                 ) {
@@ -88,7 +87,7 @@ export default function LobbyPage() {
                 await createLobby(
                   name,
                   gameMode,
-                  gameState.connection!,
+                  gameState.connection,
                   dispatch,
                 );
               }
@@ -121,7 +120,7 @@ export default function LobbyPage() {
                 className="mb-4 flex items-center gap-2"
                 onClick={() =>
                   exitLobby(
-                    gameState.connection!,
+                    gameState.connection,
                     lobbyId,
                     currentPlayer.playerId,
                     dispatch,
@@ -179,7 +178,7 @@ export default function LobbyPage() {
                 <Button
                   className="math-button-primary flex items-center gap-2"
                   onClick={async () => {
-                    connection!.send("MoveToGameScreen", lobbyId);
+                    connection.send("MoveToGameScreen", lobbyId);
                   }}
                 >
                   <Play size={16} />

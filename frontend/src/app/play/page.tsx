@@ -20,7 +20,7 @@ import {
 export default function PlayPage() {
   const { gameState, dispatch } = use(GameStateContext);
   const { lobby, currentPlayer } = gameState;
-  const connection = gameState.connection!;
+  const connection = gameState.connection;
   const { players, equations, gameMode, lobbyId } = lobby;
 
   const [countDown, setCountDown] = useState(3);

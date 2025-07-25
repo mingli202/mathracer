@@ -104,7 +104,7 @@ export default function ResultsPage() {
             if (players.length > 1) {
               router.push("/lobby");
             } else {
-              connection!.send("MoveToGameScreen", lobbyId);
+              connection.send("MoveToGameScreen", lobbyId);
             }
           }}
         >
@@ -118,7 +118,7 @@ export default function ResultsPage() {
             className="flex w-full flex-1 items-center justify-center gap-2"
             onClick={async () => {
               exitLobby(
-                gameState.connection!,
+                gameState.connection,
                 lobbyId,
                 currentPlayer.playerId,
                 dispatch,

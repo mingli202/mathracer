@@ -21,7 +21,7 @@ const defaultState = {
     name: "Player",
     score: 0,
   },
-  connection: null,
+  connection: null!,
 } satisfies GameState;
 
 export const GameStateContext = createContext<{
@@ -91,7 +91,7 @@ export type GameStateAction =
     }
   | {
       type: "setConnection";
-      connection: HubConnection | null;
+      connection: HubConnection;
     }
   | {
       type: "setName";
