@@ -235,10 +235,7 @@ public class RacerHub : Hub
 
     public string LobbyExists(string lobbyId)
     {
-        if (lobbies.ContainsKey(lobbyId))
-        {
-            return "true";
-        }
-        return "false";
+        bool exists = lobbies.ContainsKey(lobbyId);
+        return JsonSerializer.Serialize(exists);
     }
 }

@@ -2,17 +2,20 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { withConnection } from "@/utils/connection";
+import { GameStateContext } from "@/gameState";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { z } from "zod";
+import { use, useState } from "react";
 
 export default function JoinPage() {
   const router = useRouter();
 
   const [error, setError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { gameState } = use(GameStateContext);
+  const { connection } = gameState;
 
   return (
     <div className="animate-fade-in flex w-sm flex-col gap-4 space-y-6">
@@ -25,24 +28,21 @@ export default function JoinPage() {
 
       <form
         action={async (formData) => {
+          if (isLoading) return;
+
+          setIsLoading(true);
           const lobbyId = formData.get("lobbyId") as string;
           let lobbyExists = false;
 
-          await withConnection(async (c) => {
-            const res = z
-              .boolean()
-              .safeParse(await c.invoke("LobbyExists", lobbyId));
-
-            if (res.success) {
-              lobbyExists = res.data;
-            }
-          });
+          const r = await connection.invoke("LobbyExists", lobbyId);
+          lobbyExists = r === "true";
 
           if (lobbyExists) {
             router.push(`/lobby?join=${lobbyId}`);
           } else {
             setError(true);
           }
+          setIsLoading(false);
         }}
         className="space-y-4"
       >
@@ -62,7 +62,7 @@ export default function JoinPage() {
         </div>
 
         <Button type="submit" className="math-button-primary h-12 w-full">
-          JoinGame
+          {isLoading ? "Loading..." : "Join Game"}
         </Button>
         {error && (
           <p className="w-full text-center text-red-500">
