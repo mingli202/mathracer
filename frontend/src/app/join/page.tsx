@@ -33,7 +33,9 @@ export default function JoinPage() {
               .boolean()
               .safeParse(await c.invoke("LobbyExists", lobbyId));
 
-            lobbyExists = res.success;
+            if (res.success) {
+              lobbyExists = res.data;
+            }
           });
 
           if (lobbyExists) {
