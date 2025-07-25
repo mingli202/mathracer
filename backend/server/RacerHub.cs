@@ -137,11 +137,6 @@ public class RacerHub : Hub
         PrintLobbies("ExitLobby");
     }
 
-    public void StopConnection()
-    {
-        Console.WriteLine("left the app");
-    }
-
     public async Task MoveToGameScreen(string lobbyId)
     {
         if (!lobbies.ContainsKey(lobbyId))

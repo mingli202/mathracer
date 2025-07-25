@@ -126,10 +126,14 @@ public class Lobby
 
     public void ClearStats(string lobbyId)
     {
-        foreach (var player in players.Values)
+        foreach (var player in this.players.Values)
         {
             player.score = 0;
         }
+        this.equations = Equation.GenerateAllEquations(
+            this.gameMode.count * (this.gameMode.type == "time" ? 10 : 1)
+        );
+
     }
 }
 
