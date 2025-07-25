@@ -9,6 +9,50 @@ public class RacerHub : Hub
 {
     private static Lobbies _lobbies = new Lobbies();
 
+    public async Task ExitLobby(string lobbyId, string playerId)
+    {
+        Console.WriteLine("lobbyId: {0}, playerId: {1}", lobbyId, playerId);
+        if (!_lobbies.LobbyExists(lobbyId))
+        {
+            return;
+        }
+        Lobby lobby = _lobbies.GetLobby(lobbyId);
+        lobby.RemovePlayer(playerId);
+
+        if (lobby.players.Count == 0)
+        {
+            _lobbies.RemoveLobby(lobbyId);
+        }
+
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, lobbyId);
+        await SyncPlayers(lobbyId);
+
+        _lobbies.PrintLobbies("ExitLobby");
+    }
+
+    public async Task MoveToGameScreen(string lobbyId)
+    {
+        if (!_lobbies.LobbyExists(lobbyId))
+        {
+            return;
+        }
+        _lobbies.GetLobby(lobbyId).ClearStats();
+        await SyncPlayers(lobbyId);
+        await SyncEquations(lobbyId);
+        await Clients.Groups(lobbyId).SendAsync("MoveToGameScreen");
+    }
+
+    public async Task PlayerCompleted(string lobbyId, string playerId)
+    {
+        var lobby = _lobbies.GetLobby(lobbyId).players;
+        var player = lobby[playerId];
+        player.state = PlayerState.completed;
+
+        await SyncPlayers(lobbyId);
+
+        _lobbies.PrintLobbies("PlayerCompleted");
+    }
+
     public async Task SyncPlayers(string lobbyId)
     {
         string json = "[]";
@@ -39,6 +83,75 @@ public class RacerHub : Hub
         }
 
         await Clients.Groups(lobbyId).SendAsync("SyncEquations", json);
+    }
+
+    public async Task StartGame(string lobbyId)
+    {
+        Lobby lobby = _lobbies.GetLobby(lobbyId);
+        GameMode selectedMode = lobby.gameMode;
+        Equation[] equations = lobby.equations;
+
+        int count = 3;
+        DateTime now = DateTime.Now;
+        int elapsed = 1;
+        while (count >= 0)
+        {
+            if (elapsed >= 1)
+            {
+                await Clients.Groups(lobbyId).SendAsync("CountDown", count);
+                elapsed = 0;
+                now = DateTime.Now;
+                count--;
+            }
+
+            elapsed = (DateTime.Now - now).Seconds;
+        }
+
+        int time = 0;
+        elapsed = 0;
+        bool run = true;
+        while (run)
+        {
+            if (elapsed >= 1)
+            {
+                time++;
+                await Clients.Groups(lobbyId).SendAsync("TimeElapsed", time);
+                elapsed = 0;
+                now = DateTime.Now;
+            }
+
+            elapsed = (DateTime.Now - now).Seconds;
+
+            if (time > selectedMode.count)
+            {
+                run = false;
+            }
+        }
+    }
+
+    public async Task UpdatePlayerState(string lobbyId, string playerId, string state)
+    {
+        if (!_lobbies.LobbyExists(lobbyId))
+        {
+            return;
+        }
+        Lobby lobby = _lobbies.GetLobby(lobbyId);
+        if (lobby.UpdatePlayerState(playerId, state))
+        {
+            // the last one who joins will start the game
+            await Clients.Client(Context.ConnectionId).SendAsync("StartGame");
+        }
+    }
+
+    public async Task UpdateScore(string lobbyId, string playerId, int score)
+    {
+        var lobby = _lobbies.GetLobby(lobbyId).players;
+        var player = lobby[playerId];
+        player.score = score;
+
+        await SyncPlayers(lobbyId);
+
+        _lobbies.PrintLobbies("UpdateScore");
     }
 
     public async Task<string> CreateLobby(string gmode, string name)
@@ -89,118 +202,5 @@ public class RacerHub : Hub
             .SendAsync("AddUnloadEventListener", lobbyId, player.playerId);
 
         return JsonSerializer.Serialize(new { player = player, lobby = lobby });
-    }
-
-    public async Task ExitLobby(string lobbyId, string playerId)
-    {
-        Console.WriteLine("lobbyId: {0}, playerId: {1}", lobbyId, playerId);
-        if (!_lobbies.LobbyExists(lobbyId))
-        {
-            return;
-        }
-        Lobby lobby = _lobbies.GetLobby(lobbyId);
-        lobby.RemovePlayer(playerId);
-
-        if (lobby.players.Count == 0)
-        {
-            _lobbies.RemoveLobby(lobbyId);
-        }
-
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, lobbyId);
-        await SyncPlayers(lobbyId);
-
-        _lobbies.PrintLobbies("ExitLobby");
-    }
-
-    public async Task MoveToGameScreen(string lobbyId)
-    {
-        if (!_lobbies.LobbyExists(lobbyId))
-        {
-            return;
-        }
-        _lobbies.GetLobby(lobbyId).ClearStats();
-        await SyncPlayers(lobbyId);
-        await SyncEquations(lobbyId);
-        await Clients.Groups(lobbyId).SendAsync("MoveToGameScreen");
-    }
-
-    public async Task UpdatePlayerState(string lobbyId, string playerId, string state)
-    {
-        if (!_lobbies.LobbyExists(lobbyId))
-        {
-            return;
-        }
-        Lobby lobby = _lobbies.GetLobby(lobbyId);
-        if (lobby.UpdatePlayerState(playerId, state))
-        {
-            // the last one who joins will start the game
-            await Clients.Client(Context.ConnectionId).SendAsync("StartGame");
-        }
-    }
-
-    public async Task StartGame(string lobbyId)
-    {
-        Lobby lobby = _lobbies.GetLobby(lobbyId);
-        GameMode selectedMode = lobby.gameMode;
-        Equation[] equations = lobby.equations;
-
-        int count = 3;
-        DateTime now = DateTime.Now;
-        int elapsed = 1;
-        while (count >= 0)
-        {
-            if (elapsed >= 1)
-            {
-                await Clients.Groups(lobbyId).SendAsync("CountDown", count);
-                elapsed = 0;
-                now = DateTime.Now;
-                count--;
-            }
-
-            elapsed = (DateTime.Now - now).Seconds;
-        }
-
-        int time = 0;
-        elapsed = 0;
-        bool run = true;
-        while (run)
-        {
-            if (elapsed >= 1)
-            {
-                time++;
-                await Clients.Groups(lobbyId).SendAsync("TimeElapsed", time);
-                elapsed = 0;
-                now = DateTime.Now;
-            }
-
-            elapsed = (DateTime.Now - now).Seconds;
-
-            if (time > selectedMode.count)
-            {
-                run = false;
-            }
-        }
-    }
-
-    public async Task UpdateScore(string lobbyId, string playerId, int score)
-    {
-        var lobby = _lobbies.GetLobby(lobbyId).players;
-        var player = lobby[playerId];
-        player.score = score;
-
-        await SyncPlayers(lobbyId);
-
-        _lobbies.PrintLobbies("UpdateScore");
-    }
-
-    public async Task PlayerCompleted(string lobbyId, string playerId)
-    {
-        var lobby = _lobbies.GetLobby(lobbyId).players;
-        var player = lobby[playerId];
-        player.state = PlayerState.completed;
-
-        await SyncPlayers(lobbyId);
-
-        _lobbies.PrintLobbies("PlayerCompleted");
     }
 }
