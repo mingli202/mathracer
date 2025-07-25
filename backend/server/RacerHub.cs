@@ -7,7 +7,12 @@ namespace hub;
 
 public class RacerHub : Hub
 {
-    private static Lobbies _lobbies = new Lobbies();
+    private readonly Lobbies _lobbies;
+
+    public RacerHub(Lobbies lobbies)
+    {
+        _lobbies = lobbies;
+    }
 
     public async Task ExitLobby(string lobbyId, string playerId)
     {

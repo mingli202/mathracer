@@ -18,6 +18,9 @@ builder.Services.AddCors(options =>
     );
 });
 
+
+builder.Services.AddSingleton<Lobbies>();
+
 builder.Services.AddSignalR();
 builder.Services.AddControllers();
 
