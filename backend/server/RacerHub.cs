@@ -66,6 +66,22 @@ public class RacerHub : Hub
         await Clients.Groups(lobbyId).SendAsync("SyncPlayers", json);
     }
 
+    public async Task SyncEquations(string lobbyId)
+    {
+        string json = "[]";
+
+        if (lobbies.ContainsKey(lobbyId))
+        {
+            Equation[] equations = lobbies[lobbyId].equations;
+            json = JsonSerializer.Serialize(
+                equations,
+                new JsonSerializerOptions { WriteIndented = true }
+            );
+        }
+
+        await Clients.Groups(lobbyId).SendAsync("SyncEquations", json);
+    }
+
     public async Task<string> CreateLobby(string gmode, string name)
     {
         GameMode gameMode = JsonSerializer.Deserialize<GameMode>(gmode)!;
@@ -143,8 +159,9 @@ public class RacerHub : Hub
         {
             return;
         }
-        lobbies[lobbyId].ClearStats(lobbyId);
+        lobbies[lobbyId].ClearStats();
         await SyncPlayers(lobbyId);
+        await SyncEquations(lobbyId);
         await Clients.Groups(lobbyId).SendAsync("MoveToGameScreen");
     }
 

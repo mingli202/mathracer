@@ -1,6 +1,6 @@
 "use client";
 
-import { GameMode, GameState, Lobby, Player } from "@/types";
+import { Equation, GameMode, GameState, Lobby, Player } from "@/types";
 import { HubConnection } from "@microsoft/signalr";
 import { useRouter } from "next/navigation";
 import { ActionDispatch, createContext, useEffect, useReducer } from "react";
@@ -51,6 +51,11 @@ export function GameStateWrapper({ children }: Props) {
         dispatch({ type: "setPlayers", players });
       });
 
+      c.on("SyncEquations", (res: string) => {
+        const equations = z.array(Equation).parse(JSON.parse(res));
+        dispatch({ type: "setEquations", equations });
+      });
+
       c.on("AddUnloadEventListener", (lobbyId: string, playerId: string) => {
         window.addEventListener(
           "beforeunload",
@@ -79,6 +84,10 @@ export type GameStateAction =
   | {
       type: "setPlayers";
       players: Player[];
+    }
+  | {
+      type: "setEquations";
+      equations: Equation[];
     }
   | {
       type: "joinLobby";
@@ -122,6 +131,15 @@ export function gameStateReducer(
         currentPlayer:
           action.players.find((p) => p.playerId === currentPlayer.playerId) ??
           currentPlayer,
+      };
+
+    case "setEquations":
+      return {
+        ...state,
+        lobby: {
+          ...lobby,
+          equations: action.equations,
+        },
       };
 
     case "joinLobby":

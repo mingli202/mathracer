@@ -124,7 +124,7 @@ public class Lobby
         return this.players.Values.All(p => p.state == PlayerState.playing);
     }
 
-    public void ClearStats(string lobbyId)
+    public void ClearStats()
     {
         foreach (var player in this.players.Values)
         {
