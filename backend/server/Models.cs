@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Collections;
 using equation;
 
 namespace models;
@@ -150,7 +151,7 @@ public class LobbyPlayersConverter : JsonConverter<Dictionary<string, Player>>
             throw new JsonException();
         }
 
-        Player[] arr = [];
+        ArrayList arr = new();
 
         while (reader.Read())
         {
@@ -160,7 +161,7 @@ public class LobbyPlayersConverter : JsonConverter<Dictionary<string, Player>>
             }
 
             Player p = JsonSerializer.Deserialize<Player>(ref reader, options)!;
-            arr.Append(p);
+            arr.Add(p);
         }
 
         Dictionary<string, Player> lobby = new();
@@ -183,15 +184,7 @@ public class LobbyPlayersConverter : JsonConverter<Dictionary<string, Player>>
 
         foreach (Player p in lobby.Values)
         {
-            writer.WriteStartObject();
-
-            writer.WriteString("playerId", p.playerId);
-            writer.WriteNumber("score", p.score);
-            writer.WriteBoolean("isHost", p.isHost);
-            writer.WriteString("name", p.name);
-            writer.WriteString("state", p.state.ToString());
-
-            writer.WriteEndObject();
+            JsonSerializer.Serialize(writer, p, options);
         }
 
         writer.WriteEndArray();

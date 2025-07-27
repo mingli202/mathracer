@@ -61,8 +61,8 @@ public class Lobbies
         return lobbyId;
     }
 
-    public async void PrintLobbies(string name)
+    public void PrintLobbies(string name)
     {
-        await Task.Run(() => Console.WriteLine("{0} {1}", name, GetPrintableLobbies()));
+        Task.Run(() => Console.WriteLine("{0} {1}", name, GetPrintableLobbies())).ConfigureAwait(false);
     }
 }
