@@ -90,7 +90,7 @@ public class RacerHub : Hub
         await Clients.Groups(lobbyId).SendAsync("SyncEquations", json);
     }
 
-    public async void StartGame(string lobbyId)
+    public async Task StartGame(string lobbyId)
     {
         Console.WriteLine($"StartGame {lobbyId}");
 
@@ -106,7 +106,7 @@ public class RacerHub : Hub
             await Clients.Groups(lobbyId).SendAsync("CountDown", count);
             int elapsed = DateTime.Now.Millisecond - now;
 
-            await Task.Delay(TimeSpan.FromMilliseconds(1000 - elapsed)); ;
+            await Task.Delay(TimeSpan.FromMilliseconds(1000 - elapsed));
 
             count--;
         }
