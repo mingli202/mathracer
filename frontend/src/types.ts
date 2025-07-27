@@ -27,10 +27,16 @@ export const Lobby = z.object({
   players: z.array(Player),
 });
 
+export const User = z.object({
+  id: z.string(),
+  username: z.string(),
+});
+
 export type Player = z.infer<typeof Player>;
 export type Equation = z.infer<typeof Equation>;
 export type GameMode = z.infer<typeof GameMode>;
 export type Lobby = z.infer<typeof Lobby>;
+export type User = z.infer<typeof User>;
 
 export type GameState = {
   lobby: Lobby;
