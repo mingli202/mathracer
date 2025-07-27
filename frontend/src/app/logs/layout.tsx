@@ -8,7 +8,7 @@ type Props = {
 export default async function LogsLayout({ children }: Props) {
   const user = await getCurrentUser();
 
-  if (!user) {
+  if (!user && process.env.NODE_ENV === "production") {
     redirect("/login");
   }
 
