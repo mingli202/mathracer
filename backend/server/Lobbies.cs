@@ -42,6 +42,25 @@ public class Lobbies
         );
     }
 
+    public string GetPrintableLobby(string lobbyId)
+    {
+        if (!this.LobbyExists(lobbyId))
+        {
+            return $"{lobbyId} does not exist";
+        }
+
+        string json = JsonSerializer.Serialize(this.lobbies[lobbyId]);
+
+        Lobby lobbyCopy = JsonSerializer.Deserialize<Lobby>(json)!;
+
+        lobbyCopy.equations = [];
+
+        return JsonSerializer.Serialize(
+            lobbyCopy,
+            new JsonSerializerOptions { WriteIndented = true }
+        );
+    }
+
     public string GenerateNewLobbyId()
     {
         Random rand = new Random();
@@ -61,8 +80,13 @@ public class Lobbies
         return lobbyId;
     }
 
-    public void PrintLobbies(string name)
+    public void PrintLobbies(string functionName)
     {
-        Task.Run(() => Console.WriteLine("{0} {1}", name, GetPrintableLobbies())).ConfigureAwait(false);
+        Task.Run(() => Console.WriteLine("{0} {1}", functionName, GetPrintableLobbies())).ConfigureAwait(false);
+    }
+
+    public void PrintLobby(string functionName, string lobbyId)
+    {
+        Task.Run(() => Console.WriteLine("{0} {1}", functionName, GetPrintableLobby(lobbyId))).ConfigureAwait(false);
     }
 }
