@@ -43,3 +43,10 @@ export type GameState = {
   currentPlayer: Player;
   connection: HubConnection;
 };
+
+export const LogSeverity = {
+  Info: "Info",
+  Debug: "Debug",
+  Error: "Error",
+} as const;
+export type LogSeverity = (typeof LogSeverity)[keyof typeof LogSeverity];
