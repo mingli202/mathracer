@@ -25,42 +25,6 @@ public class Lobbies
         return this.lobbies[lobbyId];
     }
 
-    public string GetPrintableLobbies()
-    {
-        string json = JsonSerializer.Serialize(this.lobbies);
-
-        Dictionary<string, Lobby> lobbiesCopy = JsonSerializer.Deserialize<Dictionary<string, Lobby>>(json)!;
-
-        foreach (Lobby lobby in lobbiesCopy.Values)
-        {
-            lobby.equations = [];
-        }
-
-        return JsonSerializer.Serialize(
-            lobbiesCopy,
-            new JsonSerializerOptions { WriteIndented = true }
-        );
-    }
-
-    public string GetPrintableLobby(string lobbyId)
-    {
-        if (!this.LobbyExists(lobbyId))
-        {
-            return $"{lobbyId} does not exist";
-        }
-
-        string json = JsonSerializer.Serialize(this.lobbies[lobbyId]);
-
-        Lobby lobbyCopy = JsonSerializer.Deserialize<Lobby>(json)!;
-
-        lobbyCopy.equations = [];
-
-        return JsonSerializer.Serialize(
-            lobbyCopy,
-            new JsonSerializerOptions { WriteIndented = true }
-        );
-    }
-
     public string GenerateNewLobbyId()
     {
         Random rand = new Random();
@@ -80,13 +44,11 @@ public class Lobbies
         return lobbyId;
     }
 
-    public void PrintLobbies(string functionName)
+    public override string ToString()
     {
-        Task.Run(() => Console.WriteLine("{0} {1}", functionName, GetPrintableLobbies())).ConfigureAwait(false);
+        return $"Lobbies: {JsonSerializer.Serialize(this.lobbies,
+            new JsonSerializerOptions { WriteIndented = true }
+        )}";
     }
 
-    public void PrintLobby(string functionName, string lobbyId)
-    {
-        Task.Run(() => Console.WriteLine("{0} {1}", functionName, GetPrintableLobby(lobbyId))).ConfigureAwait(false);
-    }
 }

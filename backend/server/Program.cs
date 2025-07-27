@@ -20,6 +20,7 @@ builder.Services.AddCors(options =>
 
 
 builder.Services.AddSingleton<Lobbies>();
+builder.Services.AddSingleton<LoggingService>();
 
 builder.Services.AddSignalR();
 builder.Services.AddControllers();
