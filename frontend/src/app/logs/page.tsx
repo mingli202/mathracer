@@ -1,9 +1,11 @@
 "use client";
 
 import { GameStateContext } from "@/gameState";
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import SeverityCheckbox from "./SeverityCheckbox";
-import { LogSeverity } from "@/types";
+import { Log, LogSeverity } from "@/types";
+import { cn } from "@/utils/cn";
+import { Bug, Info, TriangleAlert } from "lucide-react";
 
 export default function Logs() {
   const { gameState } = use(GameStateContext);
@@ -19,10 +21,29 @@ export default function Logs() {
 
   const [regexFilter, setRegexFilter] = useState("");
 
+  const [logs, setLogs] = useState<Log[]>([]);
+
+  useEffect(() => {
+    connection.on("Log", (log: string) => {
+      setLogs((logs) => [...logs, Log.parse(JSON.parse(log))]);
+    });
+
+    return () => {
+      connection.off("Log");
+    };
+  }, []);
+
   return (
     <main className="flex h-full w-full flex-col gap-4">
       <p className="shink-0 w-full text-center">Server Logs</p>
-      <form className="flex w-full shrink-0 flex-col gap-2">
+      <form
+        className="flex w-full shrink-0 flex-col gap-2"
+        action={(formData) => {
+          const _regexFilter =
+            formData.get("regex-filter")?.toString() ?? regexFilter;
+          setRegexFilter(_regexFilter);
+        }}
+      >
         <div className="flex w-full items-center gap-4">
           <p>Severity:</p>
           <SeverityCheckbox
@@ -77,11 +98,29 @@ export default function Logs() {
             id="regex-filter"
             name="regex-filter"
             placeholder="Enter a regex filter"
-            value={regexFilter}
-            onChange={(e) => setRegexFilter(e.target.value)}
           />
         </div>
       </form>
+
+      {/* logs */}
+      <div className="flex h-full w-full flex-col gap-2 rounded-md border border-gray-100 bg-white p-4 shadow-sm">
+        {logs.map((log) => (
+          <div
+            key={log.timestamp}
+            className={cn("flex w-full items-center gap-2", {
+              "text-foreground": log.severity === LogSeverity.Info,
+              "text-yellow-700": log.severity === LogSeverity.Debug,
+              "text-red-700": log.severity === LogSeverity.Error,
+            })}
+          >
+            {log.severity === LogSeverity.Info && <Info />}
+            {log.severity === LogSeverity.Debug && <Bug />}
+            {log.severity === LogSeverity.Error && <TriangleAlert />}
+            <p>{log.timestamp}</p>
+            <p>{log.message}</p>
+          </div>
+        ))}
+      </div>
     </main>
   );
 }

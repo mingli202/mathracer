@@ -50,3 +50,15 @@ export const LogSeverity = {
   Error: "Error",
 } as const;
 export type LogSeverity = (typeof LogSeverity)[keyof typeof LogSeverity];
+
+export const Log = z.object({
+  timestamp: z.string(),
+  severity: z.enum([
+    LogSeverity.Info,
+    LogSeverity.Debug,
+    LogSeverity.Error,
+  ] as const),
+  message: z.string(),
+  details: z.string(),
+});
+export type Log = z.infer<typeof Log>;
