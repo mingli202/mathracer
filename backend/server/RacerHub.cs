@@ -99,35 +99,40 @@ public class RacerHub : Hub
         Equation[] equations = lobby.equations;
 
         int count = 3;
-        while (count >= 0)
+        while (true)
         {
-            Console.WriteLine($"CountDown {lobbyId}: {count}");
             int now = DateTime.Now.Millisecond;
+
+            Console.WriteLine($"CountDown {lobbyId}: {count}");
             await Clients.Groups(lobbyId).SendAsync("CountDown", count);
             int elapsed = DateTime.Now.Millisecond - now;
 
-            await Task.Delay(TimeSpan.FromMilliseconds(1000 - elapsed));
-
             count--;
+
+            if (count == 0)
+            {
+                break;
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(1000 - elapsed));
         }
 
         count = 0;
         bool run = true;
         while (run)
         {
-            Console.WriteLine($"TimeElapsed {lobbyId}: {count}");
-
             int now = DateTime.Now.Millisecond;
+
+            Console.WriteLine($"TimeElapsed {lobbyId}: {count}");
             await Clients.Groups(lobbyId).SendAsync("TimeElapsed", count);
             int elapsed = DateTime.Now.Millisecond - now;
-
-            await Task.Delay(TimeSpan.FromMilliseconds(1000 - elapsed));
 
             count++;
             if (count > selectedMode.count)
             {
                 run = false;
             }
+            await Task.Delay(TimeSpan.FromMilliseconds(1000 - elapsed));
         }
     }
 
