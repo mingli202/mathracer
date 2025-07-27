@@ -44,7 +44,7 @@ services:
           action: sync
           target: /app
     environment:
-      - ENV=production
+      - NODE_ENV=production
       - NEXT_PUBLIC_API_URL=http://localhost:8080
 
 
