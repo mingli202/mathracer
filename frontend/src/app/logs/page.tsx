@@ -17,6 +17,8 @@ export default function Logs() {
     [LogSeverity.Error]: false,
   });
 
+  const [regexFilter, setRegexFilter] = useState("");
+
   return (
     <main className="flex h-full w-full flex-col gap-4">
       <p className="shink-0 w-full text-center">Server Logs</p>
@@ -64,6 +66,20 @@ export default function Logs() {
           >
             Clear
           </button>
+        </div>
+        <div className="flex w-full items-center gap-2">
+          <label htmlFor="regex-filter" className="shrink-0">
+            Regex Filter:
+          </label>
+          <input
+            type="text"
+            className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex w-full rounded-md border px-3 py-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            id="regex-filter"
+            name="regex-filter"
+            placeholder="Enter a regex filter"
+            value={regexFilter}
+            onChange={(e) => setRegexFilter(e.target.value)}
+          />
         </div>
       </form>
     </main>
