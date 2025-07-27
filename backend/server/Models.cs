@@ -39,6 +39,11 @@ public class Player
         this.name = name;
         state = PlayerState.lobby;
     }
+
+    public override string ToString()
+    {
+        return $"Player {JsonSerializer.Serialize(this)}";
+    }
 }
 
 public class GameMode
@@ -56,6 +61,11 @@ public class GameMode
     {
         this.type = type;
         this.count = count;
+    }
+
+    public override string ToString()
+    {
+        return JsonSerializer.Serialize(this);
     }
 }
 
@@ -135,6 +145,11 @@ public class Lobby
             this.gameMode.count * (this.gameMode.type == "time" ? 10 : 1)
         );
 
+    }
+
+    public override string ToString()
+    {
+        return $"Lobby {JsonSerializer.Serialize(this)}";
     }
 }
 
