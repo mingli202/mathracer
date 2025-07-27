@@ -90,7 +90,7 @@ public class RacerHub : Hub
         await Clients.Groups(lobbyId).SendAsync("SyncEquations", json);
     }
 
-    public void StartGame(string lobbyId)
+    public async void StartGame(string lobbyId)
     {
         Console.WriteLine($"StartGame {lobbyId}");
 
@@ -99,13 +99,14 @@ public class RacerHub : Hub
         Equation[] equations = lobby.equations;
 
         int count = 3;
-        DateTime now = DateTime.Now;
         while (count >= 0)
         {
             Console.WriteLine($"CountDown {lobbyId}: {count}");
-            Clients.Groups(lobbyId).SendAsync("CountDown", count);
+            int now = DateTime.Now.Millisecond;
+            await Clients.Groups(lobbyId).SendAsync("CountDown", count);
+            int elapsed = DateTime.Now.Millisecond - now;
 
-            Task.Delay(TimeSpan.FromSeconds(1)).Wait(); ;
+            await Task.Delay(TimeSpan.FromMilliseconds(1000 - elapsed)); ;
 
             count--;
         }
@@ -115,9 +116,12 @@ public class RacerHub : Hub
         while (run)
         {
             Console.WriteLine($"TimeElapsed {lobbyId}: {count}");
-            Clients.Groups(lobbyId).SendAsync("TimeElapsed", count);
 
-            Task.Delay(TimeSpan.FromSeconds(1)).Wait();
+            int now = DateTime.Now.Millisecond;
+            await Clients.Groups(lobbyId).SendAsync("TimeElapsed", count);
+            int elapsed = DateTime.Now.Millisecond - now;
+
+            await Task.Delay(TimeSpan.FromMilliseconds(1000 - elapsed));
 
             count++;
             if (count > selectedMode.count)
