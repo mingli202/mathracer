@@ -55,7 +55,7 @@ public class RacerHub : Hub
 
         await SyncPlayers(lobbyId);
 
-        _lobbies.PrintLobbies("PlayerCompleted");
+        _lobbies.PrintLobby("PlayerCompleted", lobbyId);
     }
 
     public async Task SyncPlayers(string lobbyId)
@@ -90,44 +90,37 @@ public class RacerHub : Hub
         await Clients.Groups(lobbyId).SendAsync("SyncEquations", json);
     }
 
-    public async Task StartGame(string lobbyId)
+    public void StartGame(string lobbyId)
     {
+        Console.WriteLine($"StartGame {lobbyId}");
+
         Lobby lobby = _lobbies.GetLobby(lobbyId);
         GameMode selectedMode = lobby.gameMode;
         Equation[] equations = lobby.equations;
 
         int count = 3;
         DateTime now = DateTime.Now;
-        int elapsed = 1;
         while (count >= 0)
         {
-            if (elapsed >= 1)
-            {
-                await Clients.Groups(lobbyId).SendAsync("CountDown", count);
-                elapsed = 0;
-                now = DateTime.Now;
-                count--;
-            }
+            Console.WriteLine($"CountDown {lobbyId}: {count}");
+            Clients.Groups(lobbyId).SendAsync("CountDown", count);
 
-            elapsed = (DateTime.Now - now).Seconds;
+            Task.Delay(TimeSpan.FromSeconds(1)).Wait(); ;
+
+            count--;
         }
 
-        int time = 0;
-        elapsed = 0;
+        count = 0;
         bool run = true;
         while (run)
         {
-            if (elapsed >= 1)
-            {
-                time++;
-                await Clients.Groups(lobbyId).SendAsync("TimeElapsed", time);
-                elapsed = 0;
-                now = DateTime.Now;
-            }
+            Console.WriteLine($"TimeElapsed {lobbyId}: {count}");
+            Clients.Groups(lobbyId).SendAsync("TimeElapsed", count);
 
-            elapsed = (DateTime.Now - now).Seconds;
+            Task.Delay(TimeSpan.FromSeconds(1)).Wait();
 
-            if (time > selectedMode.count)
+            count++;
+            if (count > selectedMode.count)
             {
                 run = false;
             }
@@ -156,7 +149,7 @@ public class RacerHub : Hub
 
         await SyncPlayers(lobbyId);
 
-        _lobbies.PrintLobbies("UpdateScore");
+        _lobbies.PrintLobby("UpdateScore", lobbyId);
     }
 
     public async Task<string> CreateLobby(string gmode, string name)
@@ -200,7 +193,7 @@ public class RacerHub : Hub
 
         await SyncPlayers(lobbyId);
 
-        _lobbies.PrintLobbies("JoinLobby");
+        _lobbies.PrintLobby("JoinLobby", lobbyId);
 
         await Clients
             .Client(Context.ConnectionId)
