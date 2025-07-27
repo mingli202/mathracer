@@ -104,22 +104,24 @@ export default function Logs() {
 
       {/* logs */}
       <div className="flex h-full w-full flex-col gap-2 rounded-md border border-gray-100 bg-white p-4 shadow-sm">
-        {logs.map((log) => (
-          <div
-            key={log.timestamp}
-            className={cn("flex w-full items-center gap-2", {
-              "text-foreground": log.severity === LogSeverity.Info,
-              "text-yellow-700": log.severity === LogSeverity.Debug,
-              "text-red-700": log.severity === LogSeverity.Error,
-            })}
-          >
-            {log.severity === LogSeverity.Info && <Info />}
-            {log.severity === LogSeverity.Debug && <Bug />}
-            {log.severity === LogSeverity.Error && <TriangleAlert />}
-            <p>{log.timestamp}</p>
-            <p>{log.message}</p>
-          </div>
-        ))}
+        {logs
+          .filter((log) => regexFilter === "" || log.message.match(regexFilter))
+          .map((log) => (
+            <div
+              key={log.timestamp}
+              className={cn("flex w-full items-center gap-2 text-sm", {
+                "text-foreground": log.severity === LogSeverity.Info,
+                "text-yellow-700": log.severity === LogSeverity.Debug,
+                "text-red-700": log.severity === LogSeverity.Error,
+              })}
+            >
+              {log.severity === LogSeverity.Info && <Info />}
+              {log.severity === LogSeverity.Debug && <Bug />}
+              {log.severity === LogSeverity.Error && <TriangleAlert />}
+              <p className="font-bold">{log.timestamp}</p>
+              <p>{log.message}</p>
+            </div>
+          ))}
       </div>
     </main>
   );
