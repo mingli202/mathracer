@@ -20,23 +20,25 @@ public class RacerHub : Hub
     {
         if (!_lobbies.LobbyExists(lobbyId))
         {
-            _logger.Log(Severity.Error, $"Player {playerId} tried to exit lobby {lobbyId} but lobby does not exist.", _lobbies);
+            _logger.Log(Severity.Error, $"ExitLobby {lobbyId}: player {playerId} tried to exit non-existing lobby", _lobbies);
             return;
         }
 
         Lobby lobby = _lobbies.GetLobby(lobbyId);
         lobby.RemovePlayer(playerId);
 
+        _logger.Log(Severity.Debug, $"ExitLobby {lobbyId}: player {playerId} removed", lobby);
+
         if (lobby.players.Count == 0)
         {
             _lobbies.RemoveLobby(lobbyId);
-            _logger.Log(Severity.Debug, $"Lobby {lobbyId} removed", lobby);
+            _logger.Log(Severity.Debug, $"ExitLobby {lobbyId}: lobby removed", lobby);
         }
 
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, lobbyId);
         await SyncPlayers(lobbyId);
 
-        _logger.Log(Severity.Info, $"Player {playerId} exited lobby {lobbyId}.", lobby);
+        _logger.Log(Severity.Info, $"ExitLobby {playerId}: exited lobby {lobbyId}.", lobby);
     }
 
     public async Task MoveToGameScreen(string lobbyId)
@@ -59,7 +61,7 @@ public class RacerHub : Hub
 
         await SyncPlayers(lobbyId);
 
-        _logger.Log(Severity.Info, $"Player {playerId} completed in {lobbyId}", lobby);
+        _logger.Log(Severity.Info, $"PlayerCompleted {playerId}: completed in lobby {lobbyId}", lobby);
     }
 
     public async Task SyncPlayers(string lobbyId)
@@ -75,11 +77,11 @@ public class RacerHub : Hub
                 new JsonSerializerOptions { WriteIndented = true }
             );
 
-            _logger.Log(Severity.Debug, $"Lobby {lobbyId} sync", lobby);
+            _logger.Log(Severity.Debug, $"SyncPlayers {lobbyId}", lobby);
         }
         else
         {
-            _logger.Log(Severity.Debug, $"Lobby {lobbyId} does not exist anymore", _lobbies);
+            _logger.Log(Severity.Debug, $"SyncPlayers {lobbyId}: lobby does not exist anymore", _lobbies);
         }
 
         await Clients.Groups(lobbyId).SendAsync("SyncPlayers", json);
@@ -103,18 +105,20 @@ public class RacerHub : Hub
 
     public async Task StartGame(string lobbyId)
     {
-        Console.WriteLine($"StartGame {lobbyId}");
 
         Lobby lobby = _lobbies.GetLobby(lobbyId);
         GameMode selectedMode = lobby.gameMode;
         Equation[] equations = lobby.equations;
+
+        _logger.Log(Severity.Info, $"StartGame {lobbyId}", lobby);
 
         int count = 3;
         while (count >= 0)
         {
             int now = DateTime.Now.Millisecond;
 
-            Console.WriteLine($"CountDown {lobbyId}: {count}");
+            _logger.Log(Severity.Debug, $"CountDown {lobbyId}: {count}", lobby);
+
             await Clients.Groups(lobbyId).SendAsync("CountDown", count);
 
             count--;
@@ -133,7 +137,8 @@ public class RacerHub : Hub
         {
             int now = DateTime.Now.Millisecond;
 
-            Console.WriteLine($"TimeElapsed {lobbyId}: {count}");
+            _logger.Log(Severity.Debug, $"TimeElapsed {lobbyId}: {count}", lobby);
+
             await Clients.Groups(lobbyId).SendAsync("TimeElapsed", count);
 
             count++;
@@ -154,6 +159,7 @@ public class RacerHub : Hub
     {
         if (!_lobbies.LobbyExists(lobbyId))
         {
+            _logger.Log(Severity.Error, $"UpdatePlayerState: lobby {lobbyId} does not exist.", _lobbies);
             return;
         }
         Lobby lobby = _lobbies.GetLobby(lobbyId);
@@ -172,7 +178,7 @@ public class RacerHub : Hub
 
         await SyncPlayers(lobbyId);
 
-        _logger.Log(Severity.Info, $"Player {playerId} updated score to {score} in lobby {lobbyId}", lobby);
+        _logger.Log(Severity.Debug, $"UpdateScore {lobbyId}: Player {playerId} score to {score}", lobby);
     }
 
     public async Task<string> CreateLobby(string gmode, string name)
@@ -193,7 +199,7 @@ public class RacerHub : Hub
         _lobbies.AddLobby(lobby);
         await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
 
-        _logger.Log(Severity.Info, $"Lobby created ({lobbyId}).", lobby);
+        _logger.Log(Severity.Info, $"CreateLobby {lobbyId}: created from player {player.name}", lobby);
 
         await Clients
             .Client(Context.ConnectionId)
@@ -206,7 +212,7 @@ public class RacerHub : Hub
     {
         if (!_lobbies.LobbyExists(lobbyId))
         {
-            _logger.Log(Severity.Debug, $"Player {name} tried to join lobby {lobbyId} but lobby does not exist.", _lobbies);
+            _logger.Log(Severity.Debug, $"JoinLobby {lobbyId}: Player {name} tried to join non-existing lobby.", _lobbies);
             return "";
         }
 
@@ -217,7 +223,7 @@ public class RacerHub : Hub
 
         await SyncPlayers(lobbyId);
 
-        _logger.Log(Severity.Info, $"{player.name} joined lobby {lobbyId}.", lobby);
+        _logger.Log(Severity.Info, $"JoinLobby {lobbyId}: {player.name} joined lobby.", lobby);
 
         await Clients
             .Client(Context.ConnectionId)

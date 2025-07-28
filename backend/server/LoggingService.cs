@@ -18,7 +18,7 @@ public class LogMessage
     {
         this.message = message;
         this.details = details;
-        this.timestamp = DateTime.Now.ToString();
+        this.timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ff");
         this.severity = severity;
     }
 }
