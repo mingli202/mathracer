@@ -171,35 +171,39 @@ export default function Logs() {
           }
 
           // case insensitive unless there is an uppercase letter
-          let regex = new RegExp(regexFilter, "g");
-          if (regexFilter.toLowerCase() === regexFilter) {
-            regex = new RegExp(regexFilter, "gi");
+          let regex;
+          try {
+            regex = new RegExp(regexFilter, "g");
+            if (regexFilter.toLowerCase() === regexFilter) {
+              regex = new RegExp(regexFilter, "gi");
+            }
+          } catch (e) {
+            console.error(e);
+            return null;
           }
-          const matches = log.message.matchAll(regex);
+          const matches = log.message.matchAll(regex).toArray();
 
-          if (!matches) {
+          if (matches.length === 0) {
             return null;
           }
 
           // highlight matched text in the log message
           let next = 0;
-          const messageWithHighlights = matches
-            .map((match, ii) => {
-              const matchIndex = match.index;
-              const start = next;
-              next = matchIndex + match[0].length;
+          const messageWithHighlights = matches.map((match, ii) => {
+            const matchIndex = match.index;
+            const start = next;
+            next = matchIndex + match[0].length;
 
-              // add a non-highlighted section with a highlighted section
-              return (
-                <Fragment key={log.timestamp + ii + start}>
-                  <span>{log.message.slice(start, matchIndex)}</span>
-                  <span className="bg-yellow-200 font-bold text-black">
-                    {match[0]}
-                  </span>
-                </Fragment>
-              );
-            })
-            .toArray();
+            // add a non-highlighted section with a highlighted section
+            return (
+              <Fragment key={log.timestamp + ii + start}>
+                <span>{log.message.slice(start, matchIndex)}</span>
+                <span className="bg-yellow-200 font-bold text-black">
+                  {match[0]}
+                </span>
+              </Fragment>
+            );
+          });
 
           // add the last bit that might be left
           messageWithHighlights.push(
