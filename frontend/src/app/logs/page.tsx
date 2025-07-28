@@ -1,7 +1,7 @@
 "use client";
 
 import { GameStateContext } from "@/gameState";
-import { Fragment, use, useEffect, useState } from "react";
+import { Fragment, use, useEffect, useRef, useState } from "react";
 import SeverityCheckbox from "./SeverityCheckbox";
 import { Log, LogSeverity } from "@/types";
 import { cn } from "@/utils/cn";
@@ -20,6 +20,8 @@ export default function Logs() {
   });
 
   const [regexFilter, setRegexFilter] = useState("");
+  const timer = useRef<number | null>(null);
+  const activeSearchDelayMs = 500;
 
   const [logs, setLogs] = useState<Log[]>([]);
   const [isPaused, setIsPaused] = useState(false);
@@ -109,6 +111,18 @@ export default function Logs() {
             id="regex-filter"
             name="regex-filter"
             placeholder="Filter messges by regex"
+            defaultValue={regexFilter}
+            onChange={(e) => {
+              const value = e.target.value;
+
+              if (timer.current) {
+                window.clearTimeout(timer.current);
+              }
+
+              timer.current = window.setTimeout(() => {
+                setRegexFilter(value);
+              }, activeSearchDelayMs);
+            }}
           />
         </div>
         <div className="flex w-full items-center gap-2">
@@ -189,7 +203,9 @@ export default function Logs() {
 
           // add the last bit that might be left
           messageWithHighlights.push(
-            <span key={log.timestamp + next}>{log.message.slice(next)}</span>,
+            <span key={log.timestamp + next + messageWithHighlights.length}>
+              {log.message.slice(next)}
+            </span>,
           );
 
           return (
