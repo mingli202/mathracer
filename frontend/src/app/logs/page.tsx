@@ -1,7 +1,7 @@
 "use client";
 
 import { GameStateContext } from "@/gameState";
-import { use, useEffect, useState } from "react";
+import { Fragment, use, useEffect, useState } from "react";
 import SeverityCheckbox from "./SeverityCheckbox";
 import { Log, LogSeverity } from "@/types";
 import { cn } from "@/utils/cn";
@@ -108,7 +108,7 @@ export default function Logs() {
             className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex w-full rounded-md border px-3 py-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
             id="regex-filter"
             name="regex-filter"
-            placeholder="Enter a regex filter"
+            placeholder="Filter messges by regex"
           />
         </div>
         <div className="flex w-full items-center gap-2">
@@ -147,29 +147,86 @@ export default function Logs() {
 
       {/* logs */}
       <div className="overflow-x-none flex h-full w-full flex-col gap-2 overflow-y-auto rounded-md border border-gray-100 bg-white p-4 shadow-sm">
-        {logs
-          .filter(
-            (log) =>
-              (regexFilter === "" || log.message.match(regexFilter)) &&
-              logSeverityChecked[log.severity],
-          )
-          .map((log, i) => (
-            <div
+        {logs.map((log, i) => {
+          if (!logSeverityChecked[log.severity]) {
+            return null;
+          }
+
+          if (regexFilter === "") {
+            return <LogEntry log={log} key={log.timestamp + i} />;
+          }
+
+          // case insensitive unless there is an uppercase letter
+          let regex = new RegExp(regexFilter, "g");
+          if (regexFilter.toLowerCase() === regexFilter) {
+            regex = new RegExp(regexFilter, "gi");
+          }
+          const matches = log.message.matchAll(regex);
+
+          if (!matches) {
+            return null;
+          }
+
+          // highlight matched text in the log message
+          let next = 0;
+          const messageWithHighlights = matches
+            .map((match, ii) => {
+              const matchIndex = match.index;
+              const start = next;
+              next = matchIndex + match[0].length;
+
+              // add a non-highlighted section with a highlighted section
+              return (
+                <Fragment key={log.timestamp + ii + start}>
+                  <span>{log.message.slice(start, matchIndex)}</span>
+                  <span className="bg-yellow-200 font-bold text-black">
+                    {match[0]}
+                  </span>
+                </Fragment>
+              );
+            })
+            .toArray();
+
+          // add the last bit that might be left
+          messageWithHighlights.push(
+            <span key={log.timestamp + next}>{log.message.slice(next)}</span>,
+          );
+
+          return (
+            <LogEntry
+              log={log}
+              customMessage={messageWithHighlights}
               key={log.timestamp + i}
-              className={cn("flex w-full items-center gap-2 text-sm", {
-                "text-foreground": log.severity === LogSeverity.Info,
-                "text-yellow-700": log.severity === LogSeverity.Debug,
-                "text-red-700": log.severity === LogSeverity.Error,
-              })}
-            >
-              {log.severity === LogSeverity.Info && <Info />}
-              {log.severity === LogSeverity.Debug && <Bug />}
-              {log.severity === LogSeverity.Error && <TriangleAlert />}
-              <p className="font-bold">{log.timestamp}</p>
-              <p>{log.message}</p>
-            </div>
-          ))}
+            />
+          );
+        })}
       </div>
     </main>
+  );
+}
+
+function LogEntry({
+  log,
+  customMessage,
+  ...props
+}: {
+  log: Log;
+  customMessage?: React.ReactNode;
+} & React.ComponentProps<"div">) {
+  return (
+    <div
+      className={cn("flex w-full items-center gap-2 text-sm", {
+        "text-foreground": log.severity === LogSeverity.Info,
+        "text-yellow-700": log.severity === LogSeverity.Debug,
+        "text-red-700": log.severity === LogSeverity.Error,
+      })}
+      {...props}
+    >
+      {log.severity === LogSeverity.Info && <Info />}
+      {log.severity === LogSeverity.Debug && <Bug />}
+      {log.severity === LogSeverity.Error && <TriangleAlert />}
+      <p className="font-bold">{log.timestamp}</p>
+      <p>{customMessage ?? log.message}</p>
+    </div>
   );
 }
