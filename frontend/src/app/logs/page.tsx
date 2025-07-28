@@ -14,22 +14,33 @@ export default function Logs() {
   const [logSeverityChecked, setLogSeverityChecked] = useState<
     Record<LogSeverity, boolean>
   >({
-    [LogSeverity.Info]: false,
-    [LogSeverity.Debug]: false,
-    [LogSeverity.Error]: false,
+    [LogSeverity.Info]: true,
+    [LogSeverity.Debug]: true,
+    [LogSeverity.Error]: true,
   });
 
   const [regexFilter, setRegexFilter] = useState("");
 
   const [logs, setLogs] = useState<Log[]>([]);
+  const [isPaused, setIsPaused] = useState(false);
 
-  useEffect(() => {
+  function startListening() {
+    setIsPaused(false);
     connection.on("Log", (log: string) => {
       setLogs((logs) => [...logs, Log.parse(JSON.parse(log))]);
     });
+  }
+
+  function stopListening() {
+    setIsPaused(true);
+    connection.off("Log");
+  }
+
+  useEffect(() => {
+    startListening();
 
     return () => {
-      connection.off("Log");
+      stopListening();
     };
   }, []);
 
@@ -85,7 +96,7 @@ export default function Logs() {
               });
             }}
           >
-            Clear
+            Deselect All
           </button>
         </div>
         <div className="flex w-full items-center gap-2">
@@ -100,15 +111,51 @@ export default function Logs() {
             placeholder="Enter a regex filter"
           />
         </div>
+        <div className="flex w-full items-center gap-2">
+          <button
+            className="bg-muted text-muted-foreground border-muted hover:bg-foreground/10 hover:text-foreground w-fit rounded-md px-2 py-1 transition"
+            type="button"
+            onClick={() => {
+              setLogs([]);
+            }}
+          >
+            Clear Logs
+          </button>
+          {isPaused ? (
+            <button
+              className="bg-muted text-muted-foreground border-muted hover:bg-foreground/10 hover:text-foreground w-fit rounded-md px-2 py-1 transition"
+              type="button"
+              onClick={() => {
+                startListening();
+              }}
+            >
+              Resume Logs
+            </button>
+          ) : (
+            <button
+              className="bg-muted text-muted-foreground border-muted hover:bg-foreground/10 hover:text-foreground w-fit rounded-md px-2 py-1 transition"
+              type="button"
+              onClick={() => {
+                stopListening();
+              }}
+            >
+              Pause Logs
+            </button>
+          )}
+        </div>
       </form>
 
       {/* logs */}
-      <div className="flex h-full w-full flex-col gap-2 rounded-md border border-gray-100 bg-white p-4 shadow-sm">
+      <div className="overflow-x-none flex h-full w-full flex-col gap-2 overflow-y-auto rounded-md border border-gray-100 bg-white p-4 shadow-sm">
         {logs
-          .filter((log) => regexFilter === "" || log.message.match(regexFilter))
-          .map((log) => (
+          .filter(
+            (log) =>
+              (regexFilter === "" || log.message.match(regexFilter)) &&
+              logSeverityChecked[log.severity],
+          )
+          .map((log, i) => (
             <div
-              key={log.timestamp}
+              key={log.timestamp + i}
               className={cn("flex w-full items-center gap-2 text-sm", {
                 "text-foreground": log.severity === LogSeverity.Info,
                 "text-yellow-700": log.severity === LogSeverity.Debug,
