@@ -8,7 +8,7 @@ import {
   GameStateContext,
   joinLobby,
 } from "@/gameState";
-import { ArrowLeft, Copy, Play, Share2 } from "lucide-react";
+import { ArrowLeft, Copy, Play, LoaderCircle } from "lucide-react";
 import Link from "next/link";
 
 import { useRouter, useSearchParams } from "next/navigation";
@@ -16,36 +16,44 @@ import { use, useState } from "react";
 
 export default function LobbyPage() {
   const urlSearchParams = useSearchParams();
-  const joinId = urlSearchParams.get("join");
 
   const { gameState, dispatch } = use(GameStateContext);
+
+  const [showNameDialogue, setShowNameDialogue] = useState(true);
+  const [copyModalMessage, setCopyModalMessage] = useState<
+    "loading" | "copied"
+  >("loading");
+  const [copyModalCoords, setCopyModalCoords] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+
+  const router = useRouter();
+
   const { currentPlayer, lobby, connection } = gameState;
   const { lobbyId, players, gameMode } = lobby;
 
-  const [showNameDialogue, setShowNameDialogue] = useState(true);
-  const router = useRouter();
-
+  const joinId = urlSearchParams.get("join");
   const gameUrl = `http://localhost:3000/lobby?join=${lobbyId}`;
-  const copyInviteLink = () => {
-    navigator.clipboard.writeText(gameUrl);
+
+  const copyInviteLink = (text: string, x: number, y: number) => {
+    setCopyModalMessage("loading");
+    setCopyModalCoords({ x, y });
+    navigator.clipboard.writeText(text);
+    setCopyModalMessage("copied");
+    console.log("copied");
+
+    const f = () => {
+      window.removeEventListener("mousemove", f);
+      // window.removeEventListener("click", f);
+      setCopyModalCoords(null);
+      setCopyModalMessage("loading");
+    };
+
+    window.addEventListener("mousemove", f, { once: true });
+    // window.addEventListener("click", f, { once: true });
   };
 
-  const shareInviteLink = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "Join my Math Race Quest game!",
-          text: "Join me for a math racing challenge!",
-          url: gameUrl,
-        });
-      } catch (err) {
-        console.error("Error sharing:", err);
-        copyInviteLink();
-      }
-    } else {
-      copyInviteLink();
-    }
-  };
   const canStart = (): boolean => {
     return !players.some((p) => p.state === "playing");
   };
@@ -112,6 +120,22 @@ export default function LobbyPage() {
         </div>
       ) : (
         <>
+          {copyModalCoords ? (
+            <div
+              className="bg-background absolute z-10 -translate-x-1/2 -translate-y-full rounded-md p-1 shadow-lg"
+              style={{
+                top: copyModalCoords.y,
+                left: copyModalCoords.x,
+              }}
+            >
+              {copyModalMessage === "copied" ? (
+                "Copied!"
+              ) : (
+                <LoaderCircle className="animate-spin" />
+              )}
+            </div>
+          ) : null}
+
           <div className="w-full">
             <Link href="/">
               <Button
@@ -133,9 +157,15 @@ export default function LobbyPage() {
             </Link>
 
             <h1 className="mb-2 text-center text-3xl font-bold">Game Lobby</h1>
-            <p className="text-muted-foreground mb-6 text-center">
-              {getModeDescription()}
-            </p>
+            <div className="text-muted-foreground mb-6 flex w-full flex-col items-center text-center">
+              <p>{getModeDescription()}</p>
+              <button
+                className="flex cursor-pointer items-center justify-center gap-2 hover:underline"
+                onClick={(e) => copyInviteLink(lobbyId, e.clientX, e.clientY)}
+              >
+                Lobby id: {lobbyId} <Copy size={16} />
+              </button>
+            </div>
           </div>
 
           <div className="bg-secondary/30 border-secondary w-full rounded-lg border p-4">
@@ -147,20 +177,11 @@ export default function LobbyPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={copyInviteLink}
+                  onClick={(e) => copyInviteLink(gameUrl, e.clientX, e.clientY)}
                   className="flex items-center gap-1"
                 >
                   <Copy size={14} />
                   <span>Copy</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={shareInviteLink}
-                  className="flex items-center gap-1"
-                >
-                  <Share2 size={14} />
-                  <span>Share</span>
                 </Button>
               </div>
             </div>

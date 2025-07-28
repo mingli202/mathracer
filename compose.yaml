@@ -22,7 +22,7 @@ services:
           action: sync
           target: /app/server
     environment:
-      - ENV=development
+      - ENV=provided
 
   web:
     build:
@@ -44,8 +44,8 @@ services:
           action: sync
           target: /app
     environment:
-      - ENV=development
-      - NEXT_PUBLIC_HUB_URL=http://localhost:8080/hub
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
 
 
 

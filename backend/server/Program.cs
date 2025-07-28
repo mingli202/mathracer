@@ -18,13 +18,24 @@ builder.Services.AddCors(options =>
     );
 });
 
+
+builder.Services.AddSingleton<Lobbies>();
+
 builder.Services.AddSignalR();
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
+app.UseRouting();
+
 app.UseCors(MyAllowSpecificOrigins);
 
-app.MapHub<RacerHub>("/hub");
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapHub<RacerHub>("/hub");
+});
+
 
 app.Run();
 
