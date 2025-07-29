@@ -6,6 +6,7 @@ import SeverityCheckbox from "./SeverityCheckbox";
 import { Log, LogSeverity } from "@/types";
 import { cn } from "@/utils/cn";
 import { Bug, Info, TriangleAlert } from "lucide-react";
+import { saveAs } from "file-saver";
 
 export default function Logs() {
   const { gameState } = use(GameStateContext);
@@ -38,6 +39,14 @@ export default function Logs() {
   function stopListening() {
     setIsPaused(true);
     connection.off("Log");
+  }
+
+  function saveLogs() {
+    const stringifiedLogs = JSON.stringify(logs, null, 2);
+    const blob = new Blob([stringifiedLogs], {
+      type: "application/json",
+    });
+    saveAs(blob, "mathracer-logs.json");
   }
 
   useEffect(() => {
@@ -136,7 +145,7 @@ export default function Logs() {
               setSelectedLog(null);
             }}
           >
-            Clear Logs
+            Clear
           </button>
           {isPaused ? (
             <button
@@ -146,7 +155,7 @@ export default function Logs() {
                 startListening();
               }}
             >
-              Resume Logs
+              Resume
             </button>
           ) : (
             <button
@@ -156,9 +165,18 @@ export default function Logs() {
                 stopListening();
               }}
             >
-              Pause Logs
+              Pause
             </button>
           )}
+          <button
+            className="bg-muted text-muted-foreground border-muted hover:bg-foreground/10 hover:text-foreground w-fit rounded-md px-2 py-1 transition"
+            type="button"
+            onClick={() => {
+              saveLogs();
+            }}
+          >
+            Save
+          </button>
         </div>
       </form>
 
