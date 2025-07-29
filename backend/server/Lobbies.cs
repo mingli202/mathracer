@@ -51,8 +51,9 @@ public class Lobbies
 
     public override string ToString()
     {
-        return $"Lobbies: {JsonSerializer.Serialize(this.lobbies,
+        return JsonSerializer.Serialize(
+            this.lobbies,
             new JsonSerializerOptions { WriteIndented = true }
-        )}";
+        );
     }
 }

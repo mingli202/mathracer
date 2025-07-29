@@ -59,16 +59,16 @@ public class RacerHub : Hub
 
     public async Task PlayerCompleted(string lobbyId, string playerId)
     {
-        var lobby = _lobbies.GetLobby(lobbyId).players;
-        var player = lobby[playerId];
+        var players = _lobbies.GetLobby(lobbyId).players;
+        Player player = players[playerId];
         player.state = PlayerState.completed;
 
         await SyncPlayers(lobbyId);
 
         _logger.Log(
             Severity.Info,
-            $"PlayerCompleted {playerId}: completed in lobby {lobbyId}",
-            lobby
+            $"PlayerCompleted {lobbyId}: player {playerId} completed",
+            player
         );
     }
 

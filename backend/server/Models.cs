@@ -42,9 +42,7 @@ public class Player
 
     public override string ToString()
     {
-        return $"Player {JsonSerializer.Serialize(this,
-            new JsonSerializerOptions { WriteIndented = true }
-        )}";
+        return JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
     }
 }
 
@@ -73,8 +71,8 @@ public class GameMode
 
 public class Lobby
 {
-    public GameMode gameMode { get; set; }
     public string lobbyId { get; set; }
+    public GameMode gameMode { get; set; }
 
     [JsonConverter(typeof(LobbyPlayersConverter))]
     public Dictionary<string, Player> players { get; set; }
@@ -150,9 +148,7 @@ public class Lobby
 
     public override string ToString()
     {
-        return $"Lobby {JsonSerializer.Serialize(this,
-            new JsonSerializerOptions { WriteIndented = true }
-        )}";
+        return JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
     }
 }
 
