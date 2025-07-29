@@ -27,13 +27,38 @@ export const Lobby = z.object({
   players: z.array(Player),
 });
 
+export const User = z.object({
+  id: z.string(),
+  username: z.string(),
+});
+
 export type Player = z.infer<typeof Player>;
 export type Equation = z.infer<typeof Equation>;
 export type GameMode = z.infer<typeof GameMode>;
 export type Lobby = z.infer<typeof Lobby>;
+export type User = z.infer<typeof User>;
 
 export type GameState = {
   lobby: Lobby;
   currentPlayer: Player;
   connection: HubConnection;
 };
+
+export const LogSeverity = {
+  Info: "Info",
+  Debug: "Debug",
+  Error: "Error",
+} as const;
+export type LogSeverity = (typeof LogSeverity)[keyof typeof LogSeverity];
+
+export const Log = z.object({
+  timestamp: z.string(),
+  severity: z.enum([
+    LogSeverity.Info,
+    LogSeverity.Debug,
+    LogSeverity.Error,
+  ] as const),
+  message: z.string(),
+  details: z.string(),
+});
+export type Log = z.infer<typeof Log>;

@@ -1,6 +1,6 @@
+using System.Collections;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Collections;
 using equation;
 
 namespace models;
@@ -39,6 +39,11 @@ public class Player
         this.name = name;
         state = PlayerState.lobby;
     }
+
+    public override string ToString()
+    {
+        return JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
+    }
 }
 
 public class GameMode
@@ -57,16 +62,21 @@ public class GameMode
         this.type = type;
         this.count = count;
     }
+
+    public override string ToString()
+    {
+        return JsonSerializer.Serialize(this);
+    }
 }
 
 public class Lobby
 {
+    public string lobbyId { get; set; }
+    public GameMode gameMode { get; set; }
+
     [JsonConverter(typeof(LobbyPlayersConverter))]
     public Dictionary<string, Player> players { get; set; }
-
-    public GameMode gameMode { get; set; }
     public Equation[] equations { get; set; }
-    public string lobbyId { get; set; }
 
     public Lobby()
     {
@@ -134,7 +144,11 @@ public class Lobby
         this.equations = Equation.GenerateAllEquations(
             this.gameMode.count * (this.gameMode.type == "time" ? 10 : 1)
         );
+    }
 
+    public override string ToString()
+    {
+        return JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
     }
 }
 
