@@ -3,7 +3,12 @@ using System.Text.Json.Serialization;
 using hub;
 using Microsoft.AspNetCore.SignalR;
 
-public enum Severity { Debug, Info, Error }
+public enum Severity
+{
+    Debug,
+    Info,
+    Error,
+}
 
 public class LogMessage
 {
@@ -38,10 +43,14 @@ public class LoggingService
         {
             LogMessage log = new LogMessage(message, details, severity);
             _hubContext.Clients.All.SendAsync("Log", JsonSerializer.Serialize(log));
-            Console.WriteLine("================================================================================");
+            Console.WriteLine(
+                "================================================================================"
+            );
             Console.WriteLine($"{severity.ToString().ToUpper()} {log.timestamp}: {message}");
             Console.WriteLine(details);
-            Console.WriteLine("================================================================================");
+            Console.WriteLine(
+                "================================================================================"
+            );
         });
     }
 
@@ -51,10 +60,14 @@ public class LoggingService
         {
             LogMessage log = new LogMessage(message, details.ToString() ?? "", severity);
             _hubContext.Clients.All.SendAsync("Log", JsonSerializer.Serialize(log));
-            Console.WriteLine("================================================================================");
+            Console.WriteLine(
+                "================================================================================"
+            );
             Console.WriteLine($"{severity.ToString().ToUpper()} {log.timestamp}: {message}");
             Console.WriteLine(details);
-            Console.WriteLine("================================================================================");
+            Console.WriteLine(
+                "================================================================================"
+            );
         });
     }
 }

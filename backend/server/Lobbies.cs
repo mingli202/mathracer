@@ -20,6 +20,11 @@ public class Lobbies
         return this.lobbies.ContainsKey(lobbyId);
     }
 
+    public Dictionary<string, Lobby> GetLobbies()
+    {
+        return this.lobbies;
+    }
+
     public Lobby GetLobby(string lobbyId)
     {
         return this.lobbies[lobbyId];
@@ -50,5 +55,4 @@ public class Lobbies
             new JsonSerializerOptions { WriteIndented = true }
         )}";
     }
-
 }

@@ -1,6 +1,6 @@
+using System.Collections;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Collections;
 using equation;
 
 namespace models;
@@ -146,7 +146,6 @@ public class Lobby
         this.equations = Equation.GenerateAllEquations(
             this.gameMode.count * (this.gameMode.type == "time" ? 10 : 1)
         );
-
     }
 
     public override string ToString()

@@ -18,7 +18,6 @@ builder.Services.AddCors(options =>
     );
 });
 
-
 builder.Services.AddSingleton<Lobbies>();
 builder.Services.AddSingleton<LoggingService>();
 
@@ -37,6 +36,4 @@ app.UseEndpoints(endpoints =>
     endpoints.MapHub<RacerHub>("/hub");
 });
 
-
 app.Run();
-

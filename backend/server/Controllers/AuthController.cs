@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-
     [HttpGet]
     public ActionResult<string> Get([FromHeader(Name = "Authorization")] string token)
     {
