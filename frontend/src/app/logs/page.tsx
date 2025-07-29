@@ -26,6 +26,8 @@ export default function Logs() {
   const [logs, setLogs] = useState<Log[]>([]);
   const [isPaused, setIsPaused] = useState(false);
 
+  const [selectedLog, setSelectedLog] = useState<Log | null>(null);
+
   function startListening() {
     setIsPaused(false);
     connection.on("Log", (log: string) => {
@@ -57,7 +59,7 @@ export default function Logs() {
           setRegexFilter(_regexFilter);
         }}
       >
-        <div className="flex w-full items-center gap-4">
+        <div className="flex w-full flex-wrap items-center gap-x-4 gap-y-1">
           <p>Severity:</p>
           <SeverityCheckbox
             logSeverity={LogSeverity.Info}
@@ -75,7 +77,7 @@ export default function Logs() {
             setLogSeverityChecked={setLogSeverityChecked}
           />
           <button
-            className="bg-muted text-muted-foreground border-muted hover:bg-foreground/10 hover:text-foreground rounded-md px-2 py-1 transition"
+            className="bg-muted text-muted-foreground border-muted hover:bg-foreground/10 hover:text-foreground shrink-0 rounded-md px-2 py-1 transition"
             type="button"
             onClick={() => {
               setLogSeverityChecked({
@@ -88,7 +90,7 @@ export default function Logs() {
             Select All
           </button>
           <button
-            className="bg-muted text-muted-foreground border-muted hover:bg-foreground/10 hover:text-foreground rounded-md px-2 py-1 transition"
+            className="bg-muted text-muted-foreground border-muted hover:bg-foreground/10 hover:text-foreground shrink-0 rounded-md px-2 py-1 transition"
             type="button"
             onClick={() => {
               setLogSeverityChecked({
@@ -131,6 +133,7 @@ export default function Logs() {
             type="button"
             onClick={() => {
               setLogs([]);
+              setSelectedLog(null);
             }}
           >
             Clear Logs
@@ -160,14 +163,21 @@ export default function Logs() {
       </form>
 
       {/* logs */}
-      <div className="overflow-x-none flex h-full w-full flex-col gap-2 overflow-y-auto rounded-md border border-gray-100 bg-white p-4 shadow-sm">
+      <div className="overflow-x-none relative flex h-full w-full flex-col overflow-y-auto rounded-md border border-gray-100 bg-white p-2 shadow-sm">
         {logs.map((log, i) => {
           if (!logSeverityChecked[log.severity]) {
             return null;
           }
 
           if (regexFilter === "") {
-            return <LogEntry log={log} key={log.timestamp + i} />;
+            return (
+              <LogEntry
+                log={log}
+                key={log.timestamp + i}
+                selectedLog={selectedLog}
+                setSelectedLog={setSelectedLog}
+              />
+            );
           }
 
           // case insensitive unless there is an uppercase letter
@@ -217,6 +227,8 @@ export default function Logs() {
               log={log}
               customMessage={messageWithHighlights}
               key={log.timestamp + i}
+              selectedLog={selectedLog}
+              setSelectedLog={setSelectedLog}
             />
           );
         })}
@@ -228,25 +240,48 @@ export default function Logs() {
 function LogEntry({
   log,
   customMessage,
+  selectedLog,
+  setSelectedLog,
   ...props
 }: {
   log: Log;
+  withDetails?: boolean;
+  selectedLog: Log | null;
   customMessage?: React.ReactNode;
+  setSelectedLog: React.Dispatch<React.SetStateAction<Log | null>>;
 } & React.ComponentProps<"div">) {
+  const isSelected = selectedLog === log;
+
   return (
     <div
-      className={cn("flex w-full items-center gap-2 text-sm", {
-        "text-foreground": log.severity === LogSeverity.Info,
-        "text-yellow-700": log.severity === LogSeverity.Debug,
-        "text-red-700": log.severity === LogSeverity.Error,
-      })}
+      className={cn(
+        "hover:bg-muted flex max-h-3/4 w-full flex-col rounded-sm p-1 text-sm transition hover:cursor-pointer",
+        {
+          "text-foreground": log.severity === LogSeverity.Info,
+          "text-yellow-700": log.severity === LogSeverity.Debug,
+          "text-red-700": log.severity === LogSeverity.Error,
+        },
+        selectedLog === log && "bg-muted",
+      )}
+      onClick={() => setSelectedLog((l) => (l === log ? null : log))}
       {...props}
     >
-      {log.severity === LogSeverity.Info && <Info />}
-      {log.severity === LogSeverity.Debug && <Bug />}
-      {log.severity === LogSeverity.Error && <TriangleAlert />}
-      <p className="font-bold">{log.timestamp}</p>
-      <p>{customMessage ?? log.message}</p>
+      <div className="flex w-full items-center gap-2">
+        {log.severity === LogSeverity.Info && <Info className="shrink-0" />}
+        {log.severity === LogSeverity.Debug && <Bug className="shrink-0" />}
+        {log.severity === LogSeverity.Error && (
+          <TriangleAlert className="shrink-0" />
+        )}
+        <p className="shrink-0 font-bold">
+          {isSelected ? log.timestamp : log.timestamp.split(" ")[1]}
+        </p>
+        <p className="overflow-hidden text-ellipsis whitespace-nowrap">
+          {customMessage ?? log.message}
+        </p>
+      </div>
+      {selectedLog === log && (
+        <pre className="text-foreground overflow-y-auto p-2">{log.details}</pre>
+      )}
     </div>
   );
 }
