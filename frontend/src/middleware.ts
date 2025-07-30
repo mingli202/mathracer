@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 export async function middleware(request: NextRequest) {
   const currentUrl = request.nextUrl.pathname;
   const cookieStore = await cookies();
-  cookieStore.set("previousUrl", currentUrl);
+  cookieStore.set("previousUrl", currentUrl, { httpOnly: true });
 
   const user = await getCurrentUser();
 
