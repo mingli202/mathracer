@@ -8,7 +8,8 @@ export async function middleware(request: NextRequest) {
   const user = await getCurrentUser();
   console.log("user:", user);
 
-  if (process.env.NODE_ENV !== "production" && !user) {
+  // TODO: put this only in production
+  if (!user) {
     return NextResponse.redirect(`${request.nextUrl.origin}/login`);
   }
 
