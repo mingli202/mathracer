@@ -6,25 +6,6 @@ import { HttpVerb } from "./utils/httpverb";
 import { redirect } from "next/navigation";
 import { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 
-let publicKey: CryptoKey;
-let privateKey: CryptoKey;
-
-crypto.subtle
-  .generateKey(
-    {
-      name: "RSA-OAEP",
-      modulusLength: 4096,
-      publicExponent: new Uint8Array([1, 0, 1]),
-      hash: "SHA-256",
-    },
-    true,
-    ["encrypt", "decrypt"],
-  )
-  .then(({ publicKey: pubK, privateKey: privK }) => {
-    publicKey = pubK;
-    privateKey = privK;
-  });
-
 export async function getCookieValue(name: string): Promise<string | null> {
   const cookieStore = await cookies();
 
