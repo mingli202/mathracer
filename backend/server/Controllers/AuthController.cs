@@ -1,12 +1,21 @@
+using System.Security.Cryptography;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    [HttpGet]
-    public ActionResult<string> Get([FromHeader(Name = "Authorization")] string token)
+    private RSA rsa;
+
+    AuthController(RSA _rsa)
     {
-        return "Hello World";
+        this.rsa = _rsa;
+    }
+
+    [HttpGet("key")]
+    public ActionResult<string> GetKey()
+    {
+        byte[] spkiPublicKey = rsa.ExportSubjectPublicKeyInfo();
+        return Ok(Convert.ToBase64String(spkiPublicKey));
     }
 }

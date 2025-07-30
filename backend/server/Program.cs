@@ -1,9 +1,12 @@
+using System.Security.Cryptography;
 using hub;
 
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+RSA rsa = RSA.Create(2048);
+byte[] spkiPublicKey = rsa.ExportSubjectPublicKeyInfo();
 
 var builder = WebApplication.CreateBuilder(args);
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
@@ -20,6 +23,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddSingleton<Lobbies>();
 builder.Services.AddSingleton<LoggingService>();
+builder.Services.AddSingleton<RSA>(rsa);
 
 builder.Services.AddSignalR();
 builder.Services.AddControllers();
