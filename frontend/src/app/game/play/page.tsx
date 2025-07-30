@@ -38,7 +38,7 @@ export default function PlayPage() {
 
   useLayoutEffect(() => {
     if (lobbyId === "") {
-      router.push("/");
+      router.push("/game");
     }
   }, []);
 
@@ -86,7 +86,7 @@ export default function PlayPage() {
         //  type: "setCurrentPlayerState",
         //  state: "completed",
         //});
-        router.push("/results");
+        router.push("/game/results");
       })();
     }
   }, [timeElapsed, currentEquationIndex]);

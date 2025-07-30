@@ -34,7 +34,7 @@ export default function LobbyPage() {
   const { lobbyId, players, gameMode } = lobby;
 
   const joinId = urlSearchParams.get("join");
-  const gameUrl = `http://localhost:3000/lobby?join=${lobbyId}`;
+  const gameUrl = `http://localhost:3000/game/lobby?join=${lobbyId}`;
 
   const copyInviteLink = (text: string, x: number, y: number) => {
     setCopyModalMessage("loading");
@@ -89,7 +89,7 @@ export default function LobbyPage() {
                     dispatch,
                   ))
                 ) {
-                  return router.push("/");
+                  return router.push("/game");
                 }
               } else {
                 await createLobby(
@@ -137,7 +137,7 @@ export default function LobbyPage() {
           ) : null}
 
           <div className="w-full">
-            <Link href="/">
+            <Link href="/game">
               <Button
                 variant="ghost"
                 size="sm"
