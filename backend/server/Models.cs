@@ -204,3 +204,15 @@ public class LobbyPlayersConverter : JsonConverter<Dictionary<string, Player>>
         writer.WriteEndArray();
     }
 }
+
+
+public class Payload
+{
+    public string payload { set; get; } = "";
+}
+
+public class Credentials
+{
+    public string username { set; get; } = "";
+    public string password { set; get; } = "";
+}
