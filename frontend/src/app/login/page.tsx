@@ -11,13 +11,8 @@ export default function LoginPage() {
     const password = formData.get("password")?.toString() ?? "";
     setError(null);
 
-    const res: Response = JSON.parse(
-      await login(username, password),
-    ) satisfies Response;
-
-    if (!res.ok) {
-      setError("Invalid credentials");
-    }
+    const error = await login(username, password);
+    setError(error);
   }
 
   return (

@@ -81,5 +81,5 @@ export async function login(
   if (res.ok) {
     redirect(previousUrl);
   }
-  return JSON.stringify(res);
+  return "Invalid credentials";
 }
