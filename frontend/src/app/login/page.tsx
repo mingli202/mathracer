@@ -1,17 +1,27 @@
 "use client";
 
 import { login } from "@/auth";
+import { useState } from "react";
 
 export default function LoginPage() {
+  const [error, setError] = useState<string | null>(null);
+
   async function handleAction(formData: FormData) {
     const username = formData.get("username")?.toString() ?? "";
     const password = formData.get("password")?.toString() ?? "";
+    setError(null);
 
-    await login(username, password);
+    const res: Response = JSON.parse(
+      await login(username, password),
+    ) satisfies Response;
+
+    if (!res.ok) {
+      setError("Invalid credentials");
+    }
   }
 
   return (
-    <main className="flex h-full w-full items-center justify-center">
+    <main className="flex h-full w-full flex-col items-center justify-center gap-4">
       <form className="flex w-96 flex-col gap-2" action={handleAction}>
         <div>
           <label htmlFor="username" className="shrink-0">
@@ -48,6 +58,7 @@ export default function LoginPage() {
           </button>
         </div>
       </form>
+      {error && <p className="text-red-700">{error}</p>}
     </main>
   );
 }

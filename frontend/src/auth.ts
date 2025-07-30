@@ -48,7 +48,10 @@ export async function getPublicKey(): Promise<CryptoKey> {
   return key;
 }
 
-export async function login(username: string, password: string) {
+export async function login(
+  username: string,
+  password: string,
+): Promise<string> {
   const textEncoder = new TextEncoder();
   const payload: Uint8Array<ArrayBufferLike> = textEncoder.encode(
     JSON.stringify({ username, password }),
@@ -75,8 +78,8 @@ export async function login(username: string, password: string) {
 
   const cookieStore = await cookies();
   const previousUrl = cookieStore.get("previousUrl")?.value ?? "/";
-
   if (res.ok) {
     redirect(previousUrl);
   }
+  return JSON.stringify(res);
 }
