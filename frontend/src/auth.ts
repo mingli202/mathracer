@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { User } from "./types";
 import { HttpVerb } from "./utils/httpverb";
+import { redirect } from "next/navigation";
 
 export async function getCurrentUser(): Promise<User | null> {
   const cookieStore = await cookies();
@@ -63,7 +64,7 @@ export async function login(username: string, password: string) {
 
   const base64 = btoa(String.fromCharCode(...new Uint8Array(encrypted)));
 
-  await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
     method: HttpVerb.POST,
     body: JSON.stringify({ payload: base64 }),
     headers: {
@@ -71,4 +72,11 @@ export async function login(username: string, password: string) {
     },
     credentials: "include",
   });
+
+  const cookieStore = await cookies();
+  const previousUrl = cookieStore.get("previousUrl")?.value ?? "/";
+
+  if (res.ok) {
+    redirect(previousUrl);
+  }
 }
