@@ -7,7 +7,7 @@ public class AuthController : ControllerBase
 {
     private RSA rsa;
 
-    AuthController(RSA _rsa)
+    public AuthController(RSA _rsa)
     {
         this.rsa = _rsa;
     }
