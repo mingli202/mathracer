@@ -29,23 +29,21 @@ export async function getCurrentUser(): Promise<User | null> {
 }
 
 export async function getPublicKey(): Promise<CryptoKey> {
-  const key: CryptoKey = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/auth/key`,
-  )
-    .then((key) => key.text())
-    .then((base64) => {
-      const spki = Uint8Array.from(atob(base64), (t) => t.charCodeAt(0));
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/key`);
+  const base64 = await res.text();
 
-      // RSA algorithms always include a hash function
-      // so we need to specify which one we use (SHA-256 here)
-      return crypto.subtle.importKey(
-        "spki",
-        spki,
-        { name: "RSA-OAEP", hash: "SHA-256" },
-        false,
-        ["encrypt"],
-      );
-    });
+  const spki = Uint8Array.from(atob(base64), (t) => t.charCodeAt(0));
+
+  // RSA algorithms always include a hash function
+  // so we need to specify which one we use (SHA-256 here)
+  const key = crypto.subtle.importKey(
+    "spki",
+    spki,
+    { name: "RSA-OAEP", hash: "SHA-256" },
+    false,
+    ["encrypt"],
+  );
+
   return key;
 }
 
@@ -69,7 +67,7 @@ export async function login(username: string, password: string) {
     method: HttpVerb.POST,
     body: JSON.stringify({ payload: base64 }),
     headers: {
-      "Conten-Type": "application/json",
+      "Content-Type": "application/json",
     },
     credentials: "include",
   });
