@@ -17,6 +17,39 @@ export const { privateKey, publicKey } = await window.crypto.subtle.generateKey(
   ["encrypt", "decrypt"],
 );
 
+export async function getCookieValue(name: string): Promise<string | null> {
+  const cookieStore = await cookies();
+  const encryptedBase64Cookie = cookieStore.get(name)?.value;
+
+  if (!encryptedBase64Cookie) {
+    return null;
+  }
+
+  const decrypted: ArrayBuffer = await crypto.subtle.decrypt(
+    { name: "RSA-OAEP" },
+    privateKey,
+    Uint8Array.from(atob(encryptedBase64Cookie), (t) => t.charCodeAt(0)),
+  );
+
+  return new TextDecoder().decode(decrypted);
+}
+
+export async function setCookieValue(
+  name: string,
+  value: string,
+  options?: Partial<ResponseCookie>,
+) {
+  const cookieStore = await cookies();
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "RSA-OAEP" },
+    publicKey,
+    new TextEncoder().encode(value),
+  );
+  const base64 = btoa(String.fromCharCode(...new Uint8Array(encrypted)));
+
+  cookieStore.set(name, base64, options);
+}
+
 export async function getCurrentUser(): Promise<User | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
