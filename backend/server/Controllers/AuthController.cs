@@ -22,6 +22,23 @@ public class AuthController : ControllerBase
         return Ok(Convert.ToBase64String(spkiPublicKey));
     }
 
+    [HttpPost("decrypt")]
+    public ActionResult Decrypt([FromBody] Payload base64payload)
+    {
+        try
+        {
+            byte[] payload = Convert.FromBase64String(base64payload.payload);
+            byte[] decrypted = this._rsa.Decrypt(payload, RSAEncryptionPadding.OaepSHA256);
+            string json = Encoding.UTF8.GetString(decrypted);
+
+            return Ok(json);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
+
     [HttpPost("login")]
     public IActionResult Login([FromBody] Payload base64payload)
     {
