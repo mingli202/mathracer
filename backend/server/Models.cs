@@ -205,7 +205,6 @@ public class LobbyPlayersConverter : JsonConverter<Dictionary<string, Player>>
     }
 }
 
-
 public class Payload
 {
     public string payload { set; get; } = "";

@@ -31,9 +31,9 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 app.UseRouting();
-
 app.UseCors(MyAllowSpecificOrigins);
-
+app.UseAuthorization();
+app.UseAuthentication();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
