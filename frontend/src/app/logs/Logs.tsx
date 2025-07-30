@@ -59,7 +59,7 @@ export default function Logs({ connection }: Props) {
   }, []);
 
   return (
-    <main className="flex h-full w-full flex-col gap-4">
+    <main className="flex h-full w-full flex-col gap-4 p-4">
       <p className="shink-0 w-full text-center">Server Logs</p>
       <form
         className="flex w-full shrink-0 flex-col gap-2"

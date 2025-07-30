@@ -5,6 +5,7 @@ import { useState } from "react";
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
+  const [show, setShow] = useState(false);
 
   async function handleAction(formData: FormData) {
     const username = formData.get("username")?.toString() ?? "";
@@ -35,14 +36,19 @@ export default function LoginPage() {
           <label htmlFor="password" className="shrink-0">
             Password:
           </label>
-          <input
-            type="password"
-            className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex w-full rounded-md border px-3 py-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-            id="password"
-            name="password"
-            placeholder="Password"
-            required
-          />
+          <div className="flex w-full items-center gap-2">
+            <input
+              type={show ? "text" : "password"}
+              className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex w-full rounded-md border px-3 py-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              id="password"
+              name="password"
+              placeholder="Password"
+              required
+            />
+            <button onClick={() => setShow(!show)} type="button">
+              {show ? "Hide" : "Show"}
+            </button>
+          </div>
         </div>
         <div className="flex w-full items-center gap-2">
           <button
