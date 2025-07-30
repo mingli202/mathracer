@@ -9,10 +9,12 @@ using models;
 public class AuthController : ControllerBase
 {
     private readonly RSA _rsa;
+    private readonly LoggingService _logger;
 
-    public AuthController(RSA rsa)
+    public AuthController(RSA rsa, LoggingService logger)
     {
         this._rsa = rsa;
+        this._logger = logger;
     }
 
     [HttpGet("key")]
@@ -25,32 +27,28 @@ public class AuthController : ControllerBase
     [HttpPost("decrypt")]
     public ActionResult Decrypt([FromBody] Payload base64payload)
     {
-        try
-        {
-            byte[] payload = Convert.FromBase64String(base64payload.payload);
-            byte[] decrypted = this._rsa.Decrypt(payload, RSAEncryptionPadding.OaepSHA256);
-            string json = Encoding.UTF8.GetString(decrypted);
+        string? json = this.DecryptRsaAndBase64String(base64payload.payload);
 
-            return Ok(json);
-        }
-        catch (Exception e)
-        {
-            return BadRequest(e.Message);
-        }
+        if (json == null)
+            return BadRequest();
+
+        // HACK: dubious code
+        this._logger.Log(Severity.Debug, "Decrypt succeeded", json);
+        return Ok(json);
     }
 
     [HttpPost("login")]
     public IActionResult Login([FromBody] Payload base64payload)
     {
-        byte[] payload = Convert.FromBase64String(base64payload.payload);
-        byte[] decrypted = this._rsa.Decrypt(payload, RSAEncryptionPadding.OaepSHA256);
-        string json = Encoding.UTF8.GetString(decrypted);
+        string? json = this.DecryptRsaAndBase64String(base64payload.payload);
+
+        if (json == null)
+            return BadRequest();
+
         Credentials? creds = JsonSerializer.Deserialize<Credentials>(json);
 
         if (creds == null)
-        {
             return BadRequest();
-        }
 
         byte[] adminUsernameHash = Convert.FromBase64String(
             "5sxF3UNAZjwn5U1ObVCTShuKuRR1LZ2aNe4SnpUUPPE="
@@ -80,9 +78,33 @@ public class AuthController : ControllerBase
             || !CryptographicOperations.FixedTimeEquals(adminPasswordHash, computedPasswordHash)
         )
         {
+            this._logger.Log(Severity.Error, "Login failed: invalid credentials", creds);
             return Unauthorized();
         }
 
+        this._logger.Log(Severity.Info, "Login succeeded", creds);
+
         return Ok();
+    }
+
+    private string? DecryptRsaAndBase64String(string base64payload)
+    {
+        try
+        {
+            byte[] payload = Convert.FromBase64String(base64payload);
+            byte[] decrypted = this._rsa.Decrypt(payload, RSAEncryptionPadding.OaepSHA256);
+            string json = Encoding.UTF8.GetString(decrypted);
+
+            return json;
+        }
+        catch (Exception e)
+        {
+            this._logger.Log(
+                Severity.Error,
+                $"DecryptRsaAndBase64String failed: {e.Message}",
+                base64payload
+            );
+            return null;
+        }
     }
 }

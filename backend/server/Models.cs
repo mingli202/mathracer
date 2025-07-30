@@ -208,10 +208,20 @@ public class LobbyPlayersConverter : JsonConverter<Dictionary<string, Player>>
 public class Payload
 {
     public string payload { set; get; } = "";
+
+    public override string ToString()
+    {
+        return JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
+    }
 }
 
 public class Credentials
 {
     public string username { set; get; } = "";
     public string password { set; get; } = "";
+
+    public override string ToString()
+    {
+        return JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
+    }
 }
