@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { User } from "./types";
+import { HttpVerb } from "./utils/httpverb";
 
 export async function getCurrentUser(): Promise<User | null> {
   const cookieStore = await cookies();
@@ -46,4 +47,30 @@ export async function getPublicKey(): Promise<CryptoKey> {
       );
     });
   return key;
+}
+
+export async function login(username: string, password: string) {
+  const textEncoder = new TextEncoder();
+  const payload: Uint8Array<ArrayBufferLike> = textEncoder.encode(
+    JSON.stringify({ username, password }),
+  );
+
+  const key = await getPublicKey();
+
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "RSA-OAEP" },
+    key,
+    payload,
+  );
+
+  const base64 = btoa(String.fromCharCode(...new Uint8Array(encrypted)));
+
+  await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+    method: HttpVerb.POST,
+    body: JSON.stringify({ payload: base64 }),
+    headers: {
+      "Conten-Type": "application/json",
+    },
+    credentials: "include",
+  });
 }
