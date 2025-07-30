@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "./auth";
-import { cookies } from "next/headers";
+import { getCurrentUser, setCookieValue } from "./auth";
 
 export async function middleware(request: NextRequest) {
   const currentUrl = request.nextUrl.pathname;
-  const cookieStore = await cookies();
-  cookieStore.set("previousUrl", currentUrl, { httpOnly: true });
+  await setCookieValue("previousUrl", currentUrl);
 
   const user = await getCurrentUser();
+  console.log("user:", user);
 
   if (process.env.NODE_ENV !== "production" && !user) {
     return NextResponse.redirect(`${request.nextUrl.origin}/login`);

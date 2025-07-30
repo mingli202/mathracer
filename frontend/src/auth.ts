@@ -6,32 +6,43 @@ import { HttpVerb } from "./utils/httpverb";
 import { redirect } from "next/navigation";
 import { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 
-export const { privateKey, publicKey } = await window.crypto.subtle.generateKey(
-  {
-    name: "RSA-OAEP",
-    modulusLength: 4096,
-    publicExponent: new Uint8Array([1, 0, 1]),
-    hash: "SHA-256",
-  },
-  true,
-  ["encrypt", "decrypt"],
-);
+let publicKey: CryptoKey;
+let privateKey: CryptoKey;
+
+crypto.subtle
+  .generateKey(
+    {
+      name: "RSA-OAEP",
+      modulusLength: 4096,
+      publicExponent: new Uint8Array([1, 0, 1]),
+      hash: "SHA-256",
+    },
+    true,
+    ["encrypt", "decrypt"],
+  )
+  .then(({ publicKey: pubK, privateKey: privK }) => {
+    publicKey = pubK;
+    privateKey = privK;
+  });
 
 export async function getCookieValue(name: string): Promise<string | null> {
   const cookieStore = await cookies();
+
+  // get cookie
   const encryptedBase64Cookie = cookieStore.get(name)?.value;
 
   if (!encryptedBase64Cookie) {
     return null;
   }
 
-  const decrypted: ArrayBuffer = await crypto.subtle.decrypt(
-    { name: "RSA-OAEP" },
-    privateKey,
-    Uint8Array.from(atob(encryptedBase64Cookie), (t) => t.charCodeAt(0)),
-  );
+  const decrypted = await decryptRSAAndBase64(encryptedBase64Cookie);
 
-  return new TextDecoder().decode(decrypted);
+  if (!decrypted) {
+    cookieStore.delete(name);
+    return null;
+  }
+
+  return decrypted;
 }
 
 export async function setCookieValue(
@@ -39,20 +50,18 @@ export async function setCookieValue(
   value: string,
   options?: Partial<ResponseCookie>,
 ) {
-  const cookieStore = await cookies();
-  const encrypted = await crypto.subtle.encrypt(
-    { name: "RSA-OAEP" },
-    publicKey,
-    new TextEncoder().encode(value),
-  );
-  const base64 = btoa(String.fromCharCode(...new Uint8Array(encrypted)));
+  const base64 = await encryptRSAAndBase64(value);
 
-  cookieStore.set(name, base64, options);
+  // store
+  const cookieStore = await cookies();
+  cookieStore.set(name, base64, {
+    httpOnly: true,
+    ...options,
+  });
 }
 
 export async function getCurrentUser(): Promise<User | null> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const token = await getCookieValue("token");
 
   if (!token) {
     return null;
@@ -95,38 +104,65 @@ export async function getPublicKey(): Promise<CryptoKey> {
   return key;
 }
 
-export async function login(
-  username: string,
-  password: string,
-): Promise<string> {
+export async function encryptRSAAndBase64(value: string): Promise<string> {
   const textEncoder = new TextEncoder();
-  const payload: Uint8Array<ArrayBufferLike> = textEncoder.encode(
-    JSON.stringify({ username, password }),
-  );
-
   const key = await getPublicKey();
 
   const encrypted = await crypto.subtle.encrypt(
     { name: "RSA-OAEP" },
     key,
-    payload,
+    textEncoder.encode(value),
   );
 
   const base64 = btoa(String.fromCharCode(...new Uint8Array(encrypted)));
 
+  return base64;
+}
+
+export async function decryptRSAAndBase64(
+  encryptedBase64: string,
+): Promise<string | null> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/auth/decrypt`,
+    {
+      method: HttpVerb.POST,
+      body: JSON.stringify({ payload: encryptedBase64 }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    },
+  );
+
+  if (res.ok) {
+    const decrypted = await res.text();
+    return decrypted;
+  }
+
+  return null;
+}
+
+export async function login(
+  username: string,
+  password: string,
+): Promise<string> {
+  const base64payload = await encryptRSAAndBase64(
+    JSON.stringify({ username, password }),
+  );
+
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
     method: HttpVerb.POST,
-    body: JSON.stringify({ payload: base64 }),
+    body: JSON.stringify({ payload: base64payload }),
     headers: {
       "Content-Type": "application/json",
     },
     credentials: "include",
   });
 
-  const cookieStore = await cookies();
-  const previousUrl = cookieStore.get("previousUrl")?.value ?? "/";
   if (res.ok) {
-    cookieStore.set("token", "token test", { httpOnly: true });
+    await setCookieValue("token", "token test");
+    const previousUrl = (await getCookieValue("previousUrl")) ?? "/";
+    console.log("previousUrl:", previousUrl);
 
     redirect(previousUrl);
   }
