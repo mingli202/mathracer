@@ -4,6 +4,18 @@ import { cookies } from "next/headers";
 import { User } from "./types";
 import { HttpVerb } from "./utils/httpverb";
 import { redirect } from "next/navigation";
+import { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
+
+export const { privateKey, publicKey } = await window.crypto.subtle.generateKey(
+  {
+    name: "RSA-OAEP",
+    modulusLength: 4096,
+    publicExponent: new Uint8Array([1, 0, 1]),
+    hash: "SHA-256",
+  },
+  true,
+  ["encrypt", "decrypt"],
+);
 
 export async function getCurrentUser(): Promise<User | null> {
   const cookieStore = await cookies();
