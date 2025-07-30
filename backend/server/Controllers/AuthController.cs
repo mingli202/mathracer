@@ -35,20 +35,32 @@ public class AuthController : ControllerBase
             return BadRequest();
         }
 
-        var hash = SHA256.Create();
-        byte[] hasedUsername = hash.ComputeHash(Encoding.UTF8.GetBytes(creds.username));
-        byte[] hasedPassword = hash.ComputeHash(Encoding.UTF8.GetBytes(creds.password));
+        byte[] adminUsernameHash = Convert.FromBase64String(
+            "5sxF3UNAZjwn5U1ObVCTShuKuRR1LZ2aNe4SnpUUPPE="
+        );
+        byte[] adminPasswordHash = Convert.FromBase64String(
+            "QHipLSagok1+5FQ4z0x9Qk1uEVQzJN6O3YIYDlzx7F8="
+        );
 
-        byte[] adminUsernameHashed = Encoding.UTF8.GetBytes(
-            "e7b296d30a89a190dfa0f240e26a5d005adc034b1b68bc833380b23dbef410b1"
+        Rfc2898DeriveBytes k1 = new Rfc2898DeriveBytes(
+            creds.username,
+            [],
+            100_000,
+            HashAlgorithmName.SHA256
         );
-        byte[] adminPasswordHashed = Encoding.UTF8.GetBytes(
-            "857899397b84f9ad6b0818df99886f2ddd98e064d67652748982b47c138c58df"
+        byte[] computedUsernameHash = k1.GetBytes(32);
+
+        Rfc2898DeriveBytes k2 = new Rfc2898DeriveBytes(
+            creds.password,
+            [],
+            100_000,
+            HashAlgorithmName.SHA256
         );
+        byte[] computedPasswordHash = k1.GetBytes(32);
 
         if (
-            !CryptographicOperations.FixedTimeEquals(hasedUsername, adminUsernameHashed)
-            || !CryptographicOperations.FixedTimeEquals(hasedPassword, adminPasswordHashed)
+            !CryptographicOperations.FixedTimeEquals(adminUsernameHash, computedUsernameHash)
+            || !CryptographicOperations.FixedTimeEquals(adminPasswordHash, computedPasswordHash)
         )
         {
             return Unauthorized();
