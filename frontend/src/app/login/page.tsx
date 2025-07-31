@@ -12,7 +12,7 @@ export default function LoginPage() {
     const password = formData.get("password")?.toString() ?? "";
     setError(null);
 
-    const error = await login(username, password);
+    const error = await login({ username, password });
     setError(error);
   }
 
