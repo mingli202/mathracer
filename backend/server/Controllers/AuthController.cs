@@ -41,6 +41,7 @@ public class AuthController : ControllerBase
     public IActionResult Login([FromBody] Payload base64payload)
     {
         string? json = this.DecryptRsaAndBase64String(base64payload.payload);
+        System.Console.WriteLine("json: " + json);
 
         if (json == null)
             return BadRequest();
@@ -84,7 +85,7 @@ public class AuthController : ControllerBase
 
         this._logger.Log(Severity.Info, "Login succeeded", creds);
 
-        return Ok();
+        return Ok("some token");
     }
 
     private string? DecryptRsaAndBase64String(string base64payload)

@@ -1,10 +1,10 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { User } from "./types";
 import { HttpVerb } from "./utils/httpverb";
 import { redirect } from "next/navigation";
 import { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import { Credentials } from "./types";
 
 export async function getCookieValue(name: string): Promise<string | null> {
   const cookieStore = await cookies();
@@ -36,34 +36,33 @@ export async function setCookieValue(
   // store
   const cookieStore = await cookies();
   cookieStore.set(name, base64, {
-    httpOnly: true,
     ...options,
+    httpOnly: true,
   });
 }
 
-export async function getCurrentUser(): Promise<User | null> {
+export async function validateToken(): Promise<Response> {
   const token = await getCookieValue("token");
 
   if (!token) {
-    return null;
+    return new Response("Unauthorized", { status: 401 });
   }
 
-  return token === "token test" ? { username: "test", id: "1" } : null;
+  if (token === "some token") {
+    return new Response(null, { status: 200 });
+  } else {
+    return new Response("Unauthorized", { status: 401 });
+  }
 
-  const response = await fetch("/api/auth", {
+  const response = await fetch("/api/auth/validateToken", {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  }).catch(() => null);
+    credentials: "include",
+  });
 
-  if (!response || !response.ok) {
-    return null;
-  }
-
-  const user = await response.json();
-
-  return user;
+  return response;
 }
 
 export async function getPublicKey(): Promise<CryptoKey> {
@@ -124,12 +123,9 @@ export async function decryptRSAAndBase64(
 }
 
 export async function login(
-  username: string,
-  password: string,
-): Promise<string> {
-  const base64payload = await encryptRSAAndBase64(
-    JSON.stringify({ username, password }),
-  );
+  credentials: Credentials,
+): Promise<"Invalid credentials"> {
+  const base64payload = await encryptRSAAndBase64(JSON.stringify(credentials));
 
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
     method: HttpVerb.POST,
@@ -137,15 +133,15 @@ export async function login(
     headers: {
       "Content-Type": "application/json",
     },
-    credentials: "include",
   });
 
   if (res.ok) {
-    await setCookieValue("token", "token test");
+    const token = await res.text();
+    await setCookieValue("token", token);
+
     const previousUrl = (await getCookieValue("previousUrl")) ?? "/";
-    console.log("previousUrl:", previousUrl);
 
     redirect(previousUrl);
   }
-  return "Invalid credentials";
+  return "Invalid credentials" as const;
 }
