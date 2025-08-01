@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { Credentials } from "./types";
 
+// these have to be set or it will fail
 const publicKeyBase64 = process.env.RSA_PUBLIC_KEY!;
 const privateKeyBase64 = process.env.RSA_PRIVATE_KEY!;
 
@@ -134,7 +135,6 @@ export async function decryptRsaAndBase64(
     .then((res) => new TextDecoder().decode(res))
     .catch(() => null);
 
-  console.log("decrypted:", decrypted);
   return decrypted;
 }
 
