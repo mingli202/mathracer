@@ -24,19 +24,6 @@ public class AuthController : ControllerBase
         return Ok(Convert.ToBase64String(spkiPublicKey));
     }
 
-    [HttpPost("decrypt")]
-    public ActionResult Decrypt([FromBody] Payload base64payload)
-    {
-        string? json = this.DecryptRsaAndBase64String(base64payload.payload);
-
-        if (json == null)
-            return BadRequest();
-
-        // HACK: dubious code
-        this._logger.Log(Severity.Debug, "Decrypt succeeded", json);
-        return Ok(json);
-    }
-
     [HttpPost("login")]
     public IActionResult Login([FromBody] Payload base64payload)
     {

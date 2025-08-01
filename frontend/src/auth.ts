@@ -6,6 +6,25 @@ import { redirect } from "next/navigation";
 import { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { Credentials } from "./types";
 
+const publicKeyBase64 = process.env.RSA_PUBLIC_KEY!;
+const privateKeyBase64 = process.env.RSA_PRIVATE_KEY!;
+
+const _publicKey = await crypto.subtle.importKey(
+  "spki",
+  Uint8Array.from(atob(publicKeyBase64), (t) => t.charCodeAt(0)),
+  { name: "RSA-OAEP", hash: "SHA-256" },
+  false,
+  ["encrypt"],
+);
+
+const _privateKey = await crypto.subtle.importKey(
+  "pkcs8",
+  Uint8Array.from(atob(privateKeyBase64), (t) => t.charCodeAt(0)),
+  { name: "RSA-OAEP", hash: "SHA-256" },
+  false,
+  ["decrypt"],
+);
+
 export async function getCookieValue(name: string): Promise<string | null> {
   const cookieStore = await cookies();
 
@@ -16,7 +35,7 @@ export async function getCookieValue(name: string): Promise<string | null> {
     return null;
   }
 
-  const decrypted = await decryptRSAAndBase64(encryptedBase64Cookie);
+  const decrypted = await decryptRsaAndBase64(encryptedBase64Cookie);
 
   if (!decrypted) {
     cookieStore.delete(name);
@@ -31,7 +50,7 @@ export async function setCookieValue(
   value: string,
   options?: Partial<ResponseCookie>,
 ) {
-  const base64 = await encryptRSAAndBase64(value);
+  const base64 = await encryptRsaAndBase64(value);
 
   // store
   const cookieStore = await cookies();
@@ -65,7 +84,7 @@ export async function validateToken(): Promise<Response> {
   return response;
 }
 
-export async function getPublicKey(): Promise<CryptoKey> {
+export async function getServerPublicKey(): Promise<CryptoKey> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/key`);
   const base64 = await res.text();
 
@@ -84,9 +103,12 @@ export async function getPublicKey(): Promise<CryptoKey> {
   return key;
 }
 
-export async function encryptRSAAndBase64(value: string): Promise<string> {
+export async function encryptRsaAndBase64(
+  value: string,
+  customPublicKey?: CryptoKey,
+): Promise<string> {
   const textEncoder = new TextEncoder();
-  const key = await getPublicKey();
+  const key = customPublicKey ?? _publicKey;
 
   const encrypted = await crypto.subtle.encrypt(
     { name: "RSA-OAEP" },
@@ -99,33 +121,31 @@ export async function encryptRSAAndBase64(value: string): Promise<string> {
   return base64;
 }
 
-export async function decryptRSAAndBase64(
+export async function decryptRsaAndBase64(
   encryptedBase64: string,
 ): Promise<string | null> {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/auth/decrypt`,
-    {
-      method: HttpVerb.POST,
-      body: JSON.stringify({ payload: encryptedBase64 }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    },
-  );
+  const key = _privateKey;
+  const decrypted = await crypto.subtle
+    .decrypt(
+      { name: "RSA-OAEP" },
+      key,
+      Uint8Array.from(atob(encryptedBase64), (t) => t.charCodeAt(0)),
+    )
+    .then((res) => new TextDecoder().decode(res))
+    .catch(() => null);
 
-  if (res.ok) {
-    const decrypted = await res.text();
-    return decrypted;
-  }
-
-  return null;
+  console.log("decrypted:", decrypted);
+  return decrypted;
 }
 
 export async function login(
   credentials: Credentials,
 ): Promise<"Invalid credentials"> {
-  const base64payload = await encryptRSAAndBase64(JSON.stringify(credentials));
+  const serverPublicKey = await getServerPublicKey();
+  const base64payload = await encryptRsaAndBase64(
+    JSON.stringify(credentials),
+    serverPublicKey,
+  );
 
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
     method: HttpVerb.POST,
