@@ -1,7 +1,9 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
+
 using models;
 
 [ApiController]
@@ -9,12 +11,15 @@ using models;
 public class AuthController : ControllerBase
 {
     private readonly RSA _rsa;
+    private readonly RSA _signingKey;
     private readonly LoggingService _logger;
 
-    public AuthController(RSA rsa, LoggingService logger)
+
+    public AuthController(RSA rsa, RSA signingKey, LoggingService logger)
     {
         this._rsa = rsa;
         this._logger = logger;
+        this._signingKey = signingKey;
     }
 
     [HttpGet("key")]
@@ -33,9 +38,9 @@ public class AuthController : ControllerBase
         if (json == null)
             return BadRequest();
 
-        Credentials? creds = JsonSerializer.Deserialize<Credentials>(json);
+        Credentials? credentials = JsonSerializer.Deserialize<Credentials>(json);
 
-        if (creds == null)
+        if (credentials == null)
             return BadRequest();
 
         byte[] adminUsernameHash = Convert.FromBase64String(
@@ -46,7 +51,7 @@ public class AuthController : ControllerBase
         );
 
         Rfc2898DeriveBytes k1 = new Rfc2898DeriveBytes(
-            creds.username,
+            credentials.username,
             [],
             100_000,
             HashAlgorithmName.SHA256
@@ -54,7 +59,7 @@ public class AuthController : ControllerBase
         byte[] computedUsernameHash = k1.GetBytes(32);
 
         Rfc2898DeriveBytes k2 = new Rfc2898DeriveBytes(
-            creds.password,
+            credentials.password,
             [],
             100_000,
             HashAlgorithmName.SHA256
@@ -66,21 +71,40 @@ public class AuthController : ControllerBase
             || !CryptographicOperations.FixedTimeEquals(adminPasswordHash, computedPasswordHash)
         )
         {
-            this._logger.Log(Severity.Error, "Login failed: invalid credentials", creds);
+            this._logger.Log(Severity.Error, "Login failed: invalid credentials", credentials);
             return Unauthorized();
         }
 
-        this._logger.Log(Severity.Info, "Login succeeded", creds);
+        this._logger.Log(Severity.Info, "Login succeeded", credentials);
 
-        return Ok("some token");
+        Token token = new Token(credentials.username);
+        string encryptedToken = this.EncryptRsaAndBase64String(token.ToString(), this._signingKey);
+
+        return Ok(encryptedToken);
     }
 
-    private string? DecryptRsaAndBase64String(string base64payload)
+    [HttpGet("validateToken")]
+    public IActionResult ValidateToken()
     {
+        Token? token = this.ValidateToken(Request.Headers["Token"]);
+
+        if (token == null)
+        {
+            return Unauthorized();
+        }
+
+        string encryptedToken = this.EncryptRsaAndBase64String(token.ToString());
+
+        return Ok(encryptedToken);
+    }
+
+    private string? DecryptRsaAndBase64String(string base64payload, RSA? rsa = null)
+    {
+        rsa ??= this._rsa;
         try
         {
             byte[] payload = Convert.FromBase64String(base64payload);
-            byte[] decrypted = this._rsa.Decrypt(payload, RSAEncryptionPadding.OaepSHA256);
+            byte[] decrypted = rsa.Decrypt(payload, RSAEncryptionPadding.OaepSHA256);
             string json = Encoding.UTF8.GetString(decrypted);
 
             return json;
@@ -94,5 +118,48 @@ public class AuthController : ControllerBase
             );
             return null;
         }
+    }
+
+    private string EncryptRsaAndBase64String(string json, RSA? rsa = null)
+    {
+        rsa ??= this._rsa;
+
+        var encrypted = rsa.Encrypt(Encoding.UTF8.GetBytes(json), RSAEncryptionPadding.OaepSHA256);
+        string base64 = Convert.ToBase64String(encrypted);
+        return base64;
+    }
+
+    private Token? ValidateToken(string? token)
+    {
+        if (token == null)
+        {
+            return null;
+        }
+
+        string? decrypted = this.DecryptRsaAndBase64String(token, this._signingKey);
+
+        if (decrypted == null)
+        {
+            return null;
+        }
+
+        Token? t = JsonSerializer.Deserialize<Token>(decrypted);
+
+        if (t == null)
+        {
+            return null;
+        }
+
+        if (t.expiration < DateTime.Now)
+        {
+            this._logger.Log(Severity.Debug, "ValidateToken failed, token expired", t);
+            return null;
+        }
+
+        Token newToken = new Token(t.user);
+
+        this._logger.Log(Severity.Debug, "ValidateToken succeeded, generating new token", newToken);
+
+        return newToken;
     }
 }

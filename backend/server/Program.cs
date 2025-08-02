@@ -1,14 +1,12 @@
 using System.Security.Cryptography;
-using System.Text;
 using hub;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+
 
 RSA rsa = RSA.Create(2048);
+RSA signingKey = RSA.Create(2048);
 byte[] spkiPublicKey = rsa.ExportSubjectPublicKeyInfo();
 
-var builder = WebApplication.CreateBuilder(args);
-var jwtSecret = builder.Configuration["JWT_SECRET"];
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
@@ -28,25 +26,16 @@ builder.Services.AddCors(options =>
 builder.Services.AddSingleton<Lobbies>();
 builder.Services.AddSingleton<LoggingService>();
 builder.Services.AddSingleton<RSA>(rsa);
+builder.Services.AddSingleton<RSA>(signingKey);
+
 
 builder.Services.AddSignalR();
 builder.Services.AddControllers();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("secret")),
-    };
-});
 var app = builder.Build();
 
 app.UseRouting();
 app.UseCors(MyAllowSpecificOrigins);
-app.UseAuthorization();
-app.UseAuthentication();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
