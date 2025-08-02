@@ -68,19 +68,21 @@ export async function validateToken(): Promise<Response> {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  if (token === "some token") {
-    return new Response(null, { status: 200 });
-  } else {
-    return new Response("Unauthorized", { status: 401 });
-  }
-
-  const response = await fetch("/api/auth/validateToken", {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/auth/validateToken`,
+    {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        Token: `${token}`,
+      },
     },
-    credentials: "include",
-  });
+  );
+
+  if (response.ok) {
+    const newToken = await response.text();
+    await setCookieValue("token", newToken);
+  }
 
   return response;
 }
