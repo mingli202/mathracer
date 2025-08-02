@@ -15,7 +15,7 @@ export default function JoinPage() {
 
   return (
     <div className="animate-fade-in flex w-sm flex-col gap-4 space-y-6">
-      <Link href="/">
+      <Link href="/game">
         <Button variant="ghost" size="sm" className="flex items-center gap-2">
           <ArrowLeft size={16} />
           <span>Back to Menu</span>
@@ -36,7 +36,7 @@ export default function JoinPage() {
           lobbyExists = (await res.text()) === "true";
 
           if (lobbyExists) {
-            router.push(`/lobby?join=${lobbyId}`);
+            router.push(`/game/lobby?join=${lobbyId}`);
           } else {
             setError(true);
           }

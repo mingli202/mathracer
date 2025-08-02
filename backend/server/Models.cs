@@ -204,3 +204,43 @@ public class LobbyPlayersConverter : JsonConverter<Dictionary<string, Player>>
         writer.WriteEndArray();
     }
 }
+
+public class Payload
+{
+    public string payload { set; get; } = "";
+
+    public override string ToString()
+    {
+        return JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
+    }
+}
+
+public class Credentials
+{
+    public string username { set; get; } = "";
+    public string password { set; get; } = "";
+
+    public override string ToString()
+    {
+        return JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
+    }
+}
+
+public class Token
+{
+    public DateTime dateIssued { set; get; }
+    public DateTime expiration { set; get; }
+    public string user { set; get; }
+
+    public Token(string user)
+    {
+        this.dateIssued = DateTime.Now;
+        this.expiration = DateTime.Now.AddMinutes(10);
+        this.user = user;
+    }
+
+    public override string ToString()
+    {
+        return JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
+    }
+}

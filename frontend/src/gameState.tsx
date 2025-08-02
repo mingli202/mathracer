@@ -67,7 +67,7 @@ export function GameStateWrapper({ children }: Props) {
         );
       });
 
-      c.on("MoveToGameScreen", () => router.push("/play"));
+      c.on("MoveToGameScreen", () => router.push("/game/play"));
     })();
   }, []);
 

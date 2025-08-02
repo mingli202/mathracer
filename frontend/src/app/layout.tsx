@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { GameStateWrapper } from "../gameState";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,9 +25,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} overflow-none flex h-[100dvh] w-[100dvw] items-center justify-center p-4 antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} overflow-none h-[100dvh] w-[100dvw] antialiased`}
       >
-        <GameStateWrapper>{children}</GameStateWrapper>
+        {children}
       </body>
     </html>
   );

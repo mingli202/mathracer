@@ -16,13 +16,8 @@ services:
       - 8080:8080
     develop:
       watch:
-        - path: ./backend/server/server.csproj
-          action: rebuild
         - path: ./backend/server/
-          action: sync
-          target: /app/server
-    environment:
-      - ENV=provided
+          action: rebuild
 
   web:
     build:
@@ -41,11 +36,9 @@ services:
         - path: ./frontend/next.config.ts
           action: rebuild
         - path: ./frontend/
-          action: sync
-          target: /app
+          action: rebuild
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://localhost:8080
 
 
 

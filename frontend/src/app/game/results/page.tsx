@@ -16,7 +16,7 @@ export default function ResultsPage() {
 
   useLayoutEffect(() => {
     if (lobbyId === "") {
-      router.push("/");
+      router.push("/game");
     }
   }, []);
 
@@ -102,7 +102,7 @@ export default function ResultsPage() {
           className="math-button-primary flex w-full flex-1 items-center justify-center gap-2"
           onClick={() => {
             if (players.length > 1) {
-              router.push("/lobby");
+              router.push("/game/lobby");
             } else {
               connection.send("MoveToGameScreen", lobbyId);
             }
@@ -112,7 +112,7 @@ export default function ResultsPage() {
           <span>Play Again</span>
         </Button>
 
-        <Link href="/" className="w-full">
+        <Link href="/game" className="w-full">
           <Button
             variant="outline"
             className="flex w-full flex-1 items-center justify-center gap-2"
