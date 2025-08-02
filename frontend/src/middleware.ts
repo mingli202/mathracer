@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validateToken, setCookieValue } from "./auth";
+import { setCookieValue, login } from "./auth";
 
 export async function middleware(request: NextRequest) {
   const currentUrl = request.nextUrl.pathname;
   await setCookieValue("previousUrl", currentUrl);
 
-  const res = await validateToken();
+  const res = await login();
 
   // TODO: put this only in production
   if (!res.ok) {

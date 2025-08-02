@@ -1,6 +1,6 @@
 "use client";
 
-import { login } from "@/auth";
+import { getCookieValue, login } from "@/auth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -16,7 +16,8 @@ export default function LoginPage() {
 
     const res = await login({ username, password });
     if (res.ok) {
-      router.back();
+      const previousUrl = (await getCookieValue("previousUrl")) ?? "/";
+      router.push(previousUrl);
     } else {
       setError(res.message);
     }

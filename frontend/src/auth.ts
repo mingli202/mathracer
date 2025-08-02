@@ -78,11 +78,6 @@ export async function validateToken(): Promise<Response> {
     },
   );
 
-  if (response.ok) {
-    const newToken = await response.text();
-    await setCookieValue("token", newToken);
-  }
-
   return response;
 }
 
@@ -139,20 +134,27 @@ export async function decryptRsaAndBase64(
   return decrypted;
 }
 
-export async function login(credentials: Credentials): Promise<LoginResponse> {
-  const serverPublicKey = await getServerPublicKey();
-  const base64payload = await encryptRsaAndBase64(
-    JSON.stringify(credentials),
-    serverPublicKey,
-  );
+export async function login(credentials?: Credentials): Promise<LoginResponse> {
+  let res: Response;
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
-    method: HttpVerb.POST,
-    body: JSON.stringify({ payload: base64payload }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  if (!credentials) {
+    res = await validateToken();
+  } else {
+    const serverPublicKey = await getServerPublicKey();
+    const base64payload = await encryptRsaAndBase64(
+      JSON.stringify(credentials),
+      serverPublicKey,
+    );
+
+    res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+      method: HttpVerb.POST,
+      body: JSON.stringify({ payload: base64payload }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+  }
 
   if (res.ok) {
     const token = await res.text();
