@@ -32,11 +32,17 @@ export const Credentials = z.object({
   password: z.string(),
 });
 
+export const LoginResponse = z.object({
+  ok: z.boolean(),
+  message: z.string(),
+});
+
 export type Player = z.infer<typeof Player>;
 export type Equation = z.infer<typeof Equation>;
 export type GameMode = z.infer<typeof GameMode>;
 export type Lobby = z.infer<typeof Lobby>;
 export type Credentials = z.infer<typeof Credentials>;
+export type LoginResponse = z.infer<typeof LoginResponse>;
 
 export type GameState = {
   lobby: Lobby;

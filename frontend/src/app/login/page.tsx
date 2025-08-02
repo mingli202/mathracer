@@ -1,19 +1,25 @@
 "use client";
 
 import { login } from "@/auth";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [show, setShow] = useState(false);
+  const router = useRouter();
 
   async function handleAction(formData: FormData) {
     const username = formData.get("username")?.toString() ?? "";
     const password = formData.get("password")?.toString() ?? "";
     setError(null);
 
-    const error = await login({ username, password });
-    setError(error);
+    const res = await login({ username, password });
+    if (res.ok) {
+      router.back();
+    } else {
+      setError(res.message);
+    }
   }
 
   return (

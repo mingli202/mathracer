@@ -2,9 +2,8 @@
 
 import { cookies } from "next/headers";
 import { HttpVerb } from "./utils/httpverb";
-import { redirect } from "next/navigation";
 import { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
-import { Credentials } from "./types";
+import { Credentials, LoginResponse } from "./types";
 
 // these have to be set or it will fail
 const publicKeyBase64 = process.env.RSA_PUBLIC_KEY!;
@@ -140,9 +139,7 @@ export async function decryptRsaAndBase64(
   return decrypted;
 }
 
-export async function login(
-  credentials: Credentials,
-): Promise<"Invalid credentials"> {
+export async function login(credentials: Credentials): Promise<LoginResponse> {
   const serverPublicKey = await getServerPublicKey();
   const base64payload = await encryptRsaAndBase64(
     JSON.stringify(credentials),
@@ -161,9 +158,7 @@ export async function login(
     const token = await res.text();
     await setCookieValue("token", token);
 
-    const previousUrl = (await getCookieValue("previousUrl")) ?? "/";
-
-    redirect(previousUrl);
+    return { ok: true, message: "Logged in successfully" };
   }
-  return "Invalid credentials" as const;
+  return { ok: false, message: "Invalid credentials" } as const;
 }
