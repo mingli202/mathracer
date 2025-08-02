@@ -152,7 +152,7 @@ public class AuthController : ControllerBase
 
         if (t.expiration < DateTime.Now)
         {
-            this._logger.Log(Severity.Debug, "ValidateToken failed, token expired", t);
+            this._logger.Log(Severity.Debug, $"ValidateToken failed, token expired at {t.expiration}", t);
             return null;
         }
 
