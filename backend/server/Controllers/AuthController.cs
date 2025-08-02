@@ -1,9 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
-
 using models;
 
 [ApiController]
@@ -13,7 +11,6 @@ public class AuthController : ControllerBase
     private readonly RSA _rsa;
     private readonly RSA _signingKey;
     private readonly LoggingService _logger;
-
 
     public AuthController(RSA rsa, RSA signingKey, LoggingService logger)
     {
@@ -152,7 +149,11 @@ public class AuthController : ControllerBase
 
         if (t.expiration < DateTime.Now)
         {
-            this._logger.Log(Severity.Debug, $"ValidateToken failed, token expired at {t.expiration}", t);
+            this._logger.Log(
+                Severity.Debug,
+                $"ValidateToken failed, token expired at {t.expiration}",
+                t
+            );
             return null;
         }
 

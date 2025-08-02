@@ -1,10 +1,8 @@
 using System.Security.Cryptography;
 using hub;
 
-
 RSA rsa = RSA.Create(2048);
 RSA signingKey = RSA.Create(2048);
-byte[] spkiPublicKey = rsa.ExportSubjectPublicKeyInfo();
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -27,7 +25,6 @@ builder.Services.AddSingleton<Lobbies>();
 builder.Services.AddSingleton<LoggingService>();
 builder.Services.AddSingleton<RSA>(rsa);
 builder.Services.AddSingleton<RSA>(signingKey);
-
 
 builder.Services.AddSignalR();
 builder.Services.AddControllers();
