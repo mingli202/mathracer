@@ -14,7 +14,12 @@ export default function LogsPage() {
     }
   }, []);
 
-  if (!connection) return <div>Loading...</div>;
+  if (!connection)
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        Loading...
+      </div>
+    );
 
   return <Logs connection={connection} />;
 }

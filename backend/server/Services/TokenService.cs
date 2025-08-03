@@ -9,7 +9,7 @@ public class Token
     public Token(string user)
     {
         this.dateIssued = DateTime.Now;
-        this.expiration = DateTime.Now.AddSeconds(10);
+        this.expiration = DateTime.Now.AddMinutes(10);
         this.user = user;
     }
 
