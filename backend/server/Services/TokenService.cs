@@ -87,13 +87,21 @@ public class TokenService : ITokenService
 
         if (token.expiration < DateTime.Now)
         {
-            this._logger.Log(Severity.Debug, $"ValidateToken failed, token expired at {token.expiration}", token);
+            this._logger.Log(
+                Severity.Debug,
+                $"ValidateToken failed, token expired at {token.expiration}",
+                token
+            );
             return null;
         }
 
         Token newToken = new Token(token.user);
 
-        this._logger.Log(Severity.Debug, "Validate token succeeded, generating new token", newToken);
+        this._logger.Log(
+            Severity.Debug,
+            "Validate token succeeded, generating new token",
+            newToken
+        );
 
         return token;
     }

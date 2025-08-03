@@ -99,22 +99,6 @@ public class RacerHub : Hub
         await Clients.Groups(lobbyId).SendAsync("SyncPlayers", json);
     }
 
-    public async Task SyncEquations(string lobbyId)
-    {
-        string json = "[]";
-
-        if (_lobbies.LobbyExists(lobbyId))
-        {
-            Equation[] equations = _lobbies.GetLobby(lobbyId).equations;
-            json = JsonSerializer.Serialize(
-                equations,
-                new JsonSerializerOptions { WriteIndented = true }
-            );
-        }
-
-        await Clients.Groups(lobbyId).SendAsync("SyncEquations", json);
-    }
-
     public async Task StartGame(string lobbyId)
     {
         Lobby lobby = _lobbies.GetLobby(lobbyId);
@@ -164,6 +148,22 @@ public class RacerHub : Hub
                 await Task.Delay(TimeSpan.FromMilliseconds(1000 - elapsed));
             }
         }
+    }
+
+    public async Task SyncEquations(string lobbyId)
+    {
+        string json = "[]";
+
+        if (_lobbies.LobbyExists(lobbyId))
+        {
+            Equation[] equations = _lobbies.GetLobby(lobbyId).equations;
+            json = JsonSerializer.Serialize(
+                equations,
+                new JsonSerializerOptions { WriteIndented = true }
+            );
+        }
+
+        await Clients.Groups(lobbyId).SendAsync("SyncEquations", json);
     }
 
     public async Task UpdatePlayerState(string lobbyId, string playerId, string state)

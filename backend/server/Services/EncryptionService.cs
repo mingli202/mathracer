@@ -20,7 +20,10 @@ public class EncryptionService : IEncryptionService
 
     public string Encrypt(string plainText)
     {
-        var encrypted = this._rsa.Encrypt(Encoding.UTF8.GetBytes(plainText), RSAEncryptionPadding.OaepSHA256);
+        var encrypted = this._rsa.Encrypt(
+            Encoding.UTF8.GetBytes(plainText),
+            RSAEncryptionPadding.OaepSHA256
+        );
         string base64 = Convert.ToBase64String(encrypted);
         return base64;
     }
@@ -37,11 +40,7 @@ public class EncryptionService : IEncryptionService
         }
         catch (Exception e)
         {
-            this._logger.Log(
-                Severity.Error,
-                $"Decrypt failed: {e.Message}",
-                base64cipherText
-            );
+            this._logger.Log(Severity.Error, $"Decrypt failed: {e.Message}", base64cipherText);
             return null;
         }
     }

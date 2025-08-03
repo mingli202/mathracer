@@ -11,7 +11,11 @@ public class AuthController : ControllerBase
     private readonly TokenService _tokenService;
     private readonly EncryptionService _encryptionService;
 
-    public AuthController(LoggingService logger, TokenService tokenService, EncryptionService encryptionService)
+    public AuthController(
+        LoggingService logger,
+        TokenService tokenService,
+        EncryptionService encryptionService
+    )
     {
         this._logger = logger;
         this._tokenService = tokenService;
