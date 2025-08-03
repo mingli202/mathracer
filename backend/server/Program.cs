@@ -21,10 +21,11 @@ builder.Services.AddCors(options =>
     );
 });
 
+builder.Services.AddScoped<LoggingService>();
+
 builder.Services.AddSingleton<Lobbies>();
-builder.Services.AddSingleton<ILoggingService>();
-builder.Services.AddSingleton<RSA>(rsa);
-builder.Services.AddSingleton<RSA>(signingKey);
+builder.Services.AddSingleton<EncryptionService>();
+builder.Services.AddSingleton<TokenService>();
 
 builder.Services.AddSignalR();
 builder.Services.AddControllers();

@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using models;
@@ -8,29 +7,28 @@ using models;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly RSA _rsa;
-    private readonly RSA _signingKey;
     private readonly LoggingService _logger;
+    private readonly TokenService _tokenService;
+    private readonly EncryptionService _encryptionService;
 
-    public AuthController(RSA rsa, RSA signingKey, LoggingService logger)
+    public AuthController(LoggingService logger, TokenService tokenService, EncryptionService encryptionService)
     {
-        this._rsa = rsa;
         this._logger = logger;
-        this._signingKey = signingKey;
+        this._tokenService = tokenService;
+        this._encryptionService = encryptionService;
     }
 
     [HttpGet("key")]
     public ActionResult<string> GetKey()
     {
-        byte[] spkiPublicKey = _rsa.ExportSubjectPublicKeyInfo();
+        byte[] spkiPublicKey = this._encryptionService.ExportPublicKey();
         return Ok(Convert.ToBase64String(spkiPublicKey));
     }
 
     [HttpPost("login")]
     public IActionResult Login([FromBody] Payload base64payload)
     {
-        string? json = this.DecryptRsaAndBase64String(base64payload.payload);
-        System.Console.WriteLine("json: " + json);
+        string? json = this._encryptionService.Decrypt(base64payload.payload);
 
         if (json == null)
             return BadRequest();
@@ -75,7 +73,7 @@ public class AuthController : ControllerBase
         this._logger.Log(Severity.Info, "Login succeeded", credentials);
 
         Token token = new Token(credentials.username);
-        string encryptedToken = this.EncryptRsaAndBase64String(token.ToString(), this._signingKey);
+        string encryptedToken = this._tokenService.Sign(token);
 
         return Ok(encryptedToken);
     }
@@ -83,84 +81,15 @@ public class AuthController : ControllerBase
     [HttpGet("validateToken")]
     public IActionResult ValidateToken()
     {
-        Token? token = this.ValidateToken(Request.Headers["Token"]);
+        Token? token = this._tokenService.Validate(Request.Headers["Token"]);
 
         if (token == null)
         {
             return Unauthorized();
         }
 
-        string encryptedToken = this.EncryptRsaAndBase64String(token.ToString());
+        string encryptedToken = this._tokenService.Sign(token);
 
         return Ok(encryptedToken);
-    }
-
-    private string? DecryptRsaAndBase64String(string base64payload, RSA? rsa = null)
-    {
-        rsa ??= this._rsa;
-        try
-        {
-            byte[] payload = Convert.FromBase64String(base64payload);
-            byte[] decrypted = rsa.Decrypt(payload, RSAEncryptionPadding.OaepSHA256);
-            string json = Encoding.UTF8.GetString(decrypted);
-
-            return json;
-        }
-        catch (Exception e)
-        {
-            this._logger.Log(
-                Severity.Error,
-                $"DecryptRsaAndBase64String failed: {e.Message}",
-                base64payload
-            );
-            return null;
-        }
-    }
-
-    private string EncryptRsaAndBase64String(string json, RSA? rsa = null)
-    {
-        rsa ??= this._rsa;
-
-        var encrypted = rsa.Encrypt(Encoding.UTF8.GetBytes(json), RSAEncryptionPadding.OaepSHA256);
-        string base64 = Convert.ToBase64String(encrypted);
-        return base64;
-    }
-
-    private Token? ValidateToken(string? token)
-    {
-        if (token == null)
-        {
-            return null;
-        }
-
-        string? decrypted = this.DecryptRsaAndBase64String(token, this._signingKey);
-
-        if (decrypted == null)
-        {
-            return null;
-        }
-
-        Token? t = JsonSerializer.Deserialize<Token>(decrypted);
-
-        if (t == null)
-        {
-            return null;
-        }
-
-        if (t.expiration < DateTime.Now)
-        {
-            this._logger.Log(
-                Severity.Debug,
-                $"ValidateToken failed, token expired at {t.expiration}",
-                t
-            );
-            return null;
-        }
-
-        Token newToken = new Token(t.user);
-
-        this._logger.Log(Severity.Debug, "ValidateToken succeeded, generating new token", newToken);
-
-        return newToken;
     }
 }
