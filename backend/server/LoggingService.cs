@@ -28,7 +28,13 @@ public class LogMessage
     }
 }
 
-public class LoggingService
+public interface ILoggingService
+{
+    void Log(Severity severity, string message, string details);
+    void Log(Severity severity, string message, Object details);
+}
+
+public class LoggingService : ILoggingService
 {
     private readonly IHubContext<RacerHub> _hubContext;
 

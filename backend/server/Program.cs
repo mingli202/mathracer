@@ -22,7 +22,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddSingleton<Lobbies>();
-builder.Services.AddSingleton<LoggingService>();
+builder.Services.AddSingleton<ILoggingService>();
 builder.Services.AddSingleton<RSA>(rsa);
 builder.Services.AddSingleton<RSA>(signingKey);
 
