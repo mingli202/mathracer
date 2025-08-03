@@ -7,6 +7,8 @@
 # You can add other services your application may depend on here, such as a
 # database or a cache. For examples, see the Awesome Compose repository:
 # https://github.com/docker/awesome-compose
+
+name: mathracer
 services:
   server:
     build:
@@ -39,6 +41,8 @@ services:
           action: rebuild
     environment:
       - NODE_ENV=production
+    env_file:
+      - ./frontend/.env.production.local
 
 
 

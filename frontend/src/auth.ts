@@ -68,7 +68,7 @@ export async function validateToken(): Promise<Response> {
   }
 
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/auth/validateToken`,
+    `${process.env.SERVER_URL}/api/auth/validateToken`,
     {
       method: "GET",
       credentials: "include",
@@ -82,7 +82,7 @@ export async function validateToken(): Promise<Response> {
 }
 
 export async function getServerPublicKey(): Promise<CryptoKey> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/key`);
+  const res = await fetch(`${process.env.SERVER_URL}/api/auth/key`);
   const base64 = await res.text();
 
   const spki = Uint8Array.from(atob(base64), (t) => t.charCodeAt(0));
@@ -146,13 +146,12 @@ export async function login(credentials?: Credentials): Promise<LoginResponse> {
       serverPublicKey,
     );
 
-    res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+    res = await fetch(`${process.env.SERVER_URL}/api/auth/login`, {
       method: HttpVerb.POST,
       body: JSON.stringify({ payload: base64payload }),
       headers: {
         "Content-Type": "application/json",
       },
-      credentials: "include",
     });
   }
 
