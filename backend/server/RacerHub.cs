@@ -126,7 +126,7 @@ public class RacerHub : Hub
             }
         }
 
-        count = 0;
+        count = 1;
         bool run = true;
         while (run)
         {
@@ -147,7 +147,13 @@ public class RacerHub : Hub
             {
                 await Task.Delay(TimeSpan.FromMilliseconds(1000 - elapsed));
             }
+
+            if (lobby.players.Count == 0)
+            {
+                run = false;
+            }
         }
+        _logger.Log(Severity.Info, $"StartGame {lobbyId}: game ended", lobby);
     }
 
     public async Task SyncEquations(string lobbyId)
