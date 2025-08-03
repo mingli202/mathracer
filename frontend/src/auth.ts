@@ -162,5 +162,7 @@ export async function login(credentials?: Credentials): Promise<LoginResponse> {
 
     return { ok: true, message: "Logged in successfully" };
   }
+  (await cookies()).delete("token");
+
   return { ok: false, message: "Invalid credentials" } as const;
 }

@@ -21,7 +21,7 @@ builder.Services.AddCors(options =>
     );
 });
 
-builder.Services.AddScoped<LoggingService>();
+builder.Services.AddSingleton<LoggingService>();
 
 builder.Services.AddSingleton<Lobbies>();
 builder.Services.AddSingleton<EncryptionService>();
