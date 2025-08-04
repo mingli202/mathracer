@@ -7,7 +7,7 @@ RSA signingKey = RSA.Create(2048);
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 string frontEndUrl = builder.Environment.IsDevelopment()
     ? "http://localhost:3000"
-    : "https://mathracer-delta.vercel.app";
+    : "https://mathracer-web-245625371319.us-central1.run.app";
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
@@ -16,7 +16,7 @@ builder.Services.AddCors(options =>
         name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins(frontEndUrl, "https://mathracer-web-245625371319.us-central1.run.app");
+            policy.WithOrigins(frontEndUrl);
             policy.AllowAnyHeader();
             policy.AllowAnyMethod();
             policy.AllowCredentials();
