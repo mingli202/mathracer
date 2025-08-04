@@ -19,7 +19,9 @@ steps:
     - '--platform'
     - 'managed'
     - '--min-instances'
-    - '1'
+    - '0'
+    - '--add-custom-audiences'
+    - 'https://mathracer-delta.vercel.app'
 
 
 images:
