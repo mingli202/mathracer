@@ -17,21 +17,13 @@ steps:
   entrypoint: 'gcloud'
   args:
     - 'run'
-    - 'deploy'
+    - 'services'
+    - 'update'
     - 'mathracer-web'
-    - '--image'
-    - 'gcr.io/$PROJECT_ID/mingli202/mathracer-web:latest'
     - '--region'
     - '${_REGION}'
-    # - '--allow-unauthenticated'
-    # - '--memory'
-    # - '512Mi'
-    # - '--cpu'
-    # - '1'
-    # - '--min-instances'
-    # - '0'
-    # - '--set-env-vars'
-    # - 'SERVER_URL=${_SERVER_URL},RSA_PUBLIC_KEY=${_RSA_PUBLIC_KEY},RSA_PRIVATE_KEY=${_RSA_PRIVATE_KEY}'
+    - '--image'
+    - 'gcr.io/$PROJECT_ID/mingli202/mathracer-web:latest'
   waitFor: 
     - 'build-web'
 
@@ -39,12 +31,13 @@ steps:
   entrypoint: 'gcloud'
   args:
     - 'run'
-    - 'deploy'
+    - 'services'
+    - 'update'
     - 'mathracer-server'
-    - '--image'
-    - 'gcr.io/$PROJECT_ID/mingli202/mathracer-server:latest'
     - '--region'
     - '${_REGION}'
+    - '--image'
+    - 'gcr.io/$PROJECT_ID/mingli202/mathracer-server:latest'
   waitFor: 
     - 'build-server'
 
