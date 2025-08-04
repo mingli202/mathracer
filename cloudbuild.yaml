@@ -1,13 +1,13 @@
 steps:
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/mingli202/mathracer-web:$COMMIT_SHA', './frontend'] 
+- name: 'docker'
+  args: ['build', '-t', 'grc.io/$PROJECT_ID/mingli202/mathracer-web:$COMMIT_SHA', './frontend'] 
   env:
   - 'NEXT_PUBLIC_API_URL=${_NEXT_PUBLIC_API_URL}'
   waitFor: ['-']
   id: 'build-web'
 
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/mingli202/mathracer-web:$COMMIT_SHA']
+- name: 'docker'
+  args: ['push', 'grc.io/$PROJECT_ID/mingli202/mathracer-web:$COMMIT_SHA']
   waitFor: ['build-web']
   id: 'push-web'
 
@@ -21,21 +21,21 @@ steps:
     - '--region'
     - '${_REGION}'
     - '--image'
-    - '${_REGION}-docker.pkg.dev/$PROJECT_ID/mingli202/mathracer-web:$COMMIT_SHA'
+    - 'grc.io/$PROJECT_ID/mingli202/mathracer-web:$COMMIT_SHA'
     - '--platform'
     - 'managed'
   waitFor: 
     - 'push-web'
 
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/mingli202/mathracer-server:$COMMIT_SHA', './backend'] 
+- name: 'docker'
+  args: ['build', '-t', 'grc.io/$PROJECT_ID/mingli202/mathracer-server:$COMMIT_SHA', './backend'] 
   env:
   - 'FRONTEND_URL=${_FRONTEND_URL}'
   waitFor: ['-']
   id: 'build-server'
 
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/mingli202/mathracer-server:$COMMIT_SHA']
+- name: 'docker'
+  args: ['push', 'grc.io/$PROJECT_ID/mingli202/mathracer-server:$COMMIT_SHA']
   waitFor: ['build-server']
   id: 'push-server'
 
@@ -49,7 +49,7 @@ steps:
     - '--region'
     - '${_REGION}'
     - '--image'
-    - '${_REGION}-docker.pkg.dev/$PROJECT_ID/mingli202/mathracer-server:$COMMIT_SHA'
+    - 'grc.io/$PROJECT_ID/mingli202/mathracer-server:$COMMIT_SHA'
     - '--platform'
     - 'managed'
   waitFor: 
@@ -57,8 +57,8 @@ steps:
 
 
 images:
-  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/mingli202/mathracer-web:$COMMIT_SHA'
-  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/mingli202/mathracer-server:$COMMIT_SHA'
+  - 'grc.io/$PROJECT_ID/mingli202/mathracer-web:$COMMIT_SHA'
+  - 'grc.io/$PROJECT_ID/mingli202/mathracer-server:$COMMIT_SHA'
 
 
 options:
