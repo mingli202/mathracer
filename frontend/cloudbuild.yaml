@@ -1,25 +1,5 @@
 steps:
 - name: 'docker'
-  args: ['build', '-t', 'gcr.io/$PROJECT_ID/mingli202/mathracer-server:$COMMIT_SHA', './backend'] 
-
-- name: 'docker'
-  args: ['push', 'gcr.io/$PROJECT_ID/mingli202/mathracer-server:$COMMIT_SHA']
-
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  entrypoint: 'gcloud'
-  args:
-    - 'run'
-    - 'services'
-    - 'update'
-    - 'mathracer-server'
-    - '--region'
-    - '${_REGION}'
-    - '--image'
-    - 'gcr.io/$PROJECT_ID/mingli202/mathracer-server:$COMMIT_SHA'
-    - '--platform'
-    - 'managed'
-
-- name: 'docker'
   args:
     - 'build'
     - '-t'
@@ -51,9 +31,7 @@ steps:
     - 'managed'
 
 images:
-  - 'gcr.io/$PROJECT_ID/mingli202/mathracer-server:$COMMIT_SHA'
   - 'gcr.io/$PROJECT_ID/mingli202/mathracer-web:$COMMIT_SHA'
-
 
 options:
   defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
