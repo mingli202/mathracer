@@ -1,4 +1,4 @@
-logsBucket: 'NONE'
+logsBucket: NONE
 
 steps:
 - name: 'docker'
