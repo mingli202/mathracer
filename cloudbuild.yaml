@@ -1,12 +1,12 @@
 steps:
-- name: 'docker'
+- name: 'gcr.io/cloud-builders/docker'
   args: ['build', '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/mingli202/mathracer-web:$COMMIT_SHA', './frontend'] 
   env:
   - 'NEXT_PUBLIC_API_URL=${_NEXT_PUBLIC_API_URL}'
   waitFor: ['-']
   id: 'build-web'
 
-- name: 'docker'
+- name: 'gcr.io/cloud-builders/docker'
   args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/mingli202/mathracer-web:$COMMIT_SHA']
   waitFor: ['build-web']
   id: 'push-web'
@@ -27,14 +27,14 @@ steps:
   waitFor: 
     - 'push-web'
 
-- name: 'docker'
+- name: 'gcr.io/cloud-builders/docker'
   args: ['build', '-t', '${_REGION}-docker.pkg.dev/$PROJECT_ID/mingli202/mathracer-server:$COMMIT_SHA', './backend'] 
   env:
   - 'FRONTEND_URL=${_FRONTEND_URL}'
   waitFor: ['-']
   id: 'build-server'
 
-- name: 'docker'
+- name: 'gcr.io/cloud-builders/docker'
   args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/mingli202/mathracer-server:$COMMIT_SHA']
   waitFor: ['build-server']
   id: 'push-server'
