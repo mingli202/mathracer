@@ -1,6 +1,8 @@
 steps:
 - name: 'docker'
   args: ['build', '-t', 'gcr.io/$PROJECT_ID/mingli202/mathracer-web', './frontend'] 
+  env:
+  - 'NEXT_PUBLIC_API_URL=${_NEXT_PUBLIC_API_URL}'
 - name: 'docker'
   args: ['build', '-t', 'gcr.io/$PROJECT_ID/mingli202/mathracer-server', './backend'] 
 
