@@ -24,8 +24,7 @@ steps:
     - 'gcr.io/$PROJECT_ID/mingli202/mathracer-web:$COMMIT_SHA'
     - '--platform'
     - 'managed'
-  waitFor: 
-    - 'push-web'
+  waitFor: [ 'push-web', 'push-server' ]
 
 - name: 'docker'
   args: ['build', '-t', 'gcr.io/$PROJECT_ID/mingli202/mathracer-server:$COMMIT_SHA', './backend'] 
@@ -52,8 +51,7 @@ steps:
     - 'gcr.io/$PROJECT_ID/mingli202/mathracer-server:$COMMIT_SHA'
     - '--platform'
     - 'managed'
-  waitFor: 
-    - 'push-server'
+  waitFor: [ 'push-web', 'push-server' ]
 
 
 images:
