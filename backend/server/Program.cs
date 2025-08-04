@@ -5,6 +5,9 @@ RSA rsa = RSA.Create(2048);
 RSA signingKey = RSA.Create(2048);
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+string frontEndUrl = builder.Environment.IsDevelopment()
+    ? "http://localhost:3000"
+    : builder.Configuration["FRONTEND_URL"]!;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
