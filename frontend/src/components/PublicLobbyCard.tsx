@@ -3,19 +3,19 @@ import { Button } from "./ui/button";
 import { Trophy, Timer, Users } from "lucide-react";
 
 type PublicLobbyCardProp = {
-  gameId: string;
+  lobbyId: string;
   hostName: string;
   numPlayers: number;
   gameMode: GameMode;
 };
 
 export default function PublicLobbyCard({
-  gameId,
+  lobbyId,
   hostName,
   numPlayers,
   gameMode,
 }: PublicLobbyCardProp) {
-  const gameUrl = `https://mathracer-phi.vercel.app?join=${gameId}`;
+  const gameUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/game/lobby?join=${lobbyId}`;
 
   const handleJoin = () => {
     window.location.href = gameUrl;
@@ -32,7 +32,7 @@ export default function PublicLobbyCard({
         <div className="flex flex-row items-center justify-between">
           <div className="font-bold text-gray-900">{`${hostName}'s Lobby`}</div>
           <div className="bg-math-purple rounded-2xl p-1.5 text-gray-700">
-            {gameId}
+            {lobbyId}
           </div>
         </div>
         <div className="flex flex-row items-center text-xs text-gray-500">
