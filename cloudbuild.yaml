@@ -9,7 +9,8 @@ steps:
   entrypoint: 'gcloud'
   args:
     - 'run'
-    - 'deploy'
+    - 'services'
+    - 'update'
     - 'mathracer-server'
     - '--region'
     - '${_REGION}'
