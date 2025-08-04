@@ -18,11 +18,6 @@ steps:
     - 'gcr.io/$PROJECT_ID/mingli202/mathracer-server:$COMMIT_SHA'
     - '--platform'
     - 'managed'
-    - '--min-instances'
-    - '0'
-    - '--add-custom-audiences'
-    - 'https://mathracer-delta.vercel.app'
-
 
 images:
   - 'gcr.io/$PROJECT_ID/mingli202/mathracer-server:$COMMIT_SHA'
