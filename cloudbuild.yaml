@@ -1,4 +1,4 @@
-logsBucket: NONE
+logsBucket: CLOUD_LOGGING_ONLY
 
 steps:
 - name: 'docker'
