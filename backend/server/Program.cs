@@ -16,7 +16,7 @@ builder.Services.AddCors(options =>
         name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins(frontEndUrl);
+            policy.WithOrigins(frontEndUrl, "https://mathracer-web-245625371319.us-central1.run.app");
             policy.AllowAnyHeader();
             policy.AllowAnyMethod();
             policy.AllowCredentials();
