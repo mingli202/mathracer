@@ -1,5 +1,3 @@
-logsBucket: CLOUD_LOGGING_ONLY
-
 steps:
 - name: 'docker'
   args: ['build', '-t', 'gcr.io/$PROJECT_ID/mingli202/mathracer-web', './frontend'] 
@@ -9,3 +7,7 @@ steps:
 images:
   - 'gcr.io/$PROJECT_ID/mingli202/mathracer-web'
   - 'gcr.io/$PROJECT_ID/mingli202/mathracer-server'
+
+
+options:
+  defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
