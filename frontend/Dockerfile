@@ -1,5 +1,8 @@
 FROM node:24-alpine
 
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_BASE_URL
+
 WORKDIR /app
 
 COPY package.json .

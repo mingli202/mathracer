@@ -3,8 +3,6 @@
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 
-RUN mkdir -p /app && chown app /app
-
 COPY . /source
 
 WORKDIR /source/server
