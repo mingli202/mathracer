@@ -15,13 +15,36 @@ steps:
 
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: 'gcloud'
-  args: ['run', 'deploy', 'mathracer-web', '--image', 'gcr.io/$PROJECT_ID/mingli202/mathracer-web:latest']
+  args:
+    - 'run'
+    - 'deploy'
+    - 'mathracer-web'
+    - '--image'
+    - 'gcr.io/$PROJECT_ID/mingli202/mathracer-web:latest'
+    - '--region'
+    - '${_REGION}'
+    # - '--allow-unauthenticated'
+    # - '--memory'
+    # - '512Mi'
+    # - '--cpu'
+    # - '1'
+    # - '--min-instances'
+    # - '0'
+    # - '--set-env-vars'
+    # - 'SERVER_URL=${_SERVER_URL},RSA_PUBLIC_KEY=${_RSA_PUBLIC_KEY},RSA_PRIVATE_KEY=${_RSA_PRIVATE_KEY}'
   waitFor: 
     - 'build-web'
 
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: 'gcloud'
-  args: ['run', 'deploy', 'mathracer-server', '--image', 'gcr.io/$PROJECT_ID/mingli202/mathracer-server:latest']
+  args:
+    - 'run'
+    - 'deploy'
+    - 'mathracer-server'
+    - '--image'
+    - 'gcr.io/$PROJECT_ID/mingli202/mathracer-server:latest'
+    - '--region'
+    - '${_REGION}'
   waitFor: 
     - 'build-server'
 
