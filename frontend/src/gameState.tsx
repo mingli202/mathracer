@@ -218,7 +218,7 @@ export async function createLobby(
   gameMode: GameMode,
   conn: HubConnection,
   dispatch: ActionDispatch<[action: GameStateAction]>,
-) {
+): Promise<string> {
   const res: { player: Player; lobby: Lobby } = z
     .object({ player: Player, lobby: Lobby })
     .parse(
@@ -232,6 +232,8 @@ export async function createLobby(
     lobby: res.lobby,
     currentPlayer: res.player,
   });
+
+  return res.lobby.lobbyId;
 }
 
 export async function joinLobby(

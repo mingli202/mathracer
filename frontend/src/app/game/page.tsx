@@ -11,7 +11,7 @@ import { createLobby, GameStateContext } from "@/gameState";
 export default function Page() {
   const { dispatch, gameState } = use(GameStateContext);
   const { connection, lobby } = gameState;
-  const { lobbyId, gameMode } = lobby;
+  const { gameMode } = lobby;
 
   function onSelectMode(mode: GameMode) {
     dispatch({ type: "selectMode", mode });
@@ -35,8 +35,13 @@ export default function Page() {
             size="lg"
             className="math-button-accent flex h-16 w-full items-center justify-center gap-2"
             onClick={async () => {
-              await createLobby("Player", gameMode, connection, dispatch);
-              await connection.send("MoveToGameScreen", lobbyId);
+              const returnedLobbyId = await createLobby(
+                "Player",
+                gameMode,
+                connection,
+                dispatch,
+              );
+              await connection.send("MoveToGameScreen", returnedLobbyId);
             }}
           >
             <User size={20} />

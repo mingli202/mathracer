@@ -34,14 +34,13 @@ export default function LobbyPage() {
   const { lobbyId, players, gameMode } = lobby;
 
   const joinId = urlSearchParams.get("join");
-  const gameUrl = `http://localhost:3000/game/lobby?join=${lobbyId}`;
+  const gameUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/game/lobby?join=${lobbyId}`;
 
   const copyInviteLink = (text: string, x: number, y: number) => {
     setCopyModalMessage("loading");
     setCopyModalCoords({ x, y });
     navigator.clipboard.writeText(text);
     setCopyModalMessage("copied");
-    console.log("copied");
 
     const f = () => {
       window.removeEventListener("mousemove", f);
