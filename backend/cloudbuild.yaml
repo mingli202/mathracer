@@ -20,11 +20,8 @@ steps:
   entrypoint: 'bash'
   args:
     - '-c'
-    - 'gcloud run services update mathracer-server --region ${_REGION} --image $$USERNAME/mathracer-server:$COMMIT_SHA --platform managed'
+    - 'gcloud run services update mathracer-server --region ${_REGION} --image docker.io/$$USERNAME/mathracer-server:$COMMIT_SHA --platform managed'
   secretEnv: ['USERNAME']
-
-images:
-  - 'gcr.io/$PROJECT_ID/mingli202/mathracer-server:$COMMIT_SHA'
 
 options:
   defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
