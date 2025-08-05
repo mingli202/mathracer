@@ -25,6 +25,7 @@ export const Lobby = z.object({
   gameMode: GameMode,
   equations: z.array(Equation),
   players: z.array(Player),
+  isPublic: z.boolean(),
   hostName: z.string(),
 });
 

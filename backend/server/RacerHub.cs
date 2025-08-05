@@ -220,6 +220,7 @@ public class RacerHub : Hub
         Player player = lobby.NewPlayer(name, Context.ConnectionId);
 
         player.isHost = true;
+        lobby.UpdateHostName(name);
 
         _lobbies.AddLobby(lobby);
         await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
@@ -265,7 +266,7 @@ public class RacerHub : Hub
         return JsonSerializer.Serialize(new { player = player, lobby = lobby });
     }
 
-    public async Task ChangeLobbyPublic(string lobbyId)
+    public void ChangeLobbyPublic(string lobbyId)
     {
         _lobbies.changePublic(lobbyId);
     }
