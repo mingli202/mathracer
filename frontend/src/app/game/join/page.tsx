@@ -1,5 +1,6 @@
 "use client";
 
+import PublicLobbyCard from "@/components/PublicLobbyCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PublicLobbies } from "@/types";
@@ -7,7 +8,6 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import z from "zod";
 
 export default function JoinPage() {
   const router = useRouter();
@@ -85,6 +85,25 @@ export default function JoinPage() {
           </p>
         )}
       </form>
+
+      <div className="w-full">
+        <h2 className="mb-4 text-xl font-semibold">Join Public Lobbies</h2>
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-6">
+          {publicLobbies && publicLobbies.lobbies.length > 0 ? (
+            publicLobbies.lobbies.map((lobby) => (
+              <PublicLobbyCard
+                key={lobby.lobbyId}
+                lobbyId={lobby.lobbyId}
+                hostName={lobby.hostName}
+                numPlayers={lobby.players.length}
+                gameMode={lobby.gameMode}
+              />
+            ))
+          ) : (
+            <div>No public lobbies....</div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

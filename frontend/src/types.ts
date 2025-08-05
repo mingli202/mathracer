@@ -25,10 +25,11 @@ export const Lobby = z.object({
   gameMode: GameMode,
   equations: z.array(Equation),
   players: z.array(Player),
+  hostName: z.string(),
 });
 
 export const PublicLobbies = z.object({
-  publicLobbies: z.array(Lobby),
+  lobbies: z.array(Lobby),
 });
 
 export const Credentials = z.object({
