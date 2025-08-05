@@ -77,13 +77,15 @@ public class Lobby
     [JsonConverter(typeof(LobbyPlayersConverter))]
     public Dictionary<string, Player> players { get; set; }
     public Equation[] equations { get; set; }
+    public bool isPublic { get; set; }
 
     public Lobby()
     {
-        players = new Dictionary<string, Player>();
-        gameMode = new GameMode();
-        equations = [];
-        lobbyId = "";
+        this.players = new Dictionary<string, Player>();
+        this.gameMode = new GameMode();
+        this.equations = [];
+        this.lobbyId = "";
+        this.isPublic = false;
     }
 
     public Lobby(string lobbyId, Equation[] equations, GameMode gameMode)
@@ -93,6 +95,7 @@ public class Lobby
         this.gameMode = gameMode;
         this.lobbyId = lobbyId;
         this.equations = equations;
+        this.isPublic = false;
     }
 
     public Player NewPlayer(string name, string id)

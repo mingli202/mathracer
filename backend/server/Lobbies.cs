@@ -25,6 +25,14 @@ public class Lobbies
         return this.lobbies;
     }
 
+    public Dictionary<string, Lobby> GetPublicLobbies()
+    {
+        foreach (var lobby in this.lobbies)
+        {
+            if (lobby.Value.)
+        }
+    }
+
     public Lobby GetLobby(string lobbyId)
     {
         return this.lobbies[lobbyId];
