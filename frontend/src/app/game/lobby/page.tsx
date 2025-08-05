@@ -66,7 +66,7 @@ export default function LobbyPage() {
       return `Solve the most equations in ${gameMode.count} seconds`;
     }
   };
-
+  // Switch public-private lobby state
   const changePublicPrivate = async () => {
     const newState = !currentIsPublic;
     setIsPublic(newState);
