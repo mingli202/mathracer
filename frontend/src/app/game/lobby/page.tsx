@@ -2,11 +2,13 @@
 
 import PlayerList from "@/components/PlayerList";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
   createLobby,
   exitLobby,
   GameStateContext,
   joinLobby,
+  changeLobbyPublic,
 } from "@/gameState";
 import { ArrowLeft, Copy, Play, LoaderCircle } from "lucide-react";
 import Link from "next/link";
@@ -15,10 +17,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { use, useState } from "react";
 
 export default function LobbyPage() {
+  const { gameState, dispatch } = use(GameStateContext);
   const urlSearchParams = useSearchParams();
 
-  const { gameState, dispatch } = use(GameStateContext);
+  const { currentPlayer, lobby, connection } = gameState;
+  const { lobbyId, players, gameMode, isPublic } = lobby;
 
+  const [currentIsPublic, setIsPublic] = useState(isPublic);
   const [showNameDialogue, setShowNameDialogue] = useState(true);
   const [copyModalMessage, setCopyModalMessage] = useState<
     "loading" | "copied"
@@ -29,9 +34,6 @@ export default function LobbyPage() {
   } | null>(null);
 
   const router = useRouter();
-
-  const { currentPlayer, lobby, connection } = gameState;
-  const { lobbyId, players, gameMode } = lobby;
 
   const joinId = urlSearchParams.get("join");
   const gameUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/game/lobby?join=${lobbyId}`;
@@ -62,6 +64,16 @@ export default function LobbyPage() {
       return `First to solve ${gameMode.count} equations wins`;
     } else {
       return `Solve the most equations in ${gameMode.count} seconds`;
+    }
+  };
+  // Switch public-private lobby state
+  const changePublicPrivate = async () => {
+    const newState = !currentIsPublic;
+    setIsPublic(newState);
+    try {
+      changeLobbyPublic(connection, lobbyId, newState);
+    } catch {
+      setIsPublic(!newState);
     }
   };
 
@@ -165,6 +177,31 @@ export default function LobbyPage() {
                 Lobby id: {lobbyId} <Copy size={16} />
               </button>
             </div>
+            {currentPlayer.isHost && (
+              <div className="bg-secondary/30 border-secondary w-full rounded-lg border p-4">
+                <div className="flex flex-col items-start pb-2">
+                  <div className="text-[15px] text-gray-800">Game Settings</div>
+                  <div className="text-xs text-gray-500">
+                    Only the host can modify these settings
+                  </div>
+                </div>
+                <div className="flex flex-row items-center justify-between gap-3">
+                  <div className="flex flex-col items-start">
+                    <div className="text-[15px] text-gray-800">
+                      Public Lobby
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Allow anyone to join without an invite
+                    </div>
+                  </div>
+                  <Switch
+                    checked={currentIsPublic}
+                    onCheckedChange={changePublicPrivate}
+                    className="data-[state=checked]:bg-primary"
+                  ></Switch>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="bg-secondary/30 border-secondary w-full rounded-lg border p-4">

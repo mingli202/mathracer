@@ -25,9 +25,29 @@ public class Lobbies
         return this.lobbies;
     }
 
+    public List<Lobby> GetPublicLobbies()
+    {
+        List<Lobby> publicLobbies = new List<Lobby>();
+        foreach (var lobby in this.lobbies)
+        {
+            if (lobby.Value.isPublic)
+            {
+                publicLobbies.Add(lobby.Value);
+            }
+        }
+        return publicLobbies;
+    }
+
     public Lobby GetLobby(string lobbyId)
     {
         return this.lobbies[lobbyId];
+    }
+
+    public void changePublic(string lobbyId, bool state)
+    {
+        if (LobbyExists(lobbyId)) {
+            lobbies[lobbyId].isPublic = state;
+        }
     }
 
     public string GenerateNewLobbyId()

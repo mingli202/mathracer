@@ -1,6 +1,13 @@
 "use client";
 
-import { Equation, GameMode, GameState, Lobby, Player } from "@/types";
+import {
+  Equation,
+  GameMode,
+  GameState,
+  Lobby,
+  Player,
+  PublicLobbies,
+} from "@/types";
 import { HubConnection } from "@microsoft/signalr";
 import { useRouter } from "next/navigation";
 import { ActionDispatch, createContext, useEffect, useReducer } from "react";
@@ -13,6 +20,8 @@ const defaultState = {
     gameMode: { type: "time", count: 10 },
     players: [],
     equations: [],
+    isPublic: false,
+    hostName: "",
   },
   currentPlayer: {
     playerId: "",
@@ -285,4 +294,12 @@ export async function updatePlayerState(
 ) {
   dispatch({ type: "setCurrentPlayerState", state });
   await connection.send("UpdatePlayerState", lobbyId, playerId, state);
+}
+
+export async function changeLobbyPublic(
+  connection: HubConnection,
+  lobbyId: string,
+  state: boolean,
+) {
+  connection.send("ChangeLobbyPublic", lobbyId, state);
 }
