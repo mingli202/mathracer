@@ -2,24 +2,32 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PublicLobbies } from "@/types";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import z from "zod";
 
 export default function JoinPage() {
   const router = useRouter();
 
   const [error, setError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [publicLobbies, setPublicLobbies] = useState([]);
+  const [publicLobbies, setPublicLobbies] = useState<PublicLobbies | null>(
+    null,
+  );
 
   useEffect(() => {
     async function getPublicLobbies() {
-      const publicLobbies = await fetch(
+      const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/lobby/public`,
       );
+      const lobbies = PublicLobbies.parse(await res.json());
+      setPublicLobbies(lobbies);
     }
+
+    getPublicLobbies();
   }, []);
 
   return (
