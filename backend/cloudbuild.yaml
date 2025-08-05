@@ -13,7 +13,7 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   entrypoint: 'bash'
-  args: ['-c', 'docker push', '$$USERNAME/mathracer-server:$COMMIT_SHA']
+  args: ['-c', 'docker push $$USERNAME/mathracer-server:$COMMIT_SHA']
   secretEnv: ['USERNAME']
 
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
