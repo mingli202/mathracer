@@ -1,11 +1,14 @@
 steps:
-- name: 'docker'
-  args: ['login --username=$$USERNAME --password=$$PASSWORD']
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
+  args: ['-c', 'docker login --username=$$USERNAME --password=$$PASSWORD']
   secretEnv: ['USERNAME', 'PASSWORD']
 
-- name: 'docker'
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
   args:
-    - 'build'
+    - '-c'
+    - 'docker build'
     - '-t'
     - '$$USERNAME/mathracer-server:$COMMIT_SHA'
     - '--build-arg'
@@ -15,8 +18,9 @@ steps:
     - 'WEBAPP_URLS=${_WEBAPP_URLS}'
   secretEnv: ['USERNAME']
 
-- name: 'docker'
-  args: ['push', '$$USERNAME/mathracer-server:$COMMIT_SHA']
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
+  args: ['-c', 'docker push', '$$USERNAME/mathracer-server:$COMMIT_SHA']
   secretEnv: ['USERNAME']
 
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
