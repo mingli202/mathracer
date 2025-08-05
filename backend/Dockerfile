@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1
 
-
 FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+
+ARG WEBAPP_URLS
 
 COPY . /source
 

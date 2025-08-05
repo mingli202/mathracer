@@ -5,9 +5,10 @@ RSA rsa = RSA.Create(2048);
 RSA signingKey = RSA.Create(2048);
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
 string[] frontEndUrl = builder.Environment.IsDevelopment()
     ? ["http://localhost:3000"]
-    : ["https://mathracer-web-245625371319.us-central1.run.app", "https://mathracer-web-rfexjzrwcq-uc.a.run.app"];
+    : builder.Configuration["WEBAPP_URLS"]!.Split(",");
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
