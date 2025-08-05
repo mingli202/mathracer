@@ -299,6 +299,7 @@ export async function updatePlayerState(
 export async function changeLobbyPublic(
   connection: HubConnection,
   lobbyId: string,
+  state: boolean,
 ) {
-  connection.send("ChangeLobbyPublic", lobbyId);
+  connection.send("ChangeLobbyPublic", lobbyId, state);
 }

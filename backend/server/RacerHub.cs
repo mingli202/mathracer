@@ -266,8 +266,8 @@ public class RacerHub : Hub
         return JsonSerializer.Serialize(new { player = player, lobby = lobby });
     }
 
-    public void ChangeLobbyPublic(string lobbyId)
+    public void ChangeLobbyPublic(string lobbyId, bool state)
     {
-        _lobbies.changePublic(lobbyId);
+        _lobbies.changePublic(lobbyId, state);
     }
 }

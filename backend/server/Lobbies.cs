@@ -43,10 +43,10 @@ public class Lobbies
         return this.lobbies[lobbyId];
     }
 
-    public void changePublic(string lobbyId)
+    public void changePublic(string lobbyId, bool state)
     {
         if (LobbyExists(lobbyId)) {
-            lobbies[lobbyId].isPublic = !lobbies[lobbyId].isPublic;
+            lobbies[lobbyId].isPublic = state;
         }
     }
 
