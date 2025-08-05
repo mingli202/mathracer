@@ -20,7 +20,8 @@ steps:
   entrypoint: 'gcloud'
   args:
     - 'run'
-    - 'udpate'
+    - 'services'
+    - 'update'
     - 'mathracer-server'
     - '--region'
     - '${_REGION}'
