@@ -1,47 +1,39 @@
 steps:
-- name: 'docker'
+- name: 'gcr.io/cloud-builders/docker'
   entrypoint: 'bash'
   args: ['-c', 'docker login --username=$$USERNAME --password=$$PASSWORD']
   secretEnv: ['USERNAME', 'PASSWORD']
 
-- name: 'docker'
+- name: 'gcr.io/cloud-builders/docker'
   entrypoint: 'bash'
   args:
     - '-c'
-    - 'docker build'
-    - '-t'
-    - '$$USERNAME/mathracer-web:$COMMIT_SHA'
-    - '--build-arg'
-    - 'NEXT_PUBLIC_API_URL=${_NEXT_PUBLIC_API_URL}'
-    - '--build-arg'
-    - 'NEXT_PUBLIC_BASE_URL=${_NEXT_PUBLIC_BASE_URL}'
-    - './frontend' 
+    - |
+        docker build \
+        --build-arg NEXT_PUBLIC_API_URL=${_NEXT_PUBLIC_API_URL} \
+        --build-arg NEXT_PUBLIC_BASE_URL=${_NEXT_PUBLIC_BASE_URL} \
+        -t $$USERNAME/mathracer-web:$COMMIT_SHA \
+        ./frontend
   env:
   - 'NEXT_PUBLIC_API_URL=${_NEXT_PUBLIC_API_URL}'
   - 'NEXT_PUBLIC_BASE_URL=${_NEXT_PUBLIC_BASE_URL}'
   secretEnv: ['USERNAME']
 
-- name: 'docker'
+- name: 'gcr.io/cloud-builders/docker'
   entrypoint: 'bash'
   args: ['-c', 'docker push', '$$USERNAME/mathracer-web:$COMMIT_SHA']
   secretEnv: ['USERNAME']
 
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  entrypoint: 'gcloud'
+  entrypoint: 'bash'
   args:
-    - 'run'
-    - 'deploy'
-    - 'mathracer-web'
-    - '--region'
-    - '${_REGION}'
-    - '--image'
-    - '$$USERNAME/mathracer-web:$COMMIT_SHA'
-    - '--platform'
-    - 'managed'
+    - '-c'
+    - |
+        gcloud run services udpate mathracer-web \
+        --region ${_REGION} \
+        --image $$USERNAME/mathracer-web:$COMMIT_SHA \
+        --platform managed
   secretEnv: ['USERNAME']
-
-images:
-  - '$$USERNAME/mathracer-web:$COMMIT_SHA'
 
 options:
   defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET

@@ -6,7 +6,13 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   entrypoint: 'bash'
-  args: ['-c', 'DOCKER_BUILDKIT=1 docker build -t $$USERNAME/mathracer-server:$COMMIT_SHA --build-arg WEBAPP_URLS=${_WEBAPP_URLS} ./backend' ] 
+  args:
+    - '-c'
+    - |
+        DOCKER_BUILDKIT=1 docker build \
+        --build-arg WEBAPP_URLS=${_WEBAPP_URLS} \
+        -t $$USERNAME/mathracer-server:$COMMIT_SHA \
+        ./backend
   env:
     - 'WEBAPP_URLS=${_WEBAPP_URLS}'
   secretEnv: ['USERNAME']
@@ -20,7 +26,11 @@ steps:
   entrypoint: 'bash'
   args:
     - '-c'
-    - 'gcloud run services update mathracer-server --region ${_REGION} --image docker.io/$$USERNAME/mathracer-server:$COMMIT_SHA --platform managed'
+    - |
+        gcloud run services udpate mathracer-server \
+        --region ${_REGION} \
+        --image $$USERNAME/mathracer-server:$COMMIT_SHA \
+        --platform managed
   secretEnv: ['USERNAME']
 
 options:
