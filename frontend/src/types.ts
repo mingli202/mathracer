@@ -29,9 +29,7 @@ export const Lobby = z.object({
   hostName: z.string(),
 });
 
-export const PublicLobbies = z.object({
-  lobbies: z.array(Lobby),
-});
+export const PublicLobbies = z.array(Lobby);
 
 export const Credentials = z.object({
   username: z.string(),

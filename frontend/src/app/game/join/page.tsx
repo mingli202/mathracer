@@ -89,8 +89,8 @@ export default function JoinPage() {
       <div className="w-full">
         <h2 className="mb-4 text-xl font-semibold">Join Public Lobbies</h2>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-6">
-          {publicLobbies && publicLobbies.lobbies.length > 0 ? (
-            publicLobbies.lobbies.map((lobby) => (
+          {publicLobbies && publicLobbies.length > 0 ? (
+            publicLobbies.map((lobby) => (
               <PublicLobbyCard
                 key={lobby.lobbyId}
                 lobbyId={lobby.lobbyId}

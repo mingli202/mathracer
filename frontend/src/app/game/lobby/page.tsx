@@ -195,7 +195,7 @@ export default function LobbyPage() {
                     </div>
                   </div>
                   <Switch
-                    checked={isPublic}
+                    checked={currentIsPublic}
                     onCheckedChange={changePublicPrivate}
                     className="data-[state=checked]:bg-primary"
                   ></Switch>
