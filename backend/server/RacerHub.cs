@@ -264,4 +264,9 @@ public class RacerHub : Hub
 
         return JsonSerializer.Serialize(new { player = player, lobby = lobby });
     }
+
+    public async Task changeLobbyPublic(string lobbyId)
+    {
+        _lobbies.
+    }
 }

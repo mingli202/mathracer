@@ -43,6 +43,13 @@ public class Lobbies
         return this.lobbies[lobbyId];
     }
 
+    public void changePublic(string lobbyId)
+    {
+        if (LobbyExists(lobbyId)) {
+            lobbies[lobbyId].isPublic = !lobbies[lobbyId].isPublic;
+        }
+    }
+
     public string GenerateNewLobbyId()
     {
         Random rand = new Random();
