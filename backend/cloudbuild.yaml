@@ -17,18 +17,10 @@ steps:
   secretEnv: ['USERNAME']
 
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  entrypoint: 'gcloud'
+  entrypoint: 'bash'
   args:
-    - 'run'
-    - 'services'
-    - 'update'
-    - 'mathracer-server'
-    - '--region'
-    - '${_REGION}'
-    - '--image'
-    - 'docker.pkg.dev/$$USERNAME/mathracer-server:$COMMIT_SHA'
-    - '--platform'
-    - 'managed'
+    - '-c'
+    - 'gcloud run services update mathracer-server --region ${_REGION} --image docker.io/mathracer-server:$COMMIT_SHA --platform managed'
   secretEnv: ['USERNAME']
 
 images:
