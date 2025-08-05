@@ -1,6 +1,13 @@
 "use client";
 
-import { Equation, GameMode, GameState, Lobby, Player } from "@/types";
+import {
+  Equation,
+  GameMode,
+  GameState,
+  Lobby,
+  Player,
+  PublicLobbies,
+} from "@/types";
 import { HubConnection } from "@microsoft/signalr";
 import { useRouter } from "next/navigation";
 import { ActionDispatch, createContext, useEffect, useReducer } from "react";
@@ -289,6 +296,9 @@ export async function updatePlayerState(
 
 export async function getPublicLobbies(
   connection: HubConnection,
-): Promise<Dictionary<>> {
-  return await connection.invoke("GetPublicLobbies");
+): Promise<PublicLobbies> {
+  const response = await connection.invoke("GetPublicLobbies");
+
+  const publicLobbiesSchema = z.record(z.string(), Lobby);
+  return publicLobbiesSchema.parse(response);
 }
