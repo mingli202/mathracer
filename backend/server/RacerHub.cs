@@ -265,8 +265,13 @@ public class RacerHub : Hub
         return JsonSerializer.Serialize(new { player = player, lobby = lobby });
     }
 
-    public async Task changeLobbyPublic(string lobbyId)
+    public async Task ChangeLobbyPublic(string lobbyId)
     {
-        _lobbies.
+        _lobbies.changePublic(lobbyId);
+    }
+
+    public async Task<Dictionary<string, Lobby>> GetPublicLobbies()
+    {
+        return _lobbies.GetPublicLobbies();
     }
 }

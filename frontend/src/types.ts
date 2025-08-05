@@ -44,6 +44,10 @@ export type Lobby = z.infer<typeof Lobby>;
 export type Credentials = z.infer<typeof Credentials>;
 export type LoginResponse = z.infer<typeof LoginResponse>;
 
+export type PublicLobbies = {
+  [key: string]: Lobby;
+};
+
 export type GameState = {
   lobby: Lobby;
   currentPlayer: Player;

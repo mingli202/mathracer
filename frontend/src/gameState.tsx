@@ -286,3 +286,9 @@ export async function updatePlayerState(
   dispatch({ type: "setCurrentPlayerState", state });
   await connection.send("UpdatePlayerState", lobbyId, playerId, state);
 }
+
+export async function getPublicLobbies(
+  connection: HubConnection,
+): Promise<Dictionary<>> {
+  return await connection.invoke("GetPublicLobbies");
+}
