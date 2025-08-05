@@ -25,7 +25,7 @@ steps:
     - '--region'
     - '${_REGION}'
     - '--image'
-    - '$$USERNAME/mathracer-server:$COMMIT_SHA'
+    - 'docker.pkg.dev/$$USERNAME/mathracer-server:$COMMIT_SHA'
     - '--platform'
     - 'managed'
   secretEnv: ['USERNAME']
