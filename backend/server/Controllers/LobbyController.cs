@@ -27,4 +27,10 @@ public class LobbyController : ControllerBase
     {
         return _lobbies.LobbyExists(lobbyId);
     }
+
+    [HttpGet("lobbies/public")]
+    public ActionResult<Dictionary<string, Lobby>> GetPublicLobbies()
+    {
+        return _lobbies.GetPublicLobbies();
+    }
 }

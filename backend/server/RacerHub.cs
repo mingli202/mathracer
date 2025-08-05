@@ -269,9 +269,4 @@ public class RacerHub : Hub
     {
         _lobbies.changePublic(lobbyId);
     }
-
-    public async Task<Dictionary<string, Lobby>> GetPublicLobbies()
-    {
-        return _lobbies.GetPublicLobbies();
-    }
 }
