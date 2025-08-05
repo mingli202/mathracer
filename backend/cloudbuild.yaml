@@ -27,7 +27,7 @@ steps:
   args:
     - '-c'
     - |
-        gcloud run services udpate mathracer-server \
+        gcloud run services update mathracer-server \
         --region ${_REGION} \
         --image $$USERNAME/mathracer-server:$COMMIT_SHA \
         --platform managed

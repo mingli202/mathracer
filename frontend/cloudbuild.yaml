@@ -29,7 +29,7 @@ steps:
   args:
     - '-c'
     - |
-        gcloud run services udpate mathracer-web \
+        gcloud run services update mathracer-web \
         --region ${_REGION} \
         --image $$USERNAME/mathracer-web:$COMMIT_SHA \
         --platform managed
