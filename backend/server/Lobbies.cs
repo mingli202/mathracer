@@ -25,14 +25,14 @@ public class Lobbies
         return this.lobbies;
     }
 
-    public Dictionary<string, Lobby> GetPublicLobbies()
+    public List<Lobby> GetPublicLobbies()
     {
-        Dictionary<string, Lobby> publicLobbies = new Dictionary<string, Lobby>();
+        List<Lobby> publicLobbies = new List<Lobby>();
         foreach (var lobby in this.lobbies)
         {
             if (lobby.Value.isPublic)
             {
-                publicLobbies.Add(lobby.Key, lobby.Value);
+                publicLobbies.Add(lobby.Value);
             }
         }
         return publicLobbies;

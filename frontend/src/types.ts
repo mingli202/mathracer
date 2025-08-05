@@ -27,6 +27,10 @@ export const Lobby = z.object({
   players: z.array(Player),
 });
 
+export const PublicLobbies = z.object({
+  publicLobbies: z.array(Lobby),
+});
+
 export const Credentials = z.object({
   username: z.string(),
   password: z.string(),
@@ -41,12 +45,9 @@ export type Player = z.infer<typeof Player>;
 export type Equation = z.infer<typeof Equation>;
 export type GameMode = z.infer<typeof GameMode>;
 export type Lobby = z.infer<typeof Lobby>;
+export type PublicLobbies = z.infer<typeof PublicLobbies>;
 export type Credentials = z.infer<typeof Credentials>;
 export type LoginResponse = z.infer<typeof LoginResponse>;
-
-export type PublicLobbies = {
-  [key: string]: Lobby;
-};
 
 export type GameState = {
   lobby: Lobby;

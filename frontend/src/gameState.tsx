@@ -293,12 +293,3 @@ export async function updatePlayerState(
   dispatch({ type: "setCurrentPlayerState", state });
   await connection.send("UpdatePlayerState", lobbyId, playerId, state);
 }
-
-export async function getPublicLobbies(
-  connection: HubConnection,
-): Promise<PublicLobbies> {
-  const response = await connection.invoke("GetPublicLobbies");
-
-  const publicLobbiesSchema = z.record(z.string(), Lobby);
-  return publicLobbiesSchema.parse(response);
-}

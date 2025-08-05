@@ -5,13 +5,22 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function JoinPage() {
   const router = useRouter();
 
   const [error, setError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [publicLobbies, setPublicLobbies] = useState([]);
+
+  useEffect(() => {
+    async function getPublicLobbies() {
+      const publicLobbies = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/lobby/public`,
+      );
+    }
+  }, []);
 
   return (
     <div className="animate-fade-in flex w-sm flex-col gap-4 space-y-6">
