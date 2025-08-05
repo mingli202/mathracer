@@ -6,7 +6,7 @@ steps:
 
 - name: 'gcr.io/cloud-builders/docker'
   entrypoint: 'bash'
-  args: ['-c', 'docker build -t $$USERNAME/mathracer-server:$COMMIT_SHA --build-arg WEBAPP_URLS=${_WEBAPP_URLS} ./backend' ] 
+  args: ['-c', 'DOCKER_BUILDKIT=1 docker build -t $$USERNAME/mathracer-server:$COMMIT_SHA --build-arg WEBAPP_URLS=${_WEBAPP_URLS} ./backend' ] 
   env:
     - 'WEBAPP_URLS=${_WEBAPP_URLS}'
   secretEnv: ['USERNAME']
