@@ -77,13 +77,17 @@ public class Lobby
     [JsonConverter(typeof(LobbyPlayersConverter))]
     public Dictionary<string, Player> players { get; set; }
     public Equation[] equations { get; set; }
+    public bool isPublic { get; set; }
+    public string hostName { get; set; }
 
     public Lobby()
     {
-        players = new Dictionary<string, Player>();
-        gameMode = new GameMode();
-        equations = [];
-        lobbyId = "";
+        this.players = new Dictionary<string, Player>();
+        this.gameMode = new GameMode();
+        this.equations = [];
+        this.lobbyId = "";
+        this.isPublic = false;
+        this.hostName = "";
     }
 
     public Lobby(string lobbyId, Equation[] equations, GameMode gameMode)
@@ -93,6 +97,8 @@ public class Lobby
         this.gameMode = gameMode;
         this.lobbyId = lobbyId;
         this.equations = equations;
+        this.isPublic = false;
+        this.hostName = "";
     }
 
     public Player NewPlayer(string name, string id)
@@ -117,6 +123,7 @@ public class Lobby
         {
             Player newHost = this.players.Values.First();
             newHost.isHost = true;
+            UpdateHostName(newHost.name);
         }
     }
 
@@ -133,6 +140,11 @@ public class Lobby
 
         // check if all players are playing
         return this.players.Values.All(p => p.state == PlayerState.playing);
+    }
+
+    public void UpdateHostName(string name)
+    {
+        this.hostName = name;
     }
 
     public void ClearStats()

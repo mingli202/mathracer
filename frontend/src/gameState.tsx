@@ -13,6 +13,8 @@ const defaultState = {
     gameMode: { type: "time", count: 10 },
     players: [],
     equations: [],
+    isPublic: false,
+    hostName: "",
   },
   currentPlayer: {
     playerId: "",
@@ -285,4 +287,12 @@ export async function updatePlayerState(
 ) {
   dispatch({ type: "setCurrentPlayerState", state });
   await connection.send("UpdatePlayerState", lobbyId, playerId, state);
+}
+
+export async function changeLobbyPublic(
+  connection: HubConnection,
+  lobbyId: string,
+  state: boolean,
+) {
+  connection.send("ChangeLobbyPublic", lobbyId, state);
 }

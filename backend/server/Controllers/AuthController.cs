@@ -46,7 +46,7 @@ public class AuthController : ControllerBase
             "5sxF3UNAZjwn5U1ObVCTShuKuRR1LZ2aNe4SnpUUPPE="
         );
         byte[] adminPasswordHash = Convert.FromBase64String(
-            "QHipLSagok1+5FQ4z0x9Qk1uEVQzJN6O3YIYDlzx7F8="
+            "HfT2sjiXQ476IBFqnxjFjCCh0VC/xQEcYxHm4BysCEg="
         );
 
         Rfc2898DeriveBytes k1 = new Rfc2898DeriveBytes(
@@ -63,7 +63,7 @@ public class AuthController : ControllerBase
             100_000,
             HashAlgorithmName.SHA256
         );
-        byte[] computedPasswordHash = k1.GetBytes(32);
+        byte[] computedPasswordHash = k2.GetBytes(32);
 
         if (
             !CryptographicOperations.FixedTimeEquals(adminUsernameHash, computedUsernameHash)
