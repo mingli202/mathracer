@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Equation,
-  GameMode,
-  GameState,
-  Lobby,
-  Player,
-  PublicLobbies,
-} from "@/types";
+import { Equation, GameMode, GameState, Lobby, Player } from "@/types";
 import { HubConnection } from "@microsoft/signalr";
 import { useRouter } from "next/navigation";
 import { ActionDispatch, createContext, useEffect, useReducer } from "react";
