@@ -1,7 +1,7 @@
 "use client";
 
 import { Equation, GameMode, GameState, Lobby, Player } from "@/types";
-import { HubConnection } from "@microsoft/signalr";
+import { HubConnection, HubConnectionState } from "@microsoft/signalr";
 import { useRouter } from "next/navigation";
 import { ActionDispatch, createContext, useEffect, useReducer } from "react";
 import { z } from "zod";
@@ -82,7 +82,8 @@ export function GameStateWrapper({ children }: Props) {
     };
   }, []);
 
-  if (!gameState.connection) return <div>Connecting...</div>;
+  if (gameState.connection?.state !== HubConnectionState.Connected)
+    return <div>Connecting...</div>;
 
   return (
     <GameStateContext.Provider value={{ gameState, dispatch }}>
@@ -229,7 +230,7 @@ export async function createLobby(
   gameMode: GameMode,
   conn: HubConnection,
   dispatch: ActionDispatch<[action: GameStateAction]>,
-): Promise<string> {
+): Promise<void> {
   const res: { player: Player; lobby: Lobby } = z
     .object({ player: Player, lobby: Lobby })
     .parse(
@@ -243,8 +244,6 @@ export async function createLobby(
     lobby: res.lobby,
     currentPlayer: res.player,
   });
-
-  return res.lobby.lobbyId;
 }
 
 export async function joinLobby(
