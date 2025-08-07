@@ -1,7 +1,7 @@
 "use client";
 
 import { Equation, GameMode, GameState, Lobby, Player } from "@/types";
-import { HubConnection } from "@microsoft/signalr";
+import { HubConnection, HubConnectionState } from "@microsoft/signalr";
 import { useRouter } from "next/navigation";
 import { ActionDispatch, createContext, useEffect, useReducer } from "react";
 import { z } from "zod";
@@ -43,37 +43,47 @@ export function GameStateWrapper({ children }: Props) {
   const router = useRouter();
 
   useEffect(() => {
+    const c = newConnection();
+
+    c.on("SyncPlayers", (res: string) => {
+      const players = z.array(Player).parse(JSON.parse(res));
+      dispatch({ type: "setPlayers", players });
+    });
+
+    c.on("SyncEquations", (res: string) => {
+      const equations = z.array(Equation).parse(JSON.parse(res));
+      dispatch({ type: "setEquations", equations });
+    });
+
+    c.on("AddUnloadEventListener", (lobbyId: string, playerId: string) => {
+      window.addEventListener(
+        "beforeunload",
+        () => {
+          exitLobby(c, lobbyId, playerId, dispatch);
+          c.stop();
+        },
+        { once: true },
+      );
+    });
+
+    c.on("MoveToGameScreen", () => router.push("/game/play"));
+
     (async () => {
-      const c = await newConnection();
-
+      await c.start();
       dispatch({ type: "setConnection", connection: c });
-
-      c.on("SyncPlayers", (res: string) => {
-        const players = z.array(Player).parse(JSON.parse(res));
-        dispatch({ type: "setPlayers", players });
-      });
-
-      c.on("SyncEquations", (res: string) => {
-        const equations = z.array(Equation).parse(JSON.parse(res));
-        dispatch({ type: "setEquations", equations });
-      });
-
-      c.on("AddUnloadEventListener", (lobbyId: string, playerId: string) => {
-        window.addEventListener(
-          "beforeunload",
-          () => {
-            exitLobby(c, lobbyId, playerId, dispatch);
-            // c.stop();
-          },
-          { once: true },
-        );
-      });
-
-      c.on("MoveToGameScreen", () => router.push("/game/play"));
     })();
+
+    return () => {
+      c.off("SyncPlayers");
+      c.off("SyncEquations");
+      c.off("AddUnloadEventListener");
+      c.off("MoveToGameScreen");
+      c.stop();
+    };
   }, []);
 
-  if (!gameState.connection) return <div>Connecting...</div>;
+  if (gameState.connection?.state !== HubConnectionState.Connected)
+    return <div>Connecting...</div>;
 
   return (
     <GameStateContext.Provider value={{ gameState, dispatch }}>
@@ -220,7 +230,7 @@ export async function createLobby(
   gameMode: GameMode,
   conn: HubConnection,
   dispatch: ActionDispatch<[action: GameStateAction]>,
-): Promise<string> {
+): Promise<void> {
   const res: { player: Player; lobby: Lobby } = z
     .object({ player: Player, lobby: Lobby })
     .parse(
@@ -234,8 +244,6 @@ export async function createLobby(
     lobby: res.lobby,
     currentPlayer: res.player,
   });
-
-  return res.lobby.lobbyId;
 }
 
 export async function joinLobby(
@@ -258,8 +266,7 @@ export async function joinLobby(
       currentPlayer: res.player,
     });
     return true;
-  } catch (e) {
-    console.log(e);
+  } catch {
     alert("this lobby doesn't exist!");
     return false;
   }

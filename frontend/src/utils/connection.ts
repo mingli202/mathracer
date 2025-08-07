@@ -1,21 +1,20 @@
 import * as signalR from "@microsoft/signalr";
 
-export async function newConnection() {
+export function newConnection() {
   const url = `${process.env.NEXT_PUBLIC_API_URL}/hub`;
 
   const c = new signalR.HubConnectionBuilder()
     .withUrl(url, { withCredentials: true })
-    .withAutomaticReconnect()
     .build();
 
-  await c.start();
   return c;
 }
 
 export async function withConnection(
   f: (arg: signalR.HubConnection) => Promise<void>,
 ) {
-  const c = await newConnection();
+  const c = newConnection();
+  await c.start();
 
   await f(c);
   await c.stop();

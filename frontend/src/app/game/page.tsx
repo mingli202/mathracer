@@ -5,13 +5,23 @@ import { PlusCircle, Timer, Trophy, User, Users } from "lucide-react";
 import GameModeCard from "@/components/GameModeCard";
 import Link from "next/link";
 import { GameMode } from "@/types";
-import { use } from "react";
+import { use, useEffect, useRef } from "react";
 import { createLobby, GameStateContext } from "@/gameState";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
   const { dispatch, gameState } = use(GameStateContext);
   const { connection, lobby } = gameState;
   const { gameMode } = lobby;
+
+  const isSinglePlayer = useRef(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isSinglePlayer.current) {
+      router.push("/game/play");
+    }
+  }, [lobby.lobbyId]);
 
   function onSelectMode(mode: GameMode) {
     dispatch({ type: "selectMode", mode });
@@ -29,25 +39,18 @@ export default function Page() {
       </div>
 
       <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
-        <Link href="/game/play">
-          <Button
-            variant="outline"
-            size="lg"
-            className="math-button-accent flex h-16 w-full items-center justify-center gap-2"
-            onClick={async () => {
-              const returnedLobbyId = await createLobby(
-                "Player",
-                gameMode,
-                connection,
-                dispatch,
-              );
-              await connection.send("MoveToGameScreen", returnedLobbyId);
-            }}
-          >
-            <User size={20} />
-            <span>Single Player</span>
-          </Button>
-        </Link>
+        <Button
+          variant="outline"
+          size="lg"
+          className="math-button-accent flex h-16 w-full items-center justify-center gap-2"
+          onClick={async () => {
+            isSinglePlayer.current = true;
+            await createLobby("Player", gameMode, connection, dispatch);
+          }}
+        >
+          <User size={20} />
+          <span>Single Player</span>
+        </Button>
 
         <Link href="/game/lobby">
           <Button

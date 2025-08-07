@@ -24,6 +24,7 @@ const eslintConfig = [
           caughtErrorsIgnorePattern: "^_", // ignore catch(e)         starting with _
         },
       ],
+      "react-hooks/exhaustive-deps": "off",
     },
   },
 ];

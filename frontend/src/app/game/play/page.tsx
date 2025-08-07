@@ -43,14 +43,6 @@ export default function PlayPage() {
   }, []);
 
   useEffect(() => {
-    updatePlayerState(
-      connection,
-      lobbyId,
-      currentPlayer.playerId,
-      "playing",
-      dispatch,
-    );
-
     connection.on("CountDown", (count: number) => {
       setCountDown(count);
     });
@@ -63,12 +55,22 @@ export default function PlayPage() {
       });
     });
 
+    updatePlayerState(
+      connection,
+      lobbyId,
+      currentPlayer.playerId,
+      "playing",
+      dispatch,
+    );
+
     return () => {
       connection.off("CountDown");
       connection.off("TimeElapsed");
       connection.off("StartGame");
     };
   }, []);
+
+  useEffect(() => {});
 
   // Handle time-based game end
   useEffect(() => {
@@ -82,10 +84,6 @@ export default function PlayPage() {
           lobbyId,
           currentPlayer.playerId,
         );
-        //dispatch({
-        //  type: "setCurrentPlayerState",
-        //  state: "completed",
-        //});
         router.push("/game/results");
       })();
     }
