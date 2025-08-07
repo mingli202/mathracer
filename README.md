@@ -23,18 +23,17 @@ A competitive math game that helps you sharpen your mental math skills — all w
 - 🌐 **Public Lobbies** — Jump into global lobbies and race anyone, anytime.
 
 ---
+## 🛠 Tech Stack
 
-## Tech stack:
-Frontend:
-- NextJs
-- TailwindCss
-- Deployed on Google Cloud Run
+### Frontend
+- **Next.js**
+- **Tailwind CSS**
+- **Deployed on Google Cloud Run**
 
-Backend:
-- C#
-- ASP.NET Api, SignalR
-- Deployed on Google Cloud Run
-- RESTful API endpoints
+### Backend
+- **C#**, **ASP.NET**, **SignalR**
+- **RESTful API**
+- **Deployed on Google Cloud Run**
 --- 
 
 ## Demo
