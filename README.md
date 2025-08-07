@@ -1,6 +1,7 @@
 # Mathracer
 
-Competitive math game to practice your mental math in a fun and exciting way!!
+A competitive math game that helps you sharpen your mental math skills — all while having fun!!
+
 <p>
   💪 Try it out! 💪 <br>
   <a href="https://mathracer-web-245625371319.us-central1.run.app" target="_blank">
@@ -21,7 +22,7 @@ Competitive math game to practice your mental math in a fun and exciting way!!
 
 ---
 
-### Tech stack:
+## Tech stack:
 Frontend:
 - NextJs
 - TailwindCss
@@ -31,6 +32,8 @@ Backend:
 - C#
 - ASP.NET Api, SignalR
 - Deployed on Google Cloud Run
+- RESTful API endpoints
+--- 
 
-### Demo
+## Demo
 [![Demo](https://img.youtube.com/vi/xfg4ZZ54hCs/0.jpg)](https://youtu.be/xfg4ZZ54hCs)
