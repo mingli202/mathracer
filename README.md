@@ -2,7 +2,7 @@
 
 Competitive math game to practice your mental math in a fun and exciting way!!
 <p>
-  Try it out! <br>
+  💪 Try it out! 💪 <br>
   <a href="https://mathracer-web-245625371319.us-central1.run.app" target="_blank">
     <img src="https://img.shields.io/badge/Production-Site-brightgreen?style=for-the-badge" alt="Production Site">
   </a>
