@@ -11,6 +11,16 @@ Competitive math game to practice your mental math in a fun and exciting way!!
   </a>
 </p>
 
+---
+
+## Features
+- 🎮 **Variety of Gamemodes** — Pick a game mode between a race against time or a contest of speed.
+- 🙋 **Singleplayer Mode** — Practice you mental math through challenging yourself.
+- 👥 **Multiplayer Mode** — Challenge friends, classmates, or strangers to math duels.
+- 🌐 **Public Lobbies** — Join and challenge anyone around the globe. 
+
+---
+
 ### Tech stack:
 Frontend:
 - NextJs
