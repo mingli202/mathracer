@@ -82,10 +82,6 @@ export default function PlayPage() {
           lobbyId,
           currentPlayer.playerId,
         );
-        //dispatch({
-        //  type: "setCurrentPlayerState",
-        //  state: "completed",
-        //});
         router.push("/game/results");
       })();
     }

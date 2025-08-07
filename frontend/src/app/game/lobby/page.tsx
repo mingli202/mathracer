@@ -46,13 +46,11 @@ export default function LobbyPage() {
 
     const f = () => {
       window.removeEventListener("mousemove", f);
-      // window.removeEventListener("click", f);
       setCopyModalCoords(null);
       setCopyModalMessage("loading");
     };
 
     window.addEventListener("mousemove", f, { once: true });
-    // window.addEventListener("click", f, { once: true });
   };
 
   const canStart = (): boolean => {
