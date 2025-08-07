@@ -43,34 +43,43 @@ export function GameStateWrapper({ children }: Props) {
   const router = useRouter();
 
   useEffect(() => {
+    const c = newConnection();
+
+    c.on("SyncPlayers", (res: string) => {
+      const players = z.array(Player).parse(JSON.parse(res));
+      dispatch({ type: "setPlayers", players });
+    });
+
+    c.on("SyncEquations", (res: string) => {
+      const equations = z.array(Equation).parse(JSON.parse(res));
+      dispatch({ type: "setEquations", equations });
+    });
+
+    c.on("AddUnloadEventListener", (lobbyId: string, playerId: string) => {
+      window.addEventListener(
+        "beforeunload",
+        () => {
+          exitLobby(c, lobbyId, playerId, dispatch);
+          c.stop();
+        },
+        { once: true },
+      );
+    });
+
+    c.on("MoveToGameScreen", () => router.push("/game/play"));
+
     (async () => {
-      const c = await newConnection();
-
+      await c.start();
       dispatch({ type: "setConnection", connection: c });
-
-      c.on("SyncPlayers", (res: string) => {
-        const players = z.array(Player).parse(JSON.parse(res));
-        dispatch({ type: "setPlayers", players });
-      });
-
-      c.on("SyncEquations", (res: string) => {
-        const equations = z.array(Equation).parse(JSON.parse(res));
-        dispatch({ type: "setEquations", equations });
-      });
-
-      c.on("AddUnloadEventListener", (lobbyId: string, playerId: string) => {
-        window.addEventListener(
-          "beforeunload",
-          () => {
-            exitLobby(c, lobbyId, playerId, dispatch);
-            // c.stop();
-          },
-          { once: true },
-        );
-      });
-
-      c.on("MoveToGameScreen", () => router.push("/game/play"));
     })();
+
+    return () => {
+      c.off("SyncPlayers");
+      c.off("SyncEquations");
+      c.off("AddUnloadEventListener");
+      c.off("MoveToGameScreen");
+      c.stop();
+    };
   }, []);
 
   if (!gameState.connection) return <div>Connecting...</div>;
