@@ -7,6 +7,7 @@ import { cn } from "@/utils/cn";
 import { Bug, Info, TriangleAlert } from "lucide-react";
 import { saveAs } from "file-saver";
 import { HubConnection } from "@microsoft/signalr";
+import { HttpVerb } from "@/utils/httpverb";
 
 type Props = {
   connection: HubConnection;
@@ -20,18 +21,17 @@ export default function Logs({ connection }: Props) {
     [LogSeverity.Debug]: true,
     [LogSeverity.Error]: true,
   });
-
   const [regexFilter, setRegexFilter] = useState("");
-  const timer = useRef<number | null>(null);
-  const activeSearchDelayMs = 500;
-
   const [logs, setLogs] = useState<Log[]>([]);
   const [isPaused, setIsPaused] = useState(false);
-
   const [selectedLog, setSelectedLog] = useState<Log | null>(null);
 
+  const timer = useRef<number | null>(null);
   const logsContainerRef = useRef<HTMLDivElement>(null!);
   const isAtBottomRef = useRef(false);
+  const apiCallRef = useRef<HTMLInputElement>(null!);
+
+  const activeSearchDelayMs = 500;
 
   function startListening() {
     setIsPaused(false);
@@ -78,10 +78,42 @@ export default function Logs({ connection }: Props) {
       <p className="shink-0 w-full text-center">Server Logs</p>
       <form
         className="flex w-full shrink-0 flex-col gap-2"
-        action={(formData) => {
-          const _regexFilter =
-            formData.get("regex-filter")?.toString() ?? regexFilter;
-          setRegexFilter(_regexFilter);
+        onSubmit={async (e) => {
+          e.preventDefault();
+
+          const apiCall = apiCallRef.current.value;
+
+          if (apiCall) {
+            let res;
+            try {
+              res = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/${apiCall}`,
+              ).catch((e) => {
+                return new Response(e.message, {
+                  status: e.status,
+                  statusText: e.statusText,
+                });
+              });
+            } catch (e) {
+              res = new Response(`${e}`, {
+                status: 400,
+                statusText: "Error",
+              });
+            }
+            const text = await res.text();
+
+            setLogs((logs) => [
+              ...logs,
+              {
+                timestamp: new Date().toLocaleDateString(),
+                message: `GET ${apiCall}`,
+                severity: res.ok ? LogSeverity.Info : LogSeverity.Error,
+                details: res.ok
+                  ? text
+                  : `Error: ${res.status} ${res.statusText}`,
+              },
+            ]);
+          }
         }}
       >
         <div className="flex w-full flex-wrap items-center gap-x-4 gap-y-1">
@@ -127,32 +159,6 @@ export default function Logs({ connection }: Props) {
           >
             Deselect All
           </button>
-        </div>
-        <div className="flex w-full items-center gap-2">
-          <label htmlFor="regex-filter" className="shrink-0">
-            Regex Filter:
-          </label>
-          <input
-            type="text"
-            className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex w-full rounded-md border px-3 py-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-            id="regex-filter"
-            name="regex-filter"
-            placeholder="Filter messges by regex"
-            defaultValue={regexFilter}
-            onChange={(e) => {
-              const value = e.target.value;
-
-              if (timer.current) {
-                window.clearTimeout(timer.current);
-              }
-
-              timer.current = window.setTimeout(() => {
-                setRegexFilter(value);
-              }, activeSearchDelayMs);
-            }}
-          />
-        </div>
-        <div className="flex w-full items-center gap-2">
           <button
             className="bg-muted text-muted-foreground border-muted hover:bg-foreground/10 hover:text-foreground w-fit rounded-md px-2 py-1 transition"
             type="button"
@@ -203,6 +209,51 @@ export default function Logs({ connection }: Props) {
           >
             To Bottom
           </button>
+        </div>
+        <div className="flex w-full items-center gap-2">
+          <label htmlFor="regex-filter" className="shrink-0">
+            Regex Filter:
+          </label>
+          <input
+            type="text"
+            className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex w-full rounded-md border px-3 py-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            id="regex-filter"
+            name="regex-filter"
+            placeholder="Filter messges by regex"
+            defaultValue={regexFilter}
+            onChange={(e) => {
+              const value = e.target.value;
+
+              if (timer.current) {
+                window.clearTimeout(timer.current);
+              }
+
+              timer.current = window.setTimeout(() => {
+                setRegexFilter(value);
+              }, activeSearchDelayMs);
+            }}
+          />
+        </div>
+
+        <div className="flex w-full items-center gap-2">
+          <label htmlFor="call-api">
+            <button
+              className="bg-muted text-muted-foreground border-muted hover:bg-foreground/10 hover:text-foreground shrink-0 rounded-md px-2 py-1 transition"
+              type="submit"
+            >
+              GET
+            </button>
+          </label>
+
+          <input
+            type="text"
+            className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex w-full rounded-md border px-3 py-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            id="call-api"
+            name="call-api"
+            placeholder="api/some/endpoint (e.g. api/lobby/lobbies)"
+            defaultValue="api/"
+            ref={apiCallRef}
+          />
         </div>
       </form>
 
