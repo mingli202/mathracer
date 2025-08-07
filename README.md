@@ -3,7 +3,7 @@
 A competitive math game that helps you sharpen your mental math skills — all while having fun!!
 
 <p>
-  💪 Try it out! 💪 <br>
+  💪 <strong>Try it out!</strong> 💪 <br><br>
   <a href="https://mathracer-web-245625371319.us-central1.run.app" target="_blank">
     <img src="https://img.shields.io/badge/Production-Site-brightgreen?style=for-the-badge" alt="Production Site">
   </a>
