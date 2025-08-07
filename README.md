@@ -3,7 +3,7 @@
 A competitive math game that helps you sharpen your mental math skills — all while having fun!!
 
 <p>
-  💪 <strong>Try it out!</strong> 💪 <br><br>
+  💪 <strong>Try it out!</strong> 💪 <br>&nbsp;<br>
   <a href="https://mathracer-web-245625371319.us-central1.run.app" target="_blank">
     <img src="https://img.shields.io/badge/Production-Site-brightgreen?style=for-the-badge" alt="Production Site">
   </a>
@@ -36,5 +36,5 @@ A competitive math game that helps you sharpen your mental math skills — all w
 - **Deployed on Google Cloud Run**
 --- 
 
-## Demo
+## 🎥 Demo
 [![Demo](https://img.youtube.com/vi/xfg4ZZ54hCs/0.jpg)](https://youtu.be/xfg4ZZ54hCs)
