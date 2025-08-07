@@ -5,7 +5,6 @@ export async function newConnection() {
 
   const c = new signalR.HubConnectionBuilder()
     .withUrl(url, { withCredentials: true })
-    .withAutomaticReconnect()
     .build();
 
   await c.start();
