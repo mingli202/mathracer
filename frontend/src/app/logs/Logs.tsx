@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
 import SeverityCheckbox from "./SeverityCheckbox";
 import { Log, LogSeverity } from "@/types";
 import { cn } from "@/utils/cn";
@@ -30,9 +30,16 @@ export default function Logs({ connection }: Props) {
 
   const [selectedLog, setSelectedLog] = useState<Log | null>(null);
 
+  const logsContainerRef = useRef<HTMLDivElement>(null!);
+  const isAtBottomRef = useRef(false);
+
   function startListening() {
     setIsPaused(false);
     connection.on("Log", (log: string) => {
+      const div = logsContainerRef.current;
+      isAtBottomRef.current =
+        div.scrollTop === div.scrollHeight - div.clientHeight;
+
       setLogs((logs) => [...logs, Log.parse(JSON.parse(log))]);
     });
   }
@@ -57,6 +64,14 @@ export default function Logs({ connection }: Props) {
       stopListening();
     };
   }, []);
+
+  useLayoutEffect(() => {
+    const div = logsContainerRef.current;
+
+    if (isAtBottomRef.current) {
+      div.scrollTop = div.scrollHeight;
+    }
+  }, [logs]);
 
   return (
     <main className="flex h-full w-full flex-col gap-4 p-4">
@@ -178,11 +193,24 @@ export default function Logs({ connection }: Props) {
           >
             Save
           </button>
+          <button
+            className="bg-muted text-muted-foreground border-muted hover:bg-foreground/10 hover:text-foreground shrink-0 rounded-md px-2 py-1 transition"
+            type="button"
+            onClick={() => {
+              const div = logsContainerRef.current;
+              div.scrollTop = div.scrollHeight;
+            }}
+          >
+            To Bottom
+          </button>
         </div>
       </form>
 
       {/* logs */}
-      <div className="overflow-x-none relative flex h-full w-full flex-col overflow-y-auto rounded-md border border-gray-100 bg-white p-2 shadow-sm">
+      <div
+        className="overflow-x-none relative flex h-full w-full flex-col overflow-y-auto rounded-md border border-gray-100 bg-white p-2 shadow-sm"
+        ref={logsContainerRef}
+      >
         {logs.map((log, i) => {
           if (!logSeverityChecked[log.severity]) {
             return null;
@@ -206,8 +234,7 @@ export default function Logs({ connection }: Props) {
             if (regexFilter.toLowerCase() === regexFilter) {
               regex = new RegExp(regexFilter, "gi");
             }
-          } catch (e) {
-            console.error(e);
+          } catch {
             return null;
           }
           const matches = log.message.matchAll(regex).toArray();
