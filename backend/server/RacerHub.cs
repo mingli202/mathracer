@@ -51,10 +51,13 @@ public class RacerHub : Hub
         {
             return;
         }
-        _lobbies.GetLobby(lobbyId).ClearStats();
+        Lobby lobby = _lobbies.GetLobby(lobbyId);
+        lobby.ClearStats();
         await SyncPlayers(lobbyId);
         await SyncEquations(lobbyId);
         await Clients.Groups(lobbyId).SendAsync("MoveToGameScreen");
+
+        this._logger.Log(Severity.Debug, $"MoveToGameScreen {lobbyId}", lobby);
     }
 
     public async Task PlayerCompleted(string lobbyId, string playerId)
