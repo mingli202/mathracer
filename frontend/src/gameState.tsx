@@ -266,8 +266,7 @@ export async function joinLobby(
       currentPlayer: res.player,
     });
     return true;
-  } catch (e) {
-    console.log(e);
+  } catch {
     alert("this lobby doesn't exist!");
     return false;
   }
