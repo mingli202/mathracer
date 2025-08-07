@@ -13,7 +13,7 @@ A competitive math game that helps you sharpen your mental math skills — all w
   </a>
 </p>
 
----
+
 
 ## ✨ Features
 
@@ -22,7 +22,6 @@ A competitive math game that helps you sharpen your mental math skills — all w
 - 👥 **Real-time Multiplayer** — Compete against friends or random players online.
 - 🌐 **Public Lobbies** — Jump into global lobbies and race anyone, anytime.
 
----
 ## 🛠 Tech Stack
 
 ### Frontend
@@ -34,7 +33,6 @@ A competitive math game that helps you sharpen your mental math skills — all w
 - **C#**, **ASP.NET**, **SignalR**
 - **RESTful API**
 - **Deployed on Google Cloud Run**
---- 
 
 ## 🎥 Demo
 [![Demo](https://img.youtube.com/vi/xfg4ZZ54hCs/0.jpg)](https://youtu.be/xfg4ZZ54hCs)
