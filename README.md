@@ -15,11 +15,12 @@ A competitive math game that helps you sharpen your mental math skills — all w
 
 ---
 
-## Features
-- 🎮 **Variety of Gamemodes** — Pick a game mode between a race against time or a contest of speed.
-- 🙋 **Singleplayer Mode** — Practice you mental math through challenging yourself.
-- 👥 **Multiplayer Mode** — Challenge friends, classmates, or strangers to math duels.
-- 🌐 **Public Lobbies** — Join and challenge anyone around the globe. 
+## ✨ Features
+
+- 🎮 **Multiple Game Modes** — Choose between timed challenges or speed duels.
+- 🧠 **Singleplayer Practice** — Improve your mental math through solo challenges.
+- 👥 **Real-time Multiplayer** — Compete against friends or random players online.
+- 🌐 **Public Lobbies** — Jump into global lobbies and race anyone, anytime.
 
 ---
 
