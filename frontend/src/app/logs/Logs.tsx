@@ -7,7 +7,6 @@ import { cn } from "@/utils/cn";
 import { Bug, Info, TriangleAlert } from "lucide-react";
 import { saveAs } from "file-saver";
 import { HubConnection } from "@microsoft/signalr";
-import { HttpVerb } from "@/utils/httpverb";
 
 type Props = {
   connection: HubConnection;

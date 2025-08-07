@@ -4,12 +4,8 @@ A competitive math game that helps you sharpen your mental math skills — all w
 
 <p>
   💪 <strong>Try it out!</strong> 💪 <br>&nbsp;<br>
-  <a href="https://mathracer-web-245625371319.us-central1.run.app" target="_blank">
-    <img src="https://img.shields.io/badge/Production-Site-brightgreen?style=for-the-badge" alt="Production Site">
-  </a>
-  &nbsp;
   <a href="https://mathracer-web-1046151643421.us-central1.run.app" target="_blank">
-    <img src="https://img.shields.io/badge/Test-Site-blue?style=for-the-badge" alt="Test Site">
+    <img src="https://img.shields.io/badge/Production-Site-brightgreen?style=for-the-badge" alt="Production Site">
   </a>
 </p>
 
