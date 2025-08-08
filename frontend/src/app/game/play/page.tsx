@@ -70,8 +70,6 @@ export default function PlayPage() {
     };
   }, []);
 
-  useEffect(() => {});
-
   // Handle time-based game end
   useEffect(() => {
     if (
