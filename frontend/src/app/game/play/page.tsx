@@ -16,6 +16,7 @@ import {
   useRef,
   useState,
 } from "react";
+import DrawingCanvas from "./DrawingCanvas";
 
 export default function PlayPage() {
   const { gameState, dispatch } = use(GameStateContext);
@@ -35,6 +36,8 @@ export default function PlayPage() {
 
   const now = useMemo(() => Math.round(Date.now() / 1000), []);
   const router = useRouter();
+
+  const [isHandwritingMode, setIsHandwritingMode] = useState(false);
 
   useLayoutEffect(() => {
     if (lobbyId === "") {
@@ -189,28 +192,42 @@ export default function PlayPage() {
               />
             </div>
 
-            <form
-              onSubmit={(e: React.FormEvent) => {
-                e.preventDefault();
-                inputRef.current.value = "";
-                submitIfCorrect(inputRef.current.value);
-              }}
-              className={`relative flex w-full max-w-xs flex-col items-center`}
-            >
-              <Input
-                ref={inputRef}
-                type="text"
-                onChange={(e) => submitIfCorrect(e.target.value)}
-                placeholder="Enter your answer"
-                className={`mb-4 h-14 text-center text-xl ${formStyle}`}
-                autoComplete="off"
-                disabled={countDown > 0}
-              />
-              <Button type="submit" className={`w-full ${boxStyle}`}>
-                Submit
-              </Button>
-            </form>
+            {isHandwritingMode ? (
+              <form
+                onSubmit={(e: React.FormEvent) => {
+                  e.preventDefault();
+                  inputRef.current.value = "";
+                  submitIfCorrect(inputRef.current.value);
+                }}
+                className={`relative flex w-full max-w-xs flex-col items-center`}
+              >
+                <Input
+                  ref={inputRef}
+                  type="text"
+                  onChange={(e) => submitIfCorrect(e.target.value)}
+                  placeholder="Type your answer"
+                  className={`mb-4 h-14 text-center text-xl ${formStyle}`}
+                  autoComplete="off"
+                  disabled={countDown > 0}
+                />
+                <Button type="submit" className={`w-full ${boxStyle}`}>
+                  Enter
+                </Button>
+              </form>
+            ) : (
+              <DrawingCanvas />
+            )}
           </div>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="z-100"
+            onClick={() => setIsHandwritingMode(!isHandwritingMode)}
+          >
+            {isHandwritingMode
+              ? "Switch to typing mode"
+              : "Switch to handwriting mode"}
+          </Button>
         </div>
 
         {/* Leaderboard sidebar */}
