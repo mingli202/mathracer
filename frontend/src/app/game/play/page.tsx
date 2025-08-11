@@ -32,7 +32,7 @@ export default function PlayPage() {
 
   const [animation, setAnimation] = useState("");
   const [currentEquationIndex, setCurrentEquationIndex] = useState(0);
-  const inputRef = useRef<HTMLInputElement>(null!);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const now = useMemo(() => Math.round(Date.now() / 1000), []);
   const router = useRouter();
@@ -92,7 +92,7 @@ export default function PlayPage() {
 
   useEffect(() => {
     if (countDown == 0) {
-      inputRef.current.focus();
+      inputRef.current?.focus();
     }
   }, [countDown]);
 
@@ -107,7 +107,9 @@ export default function PlayPage() {
       score = Math.round(Date.now() / 1000) - now;
     }
 
-    inputRef.current.value = "";
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
 
     await connection
       .send("UpdateScore", lobbyId, currentPlayer.playerId, score)
@@ -196,8 +198,10 @@ export default function PlayPage() {
               <form
                 onSubmit={(e: React.FormEvent) => {
                   e.preventDefault();
-                  inputRef.current.value = "";
-                  submitIfCorrect(inputRef.current.value);
+                  if (inputRef.current) {
+                    inputRef.current.value = "";
+                    submitIfCorrect(inputRef.current?.value);
+                  }
                 }}
                 className={`relative flex w-full max-w-xs flex-col items-center`}
               >
