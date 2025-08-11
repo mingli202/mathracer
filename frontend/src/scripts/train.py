@@ -8,6 +8,9 @@ import keras
 from keras import layers
 
 NUM_CLASSES = 10
+OPTIMIZER = "adam"
+LOSS = "categorical_crossentropy"
+VERSION = 1
 
 
 def set_seed(seed: int = 42):
@@ -42,14 +45,14 @@ def build_model(input_shape=(28, 28, 1), num_classes: int = NUM_CLASSES):
             layers.Dropout(0.5),
             layers.Dense(num_classes, activation="softmax", name="output"),
         ],
-        name="mnist_cnn_light",
+        name=f"mnist_cnn_light {VERSION}",
     )
 
     model.summary()
 
     model.compile(
-        optimizer="adam",
-        loss="categorical_crossentropy",
+        optimizer=OPTIMIZER,
+        loss=LOSS,
         metrics=["accuracy"],
     )
     return model
@@ -104,11 +107,11 @@ def main():
     # Save a small metadata file (useful later).
     meta_path = out_dir / "metadata.txt"
     with open(meta_path, "a") as f:
-        f.write("model: mnist_cnn_light\n")
-        f.write("input_shape: (28, 28, 1)\n")
-        f.write("num_classes: 10\n")
+        f.write(f"model: mnist_cnn_light {VERSION}\n")
         f.write(f"test_accuracy: {test_acc:.6f}\n")
         f.write(f"test_loss: {test_loss:.6f}\n")
+        f.write(f"optimizer: {OPTIMIZER}\n")
+        f.write(f"loss: {LOSS}\n")
         f.write("=================================")
     print(f"Wrote metadata to: {meta_path}")
 
