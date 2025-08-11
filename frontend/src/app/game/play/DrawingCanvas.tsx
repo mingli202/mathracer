@@ -2,12 +2,15 @@
 
 import { useEffect, useRef } from "react";
 
-export default function DrawingCanvas() {
-  const RECT_SIZE = 5;
+const RECT_SIZE = 4;
 
+type Point = { x: number; y: number };
+
+export default function DrawingCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null!);
   const containerRef = useRef<HTMLDivElement>(null!);
   const isPressing = useRef(false);
+  const previousPoint = useRef<Point | null>(null);
 
   function handleDraw(clientX: number, clientY: number) {
     const canvas = canvasRef.current;
@@ -15,7 +18,7 @@ export default function DrawingCanvas() {
     const x = clientX - left;
     const y = clientY - top;
 
-    const ctx = canvasRef.current.getContext("2d");
+    const ctx = canvasRef.current.getContext("2d", { alpha: false });
 
     if (!ctx) {
       return;
@@ -23,18 +26,30 @@ export default function DrawingCanvas() {
 
     ctx.fillStyle = "#000";
     ctx.fillRect(x - RECT_SIZE / 2, y - RECT_SIZE / 2, RECT_SIZE, RECT_SIZE);
+
+    if (previousPoint.current) {
+      ctx.beginPath();
+      ctx.moveTo(previousPoint.current.x, previousPoint.current.y);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
+
+    previousPoint.current = { x, y };
   }
 
   useEffect(() => {
     const resize = () => {
       const canvas = canvasRef.current;
-      canvas.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
+
+      const ctx = canvasRef.current.getContext("2d", { alpha: false });
+      ctx?.clearRect(0, 0, canvas.width, canvas.height);
 
       const container = containerRef.current;
 
       const { width, height } = container.getBoundingClientRect();
       canvas.width = width;
       canvas.height = height;
+      previousPoint.current = null;
     };
     window.addEventListener("resize", resize);
     resize();
@@ -43,7 +58,7 @@ export default function DrawingCanvas() {
 
   return (
     <div
-      className="h-40 w-full max-w-md"
+      className="h-56 w-full max-w-md"
       style={{
         touchAction: "none",
         userSelect: "none",
@@ -64,6 +79,7 @@ export default function DrawingCanvas() {
         }}
         onPointerUp={() => {
           isPressing.current = false;
+          previousPoint.current = null;
         }}
       >
         Oops, your browser does not support HTML5 canvas:
@@ -71,13 +87,14 @@ export default function DrawingCanvas() {
       <button
         className="hover:text-primary w-full text-center transition hover:cursor-pointer"
         onClick={() => {
-          const ctx = canvasRef.current.getContext("2d");
+          const ctx = canvasRef.current.getContext("2d", { alpha: false });
           ctx?.clearRect(
             0,
             0,
             canvasRef.current.width,
             canvasRef.current.height,
           );
+          previousPoint.current = null;
         }}
       >
         Clear
