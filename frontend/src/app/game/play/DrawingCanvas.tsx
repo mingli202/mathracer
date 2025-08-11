@@ -36,7 +36,7 @@ export default function DrawingCanvas() {
 
   return (
     <div
-      className="border-secondary w-full max-w-md rounded-lg border-2 border-solid"
+      className="h-40 w-full max-w-md"
       style={{
         touchAction: "none",
         userSelect: "none",
@@ -45,7 +45,7 @@ export default function DrawingCanvas() {
     >
       <canvas
         ref={canvasRef}
-        style={{ width: "100%", height: "100%" }}
+        className="border-secondary h-full w-full rounded-lg border-2 border-solid"
         onPointerDown={(e) => {
           isPressing.current = true;
           draw(e.clientX, e.clientY);
@@ -61,6 +61,20 @@ export default function DrawingCanvas() {
       >
         Oops, your browser does not support HTML5 canvas:
       </canvas>
+      <button
+        className="hover:text-primary w-full text-center transition hover:cursor-pointer"
+        onClick={() => {
+          const ctx = canvasRef.current.getContext("2d");
+          ctx?.clearRect(
+            0,
+            0,
+            canvasRef.current.width,
+            canvasRef.current.height,
+          );
+        }}
+      >
+        Clear
+      </button>
     </div>
   );
 }
