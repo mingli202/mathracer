@@ -9,7 +9,7 @@ export default function DrawingCanvas() {
   const containerRef = useRef<HTMLDivElement>(null!);
   const isPressing = useRef(false);
 
-  function draw(clientX: number, clientY: number) {
+  function handleDraw(clientX: number, clientY: number) {
     const canvas = canvasRef.current;
     const { left, top } = canvas.getBoundingClientRect();
     const x = clientX - left;
@@ -26,12 +26,19 @@ export default function DrawingCanvas() {
   }
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
+    const resize = () => {
+      const canvas = canvasRef.current;
+      canvas.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
 
-    const { width, height } = container.getBoundingClientRect();
-    canvas.width = width;
-    canvas.height = height;
+      const container = containerRef.current;
+
+      const { width, height } = container.getBoundingClientRect();
+      canvas.width = width;
+      canvas.height = height;
+    };
+    window.addEventListener("resize", resize);
+    resize();
+    return () => window.removeEventListener("resize", resize);
   }, []);
 
   return (
@@ -48,11 +55,11 @@ export default function DrawingCanvas() {
         className="border-secondary h-full w-full rounded-lg border-2 border-solid"
         onPointerDown={(e) => {
           isPressing.current = true;
-          draw(e.clientX, e.clientY);
+          handleDraw(e.clientX, e.clientY);
         }}
         onPointerMove={(e) => {
           if (isPressing.current) {
-            draw(e.clientX, e.clientY);
+            handleDraw(e.clientX, e.clientY);
           }
         }}
         onPointerUp={() => {
