@@ -1,7 +1,7 @@
-import argparse
-import os
 import random
 from pathlib import Path
+from typing import Any
+import time
 
 import numpy as np
 import keras
@@ -10,7 +10,10 @@ from keras import layers
 NUM_CLASSES = 10
 OPTIMIZER = "adam"
 LOSS = "categorical_crossentropy"
-VERSION = 1
+VERSION = 4
+BATCH_SIZE = 128
+TARGET_ACCURACY = 0.996
+MAX_EPOCHS = 30
 
 
 def set_seed(seed: int = 42):
@@ -34,18 +37,21 @@ def load_mnist():
 
 
 def build_model(input_shape=(28, 28, 1), num_classes: int = NUM_CLASSES):
+    print(f"Building model {VERSION}")
+
     model = keras.Sequential(
         [
             keras.Input(shape=input_shape),
-            layers.Conv2D(32, 3, activation="relu"),
+            layers.Conv2D(16, 3, activation="relu", padding="same"),
             layers.MaxPool2D(),
-            layers.Conv2D(64, 3, activation="relu"),
+            layers.Conv2D(32, 3, activation="relu", padding="same"),
             layers.MaxPool2D(),
             layers.Flatten(),
             layers.Dropout(0.5),
-            layers.Dense(num_classes, activation="softmax", name="output"),
+            layers.Dense(128, activation="relu"),
+            layers.Dense(num_classes, activation="softmax"),
         ],
-        name=f"mnist_cnn_light {VERSION}",
+        name=f"mnist_cnn_light_{VERSION}",
     )
 
     model.summary()
@@ -55,33 +61,24 @@ def build_model(input_shape=(28, 28, 1), num_classes: int = NUM_CLASSES):
         loss=LOSS,
         metrics=["accuracy"],
     )
+
     return model
 
 
+class CustomCallback(keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs: Any = None):
+        accuracy = logs["accuracy"]
+
+        if accuracy > TARGET_ACCURACY:
+            self.model.stop_training = True
+
+
 def main():
-    parser = argparse.ArgumentParser(
-        description="Train a light CNN on MNIST and export the model."
-    )
-    parser.add_argument("--epochs", type=int, default=30)
-    parser.add_argument("--batch-size", type=int, default=128)
-    parser.add_argument("--acc-target", type=float, default=0.995)
-    parser.add_argument("--out-dir", type=str, default="./artifacts")
-    parser.add_argument(
-        "--no-gpu",
-        action="store_true",
-        help="Disable GPU (useful for reproducibility testing).",
-        default=False,
-    )
-    args = parser.parse_args()
-
-    if args.no_gpu:
-        os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-
     set_seed(42)
     (x_train, y_train), (x_test, y_test) = load_mnist()
     model = build_model()
 
-    out_dir = Path(args.out_dir)
+    out_dir = Path("./artifacts")
     out_dir.mkdir(parents=True, exist_ok=True)
 
     print(model.summary())
@@ -89,10 +86,10 @@ def main():
     model.fit(
         x_train,
         y_train,
-        epochs=args.epochs,
-        batch_size=args.batch_size,
-        verbose="2",
-        validation_split=0.1,
+        epochs=MAX_EPOCHS,
+        batch_size=BATCH_SIZE,
+        shuffle=True,
+        callbacks=[CustomCallback()],
     )
 
     # Optional evaluation on test set (not required, but informative).
@@ -100,19 +97,31 @@ def main():
     print(f"Test accuracy: {test_acc:.4f}")
     print(f"Test loss: {test_loss:.4f}")
 
-    keras_path = out_dir / "mnist_cnn.keras"
+    keras_path = out_dir / f"mnist_cnn_{VERSION}.keras"
     model.save(keras_path)
     print(f"Saved Keras model to: {keras_path}")
+
+    def func(x):
+        start = time.time()
+        model.predict(x)
+        end = time.time()
+        elapsed = end - start
+        return elapsed
+
+    elapsedTimes = [func(x) for x in x_test]
+    average = np.mean(elapsedTimes)
 
     # Save a small metadata file (useful later).
     meta_path = out_dir / "metadata.txt"
     with open(meta_path, "a") as f:
-        f.write(f"model: mnist_cnn_light {VERSION}\n")
+        f.write(f"model: {model.name}\n")
+        f.write(f"total params: {model.count_params()}\n")
+        f.write(f"average inference time: {average:.6f}\n")
         f.write(f"test_accuracy: {test_acc:.6f}\n")
         f.write(f"test_loss: {test_loss:.6f}\n")
         f.write(f"optimizer: {OPTIMIZER}\n")
-        f.write(f"loss: {LOSS}\n")
-        f.write("=================================")
+        f.write(f"loss function: {LOSS}\n")
+        f.write("=================================\n")
     print(f"Wrote metadata to: {meta_path}")
 
 

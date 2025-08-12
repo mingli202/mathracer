@@ -1,0 +1,21 @@
+model: mnist_cnn_1
+total params: 7434
+test_accuracy: 0.989800
+test_loss: 0.042210
+optimizer: adam
+loss: categorical_crossentropy
+=================================
+model: mnist_cnn_2
+total params: 424386
+test_accuracy: 0.993000
+test_loss: 0.024913
+optimizer: adam
+loss: categorical_crossentropy
+=================================
+model: mnist_cnn_light_3
+total params: 52530
+test_accuracy: 0.993000
+test_loss: 0.022818
+optimizer: adam
+loss: categorical_crossentropy
+=================================
