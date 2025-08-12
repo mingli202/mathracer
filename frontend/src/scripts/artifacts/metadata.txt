@@ -12,7 +12,7 @@ test_loss: 0.024913
 optimizer: adam
 loss: categorical_crossentropy
 =================================
-model: mnist_cnn_light_3
+model: mnist_cnn_3
 total params: 52530
 test_accuracy: 0.993000
 test_loss: 0.022818
@@ -23,13 +23,6 @@ model: mnist_cnn_geeks_for_geeks
 total params: 2325576
 test_accuracy: 0.990000
 test_loss: 0.033226
-optimizer: adam
-loss function: categorical_crossentropy
-=================================
-model: mnist_cnn_geeks_for_geeks
-total params: 2325576
-test_accuracy: 0.986800
-test_loss: 0.040308
 optimizer: adam
 loss function: categorical_crossentropy
 =================================

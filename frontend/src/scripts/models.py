@@ -86,3 +86,25 @@ class MyModel:
         )
 
         return model
+
+    def geeks_for_geeks(self):
+        arch = [
+            keras.Input(shape=input_shape),
+            layers.Conv2D(32, 3, activation="relu"),
+            layers.Conv2D(64, 3, activation="relu"),
+            layers.MaxPool2D(3),
+            layers.Dropout(0.5),
+            layers.Flatten(),
+            layers.Dense(250, activation="sigmoid"),
+            layers.Dense(num_classes, activation="softmax"),
+        ]
+
+        model = keras.Sequential(arch, name="geeks_for_geeks")
+
+        model.compile(
+            optimizer=keras.optimizers.Adadelta(),
+            loss=keras.losses.CategoricalCrossentropy(),
+            metrics=["accuracy"],
+        )
+
+        return model

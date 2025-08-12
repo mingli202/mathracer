@@ -51,7 +51,7 @@ def main():
 
     myModels = MyModel()
 
-    model = myModels.leNet()
+    model = myModels.geeks_for_geeks()
 
     out_dir = Path("./artifacts")
     out_dir.mkdir(parents=True, exist_ok=True)
