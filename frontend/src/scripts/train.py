@@ -4,16 +4,12 @@ from typing import Any
 
 import numpy as np
 import keras
-from keras import layers
+from models import MyModel
 
 NUM_CLASSES = 10
-OPTIMIZER = "adam"
-LOSS = "categorical_crossentropy"
-VERSION = 4
 BATCH_SIZE = 128
 TARGET_ACCURACY = 0.998
-MAX_EPOCHS = 40
-NAME = "mnist_cnn_geeks_for_geeks"
+MAX_EPOCHS = 50
 
 
 def set_seed(seed: int = 42):
@@ -36,42 +32,9 @@ def load_mnist():
     return (x_train, y_train), (x_test, y_test)
 
 
-def build_model(input_shape=(28, 28, 1), num_classes: int = NUM_CLASSES):
-    print(f"Building model {VERSION}")
-
-    model = keras.Sequential(
-        [
-            keras.Input(shape=input_shape),
-            layers.Conv2D(32, 3, activation="relu"),
-            layers.Conv2D(64, 3, activation="relu"),
-            layers.MaxPool2D(),
-            layers.Dropout(0.5),
-            layers.Flatten(),
-            layers.Dense(250, activation="relu"),
-            layers.Dense(num_classes, activation="softmax"),
-        ],
-        name=NAME,
-    )
-
-    model.summary()
-
-    model.compile(
-        optimizer=OPTIMIZER,
-        loss=LOSS,
-        metrics=["accuracy"],
-    )
-
-    return model
-
-
 class CustomCallback(keras.callbacks.Callback):
-    def __init__(self, x_train, y_train):
-        self.x_train = x_train
-        self.y_train = y_train
-        super().__init__()
-
     def on_epoch_end(self, epoch, logs: Any = None):
-        _, test_accuracy = self.model.evaluate(self.x_train, self.y_train)
+        test_accuracy = logs["val_accuracy"]
         train_accuracy = logs["accuracy"]
 
         if test_accuracy > TARGET_ACCURACY and train_accuracy > TARGET_ACCURACY:
@@ -81,7 +44,10 @@ class CustomCallback(keras.callbacks.Callback):
 def main():
     set_seed(42)
     (x_train, y_train), (x_test, y_test) = load_mnist()
-    model = build_model()
+
+    myModels = MyModel()
+
+    model = myModels.leNet()
 
     out_dir = Path("./artifacts")
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -94,7 +60,8 @@ def main():
         epochs=MAX_EPOCHS,
         batch_size=BATCH_SIZE,
         shuffle=True,
-        callbacks=[CustomCallback(x_train, y_train)],
+        callbacks=[CustomCallback()],
+        validation_data=(x_test, y_test),
     )
 
     # Optional evaluation on test set (not required, but informative).
@@ -113,8 +80,8 @@ def main():
         f.write(f"total params: {model.count_params()}\n")
         f.write(f"test_accuracy: {test_acc:.6f}\n")
         f.write(f"test_loss: {test_loss:.6f}\n")
-        f.write(f"optimizer: {OPTIMIZER}\n")
-        f.write(f"loss function: {LOSS}\n")
+        f.write(f"optimizer: {model.optimizer.name}\n")
+        f.write(f"loss function: {model.loss.name}\n")
         f.write("=================================\n")
     print(f"Wrote metadata to: {meta_path}")
 
