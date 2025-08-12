@@ -19,3 +19,17 @@ test_loss: 0.022818
 optimizer: adam
 loss: categorical_crossentropy
 =================================
+model: mnist_cnn_geeks_for_geeks
+total params: 2325576
+test_accuracy: 0.990000
+test_loss: 0.033226
+optimizer: adam
+loss function: categorical_crossentropy
+=================================
+model: mnist_cnn_geeks_for_geeks
+total params: 2325576
+test_accuracy: 0.986800
+test_loss: 0.040308
+optimizer: adam
+loss function: categorical_crossentropy
+=================================

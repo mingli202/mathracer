@@ -1,7 +1,6 @@
 import random
 from pathlib import Path
 from typing import Any
-import time
 
 import numpy as np
 import keras
@@ -12,8 +11,9 @@ OPTIMIZER = "adam"
 LOSS = "categorical_crossentropy"
 VERSION = 4
 BATCH_SIZE = 128
-TARGET_ACCURACY = 0.996
-MAX_EPOCHS = 30
+TARGET_ACCURACY = 0.998
+MAX_EPOCHS = 40
+NAME = "mnist_cnn_geeks_for_geeks"
 
 
 def set_seed(seed: int = 42):
@@ -42,16 +42,15 @@ def build_model(input_shape=(28, 28, 1), num_classes: int = NUM_CLASSES):
     model = keras.Sequential(
         [
             keras.Input(shape=input_shape),
-            layers.Conv2D(16, 3, activation="relu", padding="same"),
+            layers.Conv2D(32, 3, activation="relu"),
+            layers.Conv2D(64, 3, activation="relu"),
             layers.MaxPool2D(),
-            layers.Conv2D(32, 3, activation="relu", padding="same"),
-            layers.MaxPool2D(),
-            layers.Flatten(),
             layers.Dropout(0.5),
-            layers.Dense(128, activation="relu"),
+            layers.Flatten(),
+            layers.Dense(250, activation="relu"),
             layers.Dense(num_classes, activation="softmax"),
         ],
-        name=f"mnist_cnn_light_{VERSION}",
+        name=NAME,
     )
 
     model.summary()
@@ -66,10 +65,16 @@ def build_model(input_shape=(28, 28, 1), num_classes: int = NUM_CLASSES):
 
 
 class CustomCallback(keras.callbacks.Callback):
-    def on_epoch_end(self, epoch, logs: Any = None):
-        accuracy = logs["accuracy"]
+    def __init__(self, x_train, y_train):
+        self.x_train = x_train
+        self.y_train = y_train
+        super().__init__()
 
-        if accuracy > TARGET_ACCURACY:
+    def on_epoch_end(self, epoch, logs: Any = None):
+        _, test_accuracy = self.model.evaluate(self.x_train, self.y_train)
+        train_accuracy = logs["accuracy"]
+
+        if test_accuracy > TARGET_ACCURACY and train_accuracy > TARGET_ACCURACY:
             self.model.stop_training = True
 
 
@@ -89,7 +94,7 @@ def main():
         epochs=MAX_EPOCHS,
         batch_size=BATCH_SIZE,
         shuffle=True,
-        callbacks=[CustomCallback()],
+        callbacks=[CustomCallback(x_train, y_train)],
     )
 
     # Optional evaluation on test set (not required, but informative).
@@ -97,26 +102,15 @@ def main():
     print(f"Test accuracy: {test_acc:.4f}")
     print(f"Test loss: {test_loss:.4f}")
 
-    keras_path = out_dir / f"mnist_cnn_{VERSION}.keras"
+    keras_path = out_dir / f"{model.name}.keras"
     model.save(keras_path)
     print(f"Saved Keras model to: {keras_path}")
-
-    def func(x):
-        start = time.time()
-        model.predict(x)
-        end = time.time()
-        elapsed = end - start
-        return elapsed
-
-    elapsedTimes = [func(x) for x in x_test]
-    average = np.mean(elapsedTimes)
 
     # Save a small metadata file (useful later).
     meta_path = out_dir / "metadata.txt"
     with open(meta_path, "a") as f:
         f.write(f"model: {model.name}\n")
         f.write(f"total params: {model.count_params()}\n")
-        f.write(f"average inference time: {average:.6f}\n")
         f.write(f"test_accuracy: {test_acc:.6f}\n")
         f.write(f"test_loss: {test_loss:.6f}\n")
         f.write(f"optimizer: {OPTIMIZER}\n")
