@@ -66,6 +66,7 @@ class MyModel:
     def leNet(self):
         arch = [
             keras.Input(shape=input_shape),
+            layers.ZeroPadding2D(padding=2),
             layers.Conv2D(6, 5, 1, activation=keras.activations.tanh),
             layers.AvgPool2D(2, 2),
             layers.Conv2D(16, 5, 1, activation=keras.activations.tanh),

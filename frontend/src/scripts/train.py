@@ -8,7 +8,8 @@ from models import MyModel
 
 NUM_CLASSES = 10
 BATCH_SIZE = 128
-TARGET_ACCURACY = 0.998
+TRAIN_TARGET_ACCURACY = 0.998
+TEST_TARGET_ACCURACY = 0.995
 MAX_EPOCHS = 50
 
 
@@ -37,7 +38,10 @@ class CustomCallback(keras.callbacks.Callback):
         test_accuracy = logs["val_accuracy"]
         train_accuracy = logs["accuracy"]
 
-        if test_accuracy > TARGET_ACCURACY and train_accuracy > TARGET_ACCURACY:
+        if (
+            test_accuracy > TEST_TARGET_ACCURACY
+            and train_accuracy > TRAIN_TARGET_ACCURACY
+        ):
             self.model.stop_training = True
 
 
@@ -52,7 +56,8 @@ def main():
     out_dir = Path("./artifacts")
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    print(model.summary())
+    model.summary()
+    # exit()
 
     model.fit(
         x_train,

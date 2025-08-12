@@ -54,3 +54,10 @@ test_loss: 0.045588
 optimizer: adam
 loss function: categorical_crossentropy
 =================================
+model: LeNet_1
+total params: 257546
+test_accuracy: 0.990100
+test_loss: 0.038514
+optimizer: adam
+loss function: categorical_crossentropy
+=================================
