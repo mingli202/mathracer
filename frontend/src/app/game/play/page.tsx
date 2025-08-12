@@ -16,7 +16,7 @@ import {
   useRef,
   useState,
 } from "react";
-import DrawingCanvas from "./DrawingCanvas";
+import DigitPredictor from "./DigitPredictor";
 
 export default function PlayPage() {
   const { gameState, dispatch } = use(GameStateContext);
@@ -219,7 +219,7 @@ export default function PlayPage() {
                 </Button>
               </form>
             ) : (
-              <DrawingCanvas />
+              <DigitPredictor />
             )}
           </div>
           <Button

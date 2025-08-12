@@ -1,16 +1,19 @@
 "use client";
 
+import { Point } from "@/types";
 import { useEffect, useRef } from "react";
 
 const RECT_SIZE = 4;
 
-type Point = { x: number; y: number };
+type Props = {
+  handleNewPoint: (point: Point) => void;
+};
 
-export default function DrawingCanvas() {
+export default function DrawingCanvas({ handleNewPoint }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null!);
   const containerRef = useRef<HTMLDivElement>(null!);
   const isPressing = useRef(false);
-  const previousPoint = useRef<Point | null>(null);
+  const previousPoint = useRef<Point | null>(null!);
 
   function handleDraw(clientX: number, clientY: number) {
     const canvas = canvasRef.current;
@@ -35,6 +38,7 @@ export default function DrawingCanvas() {
     }
 
     previousPoint.current = { x, y };
+    handleNewPoint({ x, y });
   }
 
   useEffect(() => {
