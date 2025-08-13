@@ -1,0 +1,50 @@
+{
+    "leNet": {
+        "model": "leNet",
+        "total_params": 257546,
+        "test_accuracy": 0.9902999997138977,
+        "test_loss": 0.03527837619185448,
+        "optimizer": "adam",
+        "loss_function": "categorical_crossentropy"
+    },
+    "mini": {
+        "model": "mini",
+        "total_params": 1314,
+        "test_accuracy": 0.9697999954223633,
+        "test_loss": 0.09932548552751541,
+        "optimizer": "adam",
+        "loss_function": "categorical_crossentropy"
+    },
+    "tsjs_tutorial": {
+        "model": "tsjs_tutorial",
+        "total_params": 5633,
+        "test_accuracy": 0.989799976348877,
+        "test_loss": 0.058630023151636124,
+        "optimizer": "adam",
+        "loss_function": "categorical_crossentropy"
+    },
+    "mini_mobilenet_2": {
+        "model": "mini_mobilenet_2",
+        "total_params": 14562,
+        "test_accuracy": 0.9810000061988831,
+        "test_loss": 0.07585210353136063,
+        "optimizer": "adam",
+        "loss_function": "categorical_crossentropy"
+    },
+    "keras_tutorial": {
+        "model": "keras_tutorial",
+        "total_params": 34826,
+        "test_accuracy": 0.9937000274658203,
+        "test_loss": 0.026167064905166626,
+        "optimizer": "adam",
+        "loss_function": "categorical_crossentropy"
+    },
+    "chat_gpt5": {
+        "model": "chat_gpt5",
+        "total_params": 468202,
+        "test_accuracy": 0.995199978351593,
+        "test_loss": 0.02154187113046646,
+        "optimizer": "adam",
+        "loss_function": "categorical_crossentropy"
+    }
+}
