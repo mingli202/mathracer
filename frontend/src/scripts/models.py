@@ -4,8 +4,6 @@ from keras import layers
 
 input_shape = (28, 28, 1)
 num_classes = 10
-loss = "categorical_crossentropy"
-optimizer = keras.optimizers.Adam(learning_rate=1e-3)
 
 
 class MyModel:
@@ -31,7 +29,7 @@ class MyModel:
         model = keras.Sequential(arch, name="chat_gpt5")
 
         model.compile(
-            optimizer=keras.optimizers.Adam(1e-3),
+            optimizer="adam",
             loss=keras.losses.CategoricalCrossentropy(),
             metrics=["accuracy"],
         )
@@ -56,7 +54,7 @@ class MyModel:
         model = keras.Sequential(arch, name="tsjs_tutorial")
 
         model.compile(
-            optimizer=keras.optimizers.Adam(),
+            optimizer=keras.optimizers.Adam().name,
             loss=keras.losses.CategoricalCrossentropy(),
             metrics=["accuracy"],
         )
@@ -80,7 +78,7 @@ class MyModel:
         model = keras.Sequential(arch, name="leNet")
 
         model.compile(
-            optimizer=keras.optimizers.Adam(),
+            optimizer="adam",
             loss=keras.losses.CategoricalCrossentropy(),
             metrics=["accuracy"],
         )
@@ -102,7 +100,7 @@ class MyModel:
         model = keras.Sequential(arch, name="geeks_for_geeks")
 
         model.compile(
-            optimizer=keras.optimizers.Adadelta(),
+            optimizer="adadelta",
             loss=keras.losses.CategoricalCrossentropy(),
             metrics=["accuracy"],
         )
@@ -124,7 +122,7 @@ class MyModel:
         model = keras.Sequential(arch, name="mini")
 
         model.compile(
-            optimizer=keras.optimizers.Adam(1e-3),
+            optimizer="adam",
             loss=keras.losses.CategoricalCrossentropy(),
             metrics=["accuracy"],
         )
@@ -159,9 +157,30 @@ class MyModel:
         model = keras.Sequential(arch, name="mini_mobilenet_2")
 
         model.compile(
-            optimizer=keras.optimizers.Adam(1e-3),
+            optimizer="adam",
             loss=keras.losses.CategoricalCrossentropy(),
             metrics=["accuracy"],
+        )
+
+        return model
+
+    def keras_tutorial(self):
+        model = keras.Sequential(
+            [
+                keras.Input(shape=input_shape),
+                layers.Conv2D(32, kernel_size=(3, 3), activation="relu"),
+                layers.MaxPooling2D(pool_size=(2, 2)),
+                layers.Conv2D(64, kernel_size=(3, 3), activation="relu"),
+                layers.MaxPooling2D(pool_size=(2, 2)),
+                layers.Flatten(),
+                layers.Dropout(0.5),
+                layers.Dense(num_classes, activation="softmax"),
+            ],
+            name="keras_tutorial",
+        )
+
+        model.compile(
+            loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"]
         )
 
         return model
