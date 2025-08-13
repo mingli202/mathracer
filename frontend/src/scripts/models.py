@@ -71,13 +71,13 @@ class MyModel:
             layers.AvgPool2D(2, 2),
             layers.Conv2D(16, 5, 1, activation=keras.activations.tanh),
             layers.AvgPool2D(2, 2),
-            layers.Dense(120, activation=keras.activations.tanh),
+            layers.Conv2D(120, 5, 1, activation=keras.activations.tanh),
             layers.Flatten(),
             layers.Dense(84, activation=keras.activations.tanh),
             layers.Dense(10, activation=keras.activations.softmax),
         ]
 
-        model = keras.Sequential(arch, name="LeNet_1")
+        model = keras.Sequential(arch, name="LeNet_2")
 
         model.compile(
             optimizer=keras.optimizers.Adam(),
@@ -103,6 +103,28 @@ class MyModel:
 
         model.compile(
             optimizer=keras.optimizers.Adadelta(),
+            loss=keras.losses.CategoricalCrossentropy(),
+            metrics=["accuracy"],
+        )
+
+        return model
+
+    def mini(self):
+        arch = [
+            keras.layers.Input(shape=input_shape),
+            keras.layers.Conv2D(8, 3, padding="same", activation="relu"),
+            keras.layers.MaxPool2D(2),
+            keras.layers.SeparableConv2D(16, 3, padding="same", activation="relu"),
+            keras.layers.MaxPool2D(2),
+            keras.layers.SeparableConv2D(32, 3, padding="same", activation="relu"),
+            keras.layers.GlobalAveragePooling2D(),
+            keras.layers.Dense(num_classes, activation="softmax"),
+        ]
+
+        model = keras.Sequential(arch, name="mini")
+
+        model.compile(
+            optimizer=keras.optimizers.Adam(1e-3),
             loss=keras.losses.CategoricalCrossentropy(),
             metrics=["accuracy"],
         )

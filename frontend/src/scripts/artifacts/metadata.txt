@@ -61,3 +61,10 @@ test_loss: 0.051632
 optimizer: adam
 loss function: categorical_crossentropy
 =================================
+model: mini
+total params: 1314
+test_accuracy: 0.971700
+test_loss: 0.083349
+optimizer: adam
+loss function: categorical_crossentropy
+=================================

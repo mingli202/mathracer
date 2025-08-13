@@ -7,10 +7,10 @@ import keras
 from models import MyModel
 
 NUM_CLASSES = 10
-BATCH_SIZE = 128
+BATCH_SIZE = 68
 TRAIN_TARGET_ACCURACY = 0.998
 TEST_TARGET_ACCURACY = 0.995
-MAX_EPOCHS = 50
+MAX_EPOCHS = 60
 
 
 def set_seed(seed: int = 42):
@@ -51,7 +51,8 @@ def main():
 
     myModels = MyModel()
 
-    model = myModels.geeks_for_geeks()
+    # choose model
+    model = myModels.mini()
 
     out_dir = Path("./artifacts")
     out_dir.mkdir(parents=True, exist_ok=True)
