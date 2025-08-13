@@ -1,3 +1,5 @@
+all: batch1 batch2
+
 batch1:
 	python train.py --model leNet
 	python train.py --model tsjs_tutorial

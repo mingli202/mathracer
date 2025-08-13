@@ -154,7 +154,7 @@ class MyModel:
             layers.Dense(num_classes, activation="softmax"),
         ]
 
-        model = keras.Sequential(arch, name="mini_mobilenet_2")
+        model = keras.Sequential(arch, name="mini_mobilenet")
 
         model.compile(
             optimizer="adam",

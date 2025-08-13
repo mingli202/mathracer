@@ -107,7 +107,7 @@ def main():
         callbacks=[
             CustomCallback(train_target_accuracy, test_target_accuracy),
             keras.callbacks.EarlyStopping(
-                patience=10, monitor="loss", restore_best_weights=True
+                patience=5, monitor="loss", restore_best_weights=True
             ),
         ],
         validation_data=(x_test, y_test),
@@ -130,8 +130,6 @@ def main():
         with open(meta_path, "r") as f:
             obj = json.load(f)
 
-    print(obj)
-
     obj[model.name] = {
         "model": model.name,
         "total_params": model.count_params(),
@@ -140,8 +138,6 @@ def main():
         "optimizer": model.optimizer.name,
         "loss_function": model.loss.name,
     }
-
-    print(obj)
 
     with open(meta_path, "w") as f:
         f.write(json.dumps(obj, indent=4))
