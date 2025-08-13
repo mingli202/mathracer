@@ -37,13 +37,19 @@ def load_mnist():
 
 
 class CustomCallback(keras.callbacks.Callback):
+    def __init__(self, train_target_accuracy, test_target_accuracy):
+        super()
+        self.train_target_accuracy = train_target_accuracy
+        self.test_target_accuracy = test_target_accuracy
+
     def on_epoch_end(self, epoch, logs: Any = None):
         test_accuracy = logs["val_accuracy"]
         train_accuracy = logs["accuracy"]
 
         if (
-            test_accuracy > TEST_TARGET_ACCURACY
-            and train_accuracy > TRAIN_TARGET_ACCURACY
+            test_accuracy > self.test_target_accuracy
+            and train_accuracy > self.train_target_accuracy
+            and self.model is not None
         ):
             self.model.stop_training = True
 
@@ -51,37 +57,57 @@ class CustomCallback(keras.callbacks.Callback):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", type=str, default="mini_mobilenet")
+    parser.add_argument("--batch-size", type=int, default=BATCH_SIZE)
+    parser.add_argument(
+        "--train-target-accuracy", type=float, default=TRAIN_TARGET_ACCURACY
+    )
+    parser.add_argument(
+        "--test-target-accuracy", type=float, default=TEST_TARGET_ACCURACY
+    )
+    parser.add_argument("--max-epochs", type=int, default=MAX_EPOCHS)
     args = parser.parse_args()
+
+    batch_size = args.batch_size
+    train_target_accuracy = args.train_target_accuracy
+    test_target_accuracy = args.test_target_accuracy
+    max_epochs = args.max_epochs
 
     models = MyModel()
 
-    modelsDict = {
+    models_dict = {
         "geeks_for_geeks": models.geeks_for_geeks,
-        "gpt_5_1": models.chat_gpt5,
+        "chat_gpt5": models.chat_gpt5,
         "tsjs_tutorial": models.tsjs_tutorial,
         "leNet": models.leNet,
         "mini": models.mini,
         "mini_mobilenet": models.mini_mobilenet,
+        "keras_tutorial": models.keras_tutorial,
     }
 
     set_seed(42)
     (x_train, y_train), (x_test, y_test) = load_mnist()
 
     # choose model
-    model = modelsDict[args.model]()
+    model = models_dict[args.model]()
 
     out_dir = Path("./artifacts")
     out_dir.mkdir(parents=True, exist_ok=True)
+
+    graph_dir = out_dir / "graph"
+    graph_dir.mkdir(parents=True, exist_ok=True)
 
     model.summary()
 
     history = model.fit(
         x_train,
         y_train,
-        epochs=MAX_EPOCHS,
-        batch_size=BATCH_SIZE,
+        epochs=max_epochs,
+        batch_size=batch_size,
         shuffle=True,
-        callbacks=[CustomCallback(), keras.callbacks.EarlyStopping(patience=10)],
+        callbacks=[
+            CustomCallback(train_target_accuracy, test_target_accuracy),
+            keras.callbacks.EarlyStopping(patience=10),
+        ],
         validation_data=(x_test, y_test),
     )
 
@@ -102,6 +128,8 @@ def main():
         with open(meta_path, "r") as f:
             obj = json.load(f)
 
+    print(obj)
+
     obj[model.name] = {
         "model": model.name,
         "total_params": model.count_params(),
@@ -111,7 +139,9 @@ def main():
         "loss_function": model.loss.name,
     }
 
-    with open(meta_path, "a") as f:
+    print(obj)
+
+    with open(meta_path, "w") as f:
         f.write(json.dumps(obj, indent=4))
 
         print(f"Wrote metadata to: {meta_path}")
@@ -127,8 +157,8 @@ def main():
     plt.plot(test_losses, label="test loss")
     plt.title(f"Accuracy and Loss of {model.name}")
     plt.legend()
-    plt.show()
-    plt.savefig(out_dir / f"/graphs/{model.name}.png")
+
+    plt.savefig(graph_dir / f"{model.name}.png")
 
 
 if __name__ == "__main__":
