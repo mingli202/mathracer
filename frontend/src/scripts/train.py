@@ -106,7 +106,9 @@ def main():
         shuffle=True,
         callbacks=[
             CustomCallback(train_target_accuracy, test_target_accuracy),
-            keras.callbacks.EarlyStopping(patience=10),
+            keras.callbacks.EarlyStopping(
+                patience=10, monitor="loss", restore_best_weights=True
+            ),
         ],
         validation_data=(x_test, y_test),
     )

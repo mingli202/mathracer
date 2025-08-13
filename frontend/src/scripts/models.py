@@ -69,7 +69,7 @@ class MyModel:
             layers.AvgPool2D(2, 2),
             layers.Conv2D(16, 5, 1, activation=keras.activations.tanh),
             layers.AvgPool2D(2, 2),
-            layers.Conv2D(120, 5, 1, activation=keras.activations.tanh),
+            layers.Dense(120, activation=keras.activations.tanh),
             layers.Flatten(),
             layers.Dense(84, activation=keras.activations.tanh),
             layers.Dense(10, activation=keras.activations.softmax),
@@ -180,7 +180,9 @@ class MyModel:
         )
 
         model.compile(
-            loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"]
+            loss=keras.losses.CategoricalCrossentropy(),
+            optimizer="adam",
+            metrics=["accuracy"],
         )
 
         return model
