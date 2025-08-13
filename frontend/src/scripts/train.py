@@ -7,6 +7,7 @@ import keras
 import numpy as np
 from matplotlib import pyplot as plt
 from models import MyModel
+import json
 
 NUM_CLASSES = 10
 BATCH_SIZE = 128
@@ -94,16 +95,19 @@ def main():
     print(f"Saved Keras model to: {keras_path}")
 
     # Save a small metadata file (useful later).
-    meta_path = out_dir / "metadata.txt"
+    meta_path = out_dir / "metadata.json"
     with open(meta_path, "a") as f:
-        f.write(f"model: {model.name}\n")
-        f.write(f"total params: {model.count_params()}\n")
-        f.write(f"test_accuracy: {test_acc:.6f}\n")
-        f.write(f"test_loss: {test_loss:.6f}\n")
-        f.write(f"optimizer: {model.optimizer.name}\n")
-        f.write(f"loss function: {model.loss.name}\n")
-        f.write("=================================\n")
-    print(f"Wrote metadata to: {meta_path}")
+        obj = {
+            "model": model.name,
+            "total_params": model.count_params(),
+            "test_accuracy": test_acc,
+            "test_loss": test_loss,
+            "optimizer": model.optimizer.name,
+            "loss_function": model.loss.name,
+        }
+        f.write(json.dumps(obj, indent=4))
+
+        print(f"Wrote metadata to: {meta_path}")
 
     train_accuracies = history.history["accuracy"]
     train_losses = history.history["loss"]
