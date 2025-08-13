@@ -96,15 +96,22 @@ def main():
 
     # Save a small metadata file (useful later).
     meta_path = out_dir / "metadata.json"
+
+    obj = {}
+    if meta_path.exists():
+        with open(meta_path, "r") as f:
+            obj = json.load(f)
+
+    obj[model.name] = {
+        "model": model.name,
+        "total_params": model.count_params(),
+        "test_accuracy": test_acc,
+        "test_loss": test_loss,
+        "optimizer": model.optimizer.name,
+        "loss_function": model.loss.name,
+    }
+
     with open(meta_path, "a") as f:
-        obj = {
-            "model": model.name,
-            "total_params": model.count_params(),
-            "test_accuracy": test_acc,
-            "test_loss": test_loss,
-            "optimizer": model.optimizer.name,
-            "loss_function": model.loss.name,
-        }
         f.write(json.dumps(obj, indent=4))
 
         print(f"Wrote metadata to: {meta_path}")
