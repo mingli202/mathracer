@@ -111,17 +111,52 @@ class MyModel:
 
     def mini(self):
         arch = [
-            keras.layers.Input(shape=input_shape),
-            keras.layers.Conv2D(8, 3, padding="same", activation="relu"),
-            keras.layers.MaxPool2D(2),
-            keras.layers.SeparableConv2D(16, 3, padding="same", activation="relu"),
-            keras.layers.MaxPool2D(2),
-            keras.layers.SeparableConv2D(32, 3, padding="same", activation="relu"),
-            keras.layers.GlobalAveragePooling2D(),
-            keras.layers.Dense(num_classes, activation="softmax"),
+            layers.Input(shape=input_shape),
+            layers.Conv2D(8, 3, padding="same", activation="relu"),
+            layers.MaxPool2D(2),
+            layers.SeparableConv2D(16, 3, padding="same", activation="relu"),
+            layers.MaxPool2D(2),
+            layers.SeparableConv2D(32, 3, padding="same", activation="relu"),
+            layers.GlobalAveragePooling2D(),
+            layers.Dense(num_classes, activation="softmax"),
         ]
 
         model = keras.Sequential(arch, name="mini")
+
+        model.compile(
+            optimizer=keras.optimizers.Adam(1e-3),
+            loss=keras.losses.CategoricalCrossentropy(),
+            metrics=["accuracy"],
+        )
+
+        return model
+
+    def mini_mobilenet(self):
+        arch = [
+            layers.Input(shape=input_shape),
+            layers.ZeroPadding2D(padding=2),  # shape (32, 32, 1)
+            layers.Conv2D(8, 3, 2, padding="same"),  # output shape (16, 16, 8)
+            layers.BatchNormalization(),
+            layers.ReLU(),
+            layers.SeparableConv2D(16, 3, 2, padding="same"),  # output shape (8, 8, 16)
+            layers.BatchNormalization(),
+            layers.ReLU(),
+            layers.SeparableConv2D(32, 3, 2, padding="same"),  # output shape (4, 4, 32)
+            layers.BatchNormalization(),
+            layers.ReLU(),
+            layers.SeparableConv2D(64, 3, 2, padding="same"),  # output shape (2, 2, 64)
+            layers.BatchNormalization(),
+            layers.ReLU(),
+            layers.SeparableConv2D(
+                128, 3, 2, padding="same"
+            ),  # output shape (1, 1, 128)
+            layers.BatchNormalization(),
+            layers.ReLU(),
+            layers.GlobalAveragePooling2D(),
+            layers.Dense(num_classes, activation="softmax"),
+        ]
+
+        model = keras.Sequential(arch, name="mini_mobilenet_2")
 
         model.compile(
             optimizer=keras.optimizers.Adam(1e-3),

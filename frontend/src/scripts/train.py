@@ -5,9 +5,10 @@ from typing import Any
 import numpy as np
 import keras
 from models import MyModel
+from matplotlib import pyplot as plt
 
 NUM_CLASSES = 10
-BATCH_SIZE = 68
+BATCH_SIZE = 128
 TRAIN_TARGET_ACCURACY = 0.998
 TEST_TARGET_ACCURACY = 0.995
 MAX_EPOCHS = 60
@@ -52,21 +53,20 @@ def main():
     myModels = MyModel()
 
     # choose model
-    model = myModels.mini()
+    model = myModels.mini_mobilenet()
 
     out_dir = Path("./artifacts")
     out_dir.mkdir(parents=True, exist_ok=True)
 
     model.summary()
-    # exit()
 
-    model.fit(
+    history = model.fit(
         x_train,
         y_train,
         epochs=MAX_EPOCHS,
         batch_size=BATCH_SIZE,
         shuffle=True,
-        callbacks=[CustomCallback()],
+        callbacks=[CustomCallback(), keras.callbacks.EarlyStopping(patience=10)],
         validation_data=(x_test, y_test),
     )
 
@@ -90,6 +90,20 @@ def main():
         f.write(f"loss function: {model.loss.name}\n")
         f.write("=================================\n")
     print(f"Wrote metadata to: {meta_path}")
+
+    train_accuracies = history.history["accuracy"]
+    train_losses = history.history["loss"]
+    test_accuracies = history.history["val_accuracy"]
+    test_losses = history.history["val_loss"]
+
+    plt.plot(train_accuracies, label="train accuracy")
+    plt.plot(train_losses, label="train loss")
+    plt.plot(test_accuracies, label="test accuracy")
+    plt.plot(test_losses, label="test loss")
+    plt.title(f"Accuracy and Loss of {model.name}")
+    plt.legend()
+    plt.show()
+    plt.savefig(out_dir / f"/graphs/{model.name}.png")
 
 
 if __name__ == "__main__":

@@ -68,3 +68,24 @@ test_loss: 0.083349
 optimizer: adam
 loss function: categorical_crossentropy
 =================================
+model: mini_mobilenet_1
+total params: 1538
+test_accuracy: 0.958800
+test_loss: 0.130927
+optimizer: adam
+loss function: categorical_crossentropy
+=================================
+model: mini_mobilenet
+total params: 1538
+test_accuracy: 0.918700
+test_loss: 0.238112
+optimizer: adam
+loss function: categorical_crossentropy
+=================================
+model: mini_mobilenet_2
+total params: 14562
+test_accuracy: 0.984200
+test_loss: 0.064354
+optimizer: adam
+loss function: categorical_crossentropy
+=================================
