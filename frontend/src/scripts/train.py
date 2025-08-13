@@ -75,7 +75,6 @@ def main():
     models = MyModel()
 
     models_dict = {
-        "geeks_for_geeks": models.geeks_for_geeks,
         "chat_gpt5": models.chat_gpt5,
         "tsjs_tutorial": models.tsjs_tutorial,
         "leNet": models.leNet,
