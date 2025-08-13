@@ -9,7 +9,7 @@ optimizer = keras.optimizers.Adam(learning_rate=1e-3)
 
 
 class MyModel:
-    def chat_gpt5_arch(self):
+    def chat_gpt5(self):
         arch = [
             keras.Input(shape=input_shape),
             layers.Conv2D(32, 3, activation="relu", padding="same"),
@@ -38,7 +38,7 @@ class MyModel:
 
         return model
 
-    def tensorflow_tutorial(self):
+    def tsjs_tutorial(self):
         arch = [
             keras.Input(shape=input_shape),
             layers.Conv2D(
@@ -77,7 +77,7 @@ class MyModel:
             layers.Dense(10, activation=keras.activations.softmax),
         ]
 
-        model = keras.Sequential(arch, name="LeNet_2")
+        model = keras.Sequential(arch, name="leNet")
 
         model.compile(
             optimizer=keras.optimizers.Adam(),

@@ -1,11 +1,12 @@
+import argparse
 import random
 from pathlib import Path
 from typing import Any
 
-import numpy as np
 import keras
-from models import MyModel
+import numpy as np
 from matplotlib import pyplot as plt
+from models import MyModel
 
 NUM_CLASSES = 10
 BATCH_SIZE = 128
@@ -47,13 +48,26 @@ class CustomCallback(keras.callbacks.Callback):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model", type=str, default="mini_mobilenet")
+    args = parser.parse_args()
+
+    models = MyModel()
+
+    modelsDict = {
+        "geeks_for_geeks": models.geeks_for_geeks,
+        "gpt_5_1": models.chat_gpt5,
+        "tsjs_tutorial": models.tsjs_tutorial,
+        "leNet": models.leNet,
+        "mini": models.mini,
+        "mini_mobilenet": models.mini_mobilenet,
+    }
+
     set_seed(42)
     (x_train, y_train), (x_test, y_test) = load_mnist()
 
-    myModels = MyModel()
-
     # choose model
-    model = myModels.mini_mobilenet()
+    model = modelsDict[args.model]()
 
     out_dir = Path("./artifacts")
     out_dir.mkdir(parents=True, exist_ok=True)
