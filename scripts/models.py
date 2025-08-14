@@ -109,9 +109,8 @@ class MyModel:
 
     def mini(self):
         arch = [
-            layers.Conv2D(
-                8, 3, padding="same", activation="relu", input_shape=input_shape
-            ),
+            layers.Input(shape=input_shape, name="input"),
+            layers.Conv2D(8, 3, padding="same", activation="relu"),
             layers.MaxPool2D(2),
             layers.SeparableConv2D(16, 3, padding="same", activation="relu"),
             layers.MaxPool2D(2),

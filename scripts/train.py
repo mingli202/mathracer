@@ -112,17 +112,18 @@ def main():
         ],
         validation_data=(x_test, y_test),
     )
+    model.build(input_shape=(None, 28, 28, 1))
 
     # Optional evaluation on test set (not required, but informative).
     test_loss, test_acc = model.evaluate(x_test, y_test, verbose="0")
     print(f"Test accuracy: {test_acc:.4f}")
     print(f"Test loss: {test_loss:.4f}")
 
-    keras_path = out_dir / f"{model.name}.h5"
+    keras_path = out_dir / f"{model.name}.keras"
     model.save(keras_path)
     print(f"Saved Keras model to: {keras_path}")
 
-    out_path = Path(f"../frontend/src/public/models/{model.name}")
+    out_path = Path(f"../frontend/public/models/{model.name}")
     out_path.mkdir(parents=True, exist_ok=True)
     tfjs.converters.save_keras_model(model, out_path)
 
