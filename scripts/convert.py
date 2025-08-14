@@ -8,7 +8,7 @@ import argparse
 def convert(model_name: str):
     print(f"Converting {model_name}")
 
-    path = Path(f"./artifacts/{model_name}.keras")
+    path = Path(f"./artifacts/{model_name}.h5")
     model = keras.models.load_model(path)
 
     out_path = Path(f"../frontend/src/public/models/{model_name}")
