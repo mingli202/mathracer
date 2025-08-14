@@ -1,5 +1,5 @@
 import Play from "./Play";
 
-export async function PlayPage() {
+export default async function PlayPage() {
   return <Play />;
 }

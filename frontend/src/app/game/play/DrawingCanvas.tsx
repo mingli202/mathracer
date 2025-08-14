@@ -6,14 +6,14 @@ import { useEffect, useRef } from "react";
 const RECT_SIZE = 4;
 
 type Props = {
-  handleNewPoint: (point: Point) => void;
+  handleNewStoke: (points: Point[]) => void;
 };
 
-export default function DrawingCanvas({ handleNewPoint }: Props) {
+export default function DrawingCanvas({ handleNewStoke }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null!);
   const containerRef = useRef<HTMLDivElement>(null!);
   const isPressing = useRef(false);
-  const previousPoint = useRef<Point | null>(null!);
+  const stroke = useRef<Point[]>([]);
 
   function handleDraw(clientX: number, clientY: number) {
     const canvas = canvasRef.current;
@@ -30,15 +30,16 @@ export default function DrawingCanvas({ handleNewPoint }: Props) {
     ctx.fillStyle = "#000";
     ctx.fillRect(x - RECT_SIZE / 2, y - RECT_SIZE / 2, RECT_SIZE, RECT_SIZE);
 
-    if (previousPoint.current) {
+    if (stroke.current.length > 0) {
+      const previousPoint = stroke.current[stroke.current.length - 1];
+
       ctx.beginPath();
-      ctx.moveTo(previousPoint.current.x, previousPoint.current.y);
+      ctx.moveTo(previousPoint.x, previousPoint.y);
       ctx.lineTo(x, y);
       ctx.stroke();
     }
 
-    previousPoint.current = { x, y };
-    handleNewPoint({ x, y });
+    stroke.current.push({ x, y });
   }
 
   useEffect(() => {
@@ -53,7 +54,7 @@ export default function DrawingCanvas({ handleNewPoint }: Props) {
       const { width, height } = container.getBoundingClientRect();
       canvas.width = width;
       canvas.height = height;
-      previousPoint.current = null;
+      stroke.current = [];
     };
     window.addEventListener("resize", resize);
     resize();
@@ -82,8 +83,9 @@ export default function DrawingCanvas({ handleNewPoint }: Props) {
           }
         }}
         onPointerUp={() => {
+          handleNewStoke(stroke.current);
           isPressing.current = false;
-          previousPoint.current = null;
+          stroke.current = [];
         }}
       >
         Oops, your browser does not support HTML5 canvas:
@@ -98,7 +100,7 @@ export default function DrawingCanvas({ handleNewPoint }: Props) {
             canvasRef.current.width,
             canvasRef.current.height,
           );
-          previousPoint.current = null;
+          stroke.current = [];
         }}
       >
         Clear
