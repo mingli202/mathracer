@@ -11,7 +11,7 @@ def convert(model_name: str):
     path = Path(f"./artifacts/{model_name}.keras")
     model = keras.models.load_model(path)
 
-    out_path = Path(f"../public/models/{model_name}")
+    out_path = Path(f"../frontend/src/public/models/{model_name}")
     out_path.mkdir(parents=True, exist_ok=True)
     tfjs.converters.save_keras_model(model, out_path)
 
