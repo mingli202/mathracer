@@ -73,3 +73,5 @@ export const Log = z.object({
   details: z.string(),
 });
 export type Log = z.infer<typeof Log>;
+
+export type Point = { x: number; y: number };
