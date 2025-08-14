@@ -26,8 +26,8 @@
     "mini": {
         "model": "mini",
         "total_params": 1314,
-        "test_accuracy": 0.9703999757766724,
-        "test_loss": 0.09489219635725021,
+        "test_accuracy": 0.9746000170707703,
+        "test_loss": 0.08544597029685974,
         "optimizer": "adam",
         "loss_function": "categorical_crossentropy"
     },
