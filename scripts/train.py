@@ -119,13 +119,9 @@ def main():
     print(f"Test accuracy: {test_acc:.4f}")
     print(f"Test loss: {test_loss:.4f}")
 
-    keras_path = out_dir / f"{model.name}.keras"
+    keras_path = out_dir / f"{model.name}.h5"
     model.save(keras_path)
     print(f"Saved Keras model to: {keras_path}")
-
-    out_path = Path(f"../frontend/public/models/{model.name}")
-    out_path.mkdir(parents=True, exist_ok=True)
-    tfjs.converters.save_keras_model(model, out_path)
 
     # Save a small metadata file (useful later).
     meta_path = out_dir / "metadata.json"
