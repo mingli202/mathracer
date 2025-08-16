@@ -1,8 +1,6 @@
-import * as tf from "@tensorflow/tfjs-node";
 import { MnistData } from "./data";
 import fs from "fs";
-import type { UnresolvedLogs } from "@tensorflow/tfjs-layers/dist/logs";
-import { Mini } from "./models";
+import { Mini } from "./model";
 
 async function main() {
   const data = new MnistData();
@@ -10,13 +8,7 @@ async function main() {
   const mini = new Mini(data);
 
   const [loss, accuracy] = mini.evaluate();
-
-  saveModel(
-    mini.name,
-    mini.countParams(),
-    accuracy.arraySync(),
-    loss.arraySync(),
-  );
+  mini.saveModel(accuracy, loss);
 }
 
 function saveModel(

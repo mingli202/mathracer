@@ -74,7 +74,7 @@ abstract class Model {
     return this.model.evaluate(testXs, testYs) as [tf.Scalar, tf.Scalar];
   }
 
-  saveModel(accuracy: number, loss: number) {
+  saveModel(accuracy: tf.Scalar, loss: tf.Scalar) {
     const filename = "./artifacts/metadata.json";
     const name = this.model.name;
     const totalParams = this.model.countParams();
@@ -95,8 +95,8 @@ abstract class Model {
 
     json[name] = {
       totalParams,
-      accuracy,
-      loss,
+      accuracy: accuracy.arraySync(),
+      loss: loss.arraySync(),
     };
 
     fs.writeFileSync(filename, JSON.stringify(json, null, 2));
