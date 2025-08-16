@@ -66,5 +66,3 @@ export class MnistData {
     return [dimensionSizes, i];
   }
 }
-
-const data = new MnistData();
