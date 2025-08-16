@@ -65,4 +65,38 @@ export class MnistData {
 
     return [dimensionSizes, i];
   }
+
+  public trainData(): [tf.Tensor, tf.Tensor] {
+    return tf.tidy(() => {
+      const labels = this.trainLabels.arraySync() as number[];
+
+      return [
+        tf.reshape(this.trainImages, [...this.trainImages.shape, 1]),
+        tf.tensor(
+          labels.map((y) => {
+            const arr = Array(10).fill(0);
+            arr[y] = 1;
+            return arr;
+          }),
+        ),
+      ];
+    });
+  }
+
+  public testData(): [tf.Tensor, tf.Tensor] {
+    return tf.tidy(() => {
+      const labels = this.testLabels.arraySync() as number[];
+
+      return [
+        tf.reshape(this.testImages, [...this.testImages.shape, 1]),
+        tf.tensor(
+          labels.map((y) => {
+            const arr = Array(10).fill(0);
+            arr[y] = 1;
+            return arr;
+          }),
+        ),
+      ];
+    });
+  }
 }
