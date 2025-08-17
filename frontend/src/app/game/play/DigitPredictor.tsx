@@ -11,11 +11,8 @@ type Props = {
   rightAnswer: number;
 };
 
-export default function DigitPredictor({
-  submitIfCorrect,
-  rightAnswer,
-}: Props) {
-  const testInput = process.env.NODE_ENV === "development";
+export default function DigitPredictor({ submitAnswer, rightAnswer }: Props) {
+  const testInput = false;
 
   const strokes = useRef<tf.Tensor[]>([]);
   const modelRef = useRef<tf.LayersModel | null>(null);
@@ -24,6 +21,8 @@ export default function DigitPredictor({
 
   const [lastStroke, setLastStoke] = useState<number[][]>([]);
   const [prediction, setPrediction] = useState<number | null>(null);
+
+  const canvasRef = useRef<HTMLCanvasElement>(null!);
 
   useEffect(() => {
     async function loadModel() {
@@ -36,6 +35,8 @@ export default function DigitPredictor({
       modelRef.current = await tf.loadLayersModel(
         "https://raw.githubusercontent.com/mingli202/mathracer/refs/heads/digit-recognition/artifacts/leNet/model.json",
       );
+      // warm up the model
+      modelRef.current.predict(tf.randomUniform([1, 28, 28, 1]));
     }
     loadModel();
 
@@ -61,27 +62,70 @@ export default function DigitPredictor({
     }
 
     if (testInput) {
-      const pred = model.predict(strokeTensor);
+      const pred = model.predict(strokeTensor) as tf.Tensor;
 
-      if (pred instanceof tf.Tensor) {
-        const i = tf.argMax(pred, 1).arraySync() as number[];
-        setPrediction(i[0]);
-      }
+      const i = tf.argMax(pred, 1).arraySync() as number[];
+      setPrediction(i[0]);
+    } else {
+      strokes.current.push(strokeTensor);
+      parseStrokes();
     }
-
-    strokes.current.push(strokeTensor);
-    parseStrokes();
   }
 
   /**
    * Loop through some combinations of strokes to guess what the player wrote
    * 1. Each stroke is a number
-   * 2. Pairs of consecutive strokes is a number
+   * 2. Pairs of consecutive strokes is a number.
    */
-  function parseStrokes() {}
+  async function parseStrokes() {
+    const st = strokes.current;
+    const nDigits = rightAnswer.toString().length;
+
+    // at least as many strokes as the number of digits
+    // better performance but you can't see your errors as you write
+    // if (st.length < nDigits) {
+    //   return;
+    // }
+
+    const model = modelRef.current;
+    if (!model) {
+      return;
+    }
+
+    let sum = 0;
+    for (let i = 0; i < st.length; i++) {
+      const tensor = st[i];
+
+      const pred = model.predict(tensor) as tf.Tensor;
+
+      const index = (await tf.argMax(pred, 1).array()) as number[];
+      sum += index[0] * Math.pow(10, st.length - 1 - i);
+    }
+
+    if (sum === rightAnswer) {
+      clear();
+      submitAnswer();
+      return;
+    }
+    setPrediction(sum);
+
+    // consider pairs of strokes to be part of one number
+    // chances are the first digit will be low (Benford's law)
+    // so start grouping the last strokes
+    if (st.length > nDigits * 2) {
+      return;
+    }
+  }
 
   function transform(stroke: Stroke): tf.Tensor | undefined {
-    if (!stroke.top || !stroke.bot || !stroke.left || !stroke.right) {
+    // at least 2 points
+    if (
+      !stroke.top ||
+      !stroke.bot ||
+      !stroke.left ||
+      !stroke.right ||
+      stroke.points.length < 2
+    ) {
       return;
     }
 
@@ -108,7 +152,7 @@ export default function DigitPredictor({
 
       drawPoint(strokeArray, point, offsetX, offsetY, squareSize);
 
-      // connect previous point
+      // connect previous point with points in the middle
       if (i !== 0) {
         const previousPoint = stroke.points[i - 1];
 
@@ -155,8 +199,8 @@ export default function DigitPredictor({
 
     strokeArray[y][x] = 255;
 
-    const crossOpacity = 255 / 2; // top bot left right
-    const edgeOpacity = 255 / 4; // tl tr bl br
+    const crossOpacity = 255 / 3; // top bot left right
+    const edgeOpacity = 255 / 3; // tl tr bl br
 
     strokeArray[y - 1][x] = Math.min(strokeArray[y - 1][x] + crossOpacity, 255);
     strokeArray[y + 1][x] = Math.min(strokeArray[y + 1][x] + crossOpacity, 255);
@@ -178,6 +222,13 @@ export default function DigitPredictor({
       strokeArray[y - 1][x + 1] + edgeOpacity,
       255,
     );
+  }
+
+  function clear() {
+    strokes.current = [];
+    const ctx = canvasRef.current.getContext("2d");
+    ctx?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    setPrediction(null);
   }
 
   return (
@@ -205,7 +256,14 @@ export default function DigitPredictor({
           <p>Prediction: {prediction ?? "nothing"}</p>
         </div>
       ) : null}
-      <DrawingCanvas handleNewStoke={handleNewStoke} />
+      <>
+        <p>Prediction: {prediction}</p>
+        <DrawingCanvas
+          handleNewStoke={handleNewStoke}
+          clear={clear}
+          canvasRef={canvasRef}
+        />
+      </>
     </>
   );
 }

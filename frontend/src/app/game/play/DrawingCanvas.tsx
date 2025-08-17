@@ -1,19 +1,29 @@
 "use client";
 
 import { Stroke } from "@/types";
-import { useEffect, useRef } from "react";
+import { RefObject, useCallback, useEffect, useRef } from "react";
 
 const RECT_SIZE = 4;
 
 type Props = {
   handleNewStoke: (points: Stroke | null) => void;
+  clear: () => void;
+  canvasRef: RefObject<HTMLCanvasElement>;
 };
 
-export default function DrawingCanvas({ handleNewStoke }: Props) {
-  const canvasRef = useRef<HTMLCanvasElement>(null!);
+export default function DrawingCanvas({
+  handleNewStoke,
+  clear,
+  canvasRef,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null!);
   const isPressing = useRef(false);
   const stroke = useRef<Stroke>({ points: [] });
+
+  const cl = useCallback(() => {
+    clear();
+    stroke.current = { points: [] };
+  }, []);
 
   function handleDraw(clientX: number, clientY: number) {
     const canvas = canvasRef.current;
@@ -109,16 +119,7 @@ export default function DrawingCanvas({ handleNewStoke }: Props) {
       </canvas>
       <button
         className="hover:text-primary w-full text-center transition hover:cursor-pointer"
-        onClick={() => {
-          const ctx = canvasRef.current.getContext("2d");
-          ctx?.clearRect(
-            0,
-            0,
-            canvasRef.current.width,
-            canvasRef.current.height,
-          );
-          stroke.current = { points: [] };
-        }}
+        onClick={() => cl()}
       >
         Clear
       </button>
