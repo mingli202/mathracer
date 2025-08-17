@@ -6,7 +6,9 @@ import fs from "node:fs";
 class BestWeightCallback extends tf.Callback {
   #bestLoss = Number.MAX_VALUE;
   #bestWeights?: tf.Tensor[];
-  #bestEpoch?: number;
+  #bestEpoch: number = 0;
+
+  #patience = 5;
 
   override async onEpochEnd(
     epoch: number,
@@ -18,8 +20,13 @@ class BestWeightCallback extends tf.Callback {
       if (loss < this.#bestLoss) {
         this.#bestLoss = loss;
         this.#bestWeights = this.model.getWeights();
-        this.#bestEpoch = epoch + 1;
+        this.#bestEpoch = epoch;
         console.log("Saved weights from epoch ", epoch + 1);
+      }
+
+      // stop if no progress has been made
+      if (epoch >= this.#bestEpoch + this.#patience) {
+        this.model.stopTraining = true;
       }
     }
   }
@@ -27,7 +34,7 @@ class BestWeightCallback extends tf.Callback {
   override async onTrainEnd(_logs?: UnresolvedLogs): Promise<void> {
     if (this.#bestWeights) {
       this.model.setWeights(this.#bestWeights);
-      console.log("Restored best weights from epoch ", this.#bestEpoch);
+      console.log("Restored best weights from epoch ", this.#bestEpoch + 1);
     }
   }
 }
@@ -65,13 +72,7 @@ export abstract class Model {
       epochs: this.modelFitArgs?.epochs ?? 30,
       shuffle: this.modelFitArgs?.shuffle ?? true,
       validationData: this.modelFitArgs?.validationData ?? [testXs, testYs],
-      callbacks: this.modelFitArgs?.callbacks ?? [
-        new BestWeightCallback(),
-        tf.callbacks.earlyStopping({
-          monitor: "loss",
-          patience: 7,
-        }),
-      ],
+      callbacks: this.modelFitArgs?.callbacks ?? [new BestWeightCallback()],
     });
   }
 
