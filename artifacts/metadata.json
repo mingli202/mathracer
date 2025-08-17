@@ -1,0 +1,32 @@
+{
+  "leNet": {
+    "totalParams": 257546,
+    "accuracy": 0.9896000027656555,
+    "loss": 0.037266071885824203
+  },
+  "tfjsTutorial": {
+    "totalParams": 5633,
+    "accuracy": 0.9884999990463257,
+    "loss": 0.05732150748372078
+  },
+  "mobileNetMini": {
+    "totalParams": 14562,
+    "accuracy": 0.9803000092506409,
+    "loss": 0.08610580116510391
+  },
+  "mini": {
+    "totalParams": 1418,
+    "accuracy": 0.9340999722480774,
+    "loss": 0.2209998220205307
+  },
+  "kerasTutorial": {
+    "totalParams": 34826,
+    "accuracy": 0.9925000071525574,
+    "loss": 0.025768212974071503
+  },
+  "chatGpt5": {
+    "totalParams": 468202,
+    "accuracy": 0.9944000244140625,
+    "loss": 0.029611462727189064
+  }
+}
