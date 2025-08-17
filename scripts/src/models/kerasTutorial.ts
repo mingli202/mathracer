@@ -19,6 +19,9 @@ export class KerasTutorial extends Model {
       tf.layers.dense({ units: 10, activation: "softmax" }),
     ];
 
-    super(layers, "kerasTutorial", data, compileArgs, modelFitArgs);
+    super(layers, "kerasTutorial", data, compileArgs, {
+      ...modelFitArgs,
+      epochs: 50,
+    });
   }
 }

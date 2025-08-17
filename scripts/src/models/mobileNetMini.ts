@@ -55,6 +55,9 @@ export class MobileNetMini extends Model {
       tf.layers.dense({ units: 10, activation: "softmax" }),
     ];
 
-    super(layers, "mobileNetMini", data, compileArgs, modelFitArgs);
+    super(layers, "mobileNetMini", data, compileArgs, {
+      ...modelFitArgs,
+      epochs: modelFitArgs?.epochs ?? 50,
+    });
   }
 }

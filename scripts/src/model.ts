@@ -58,7 +58,7 @@ export abstract class Model {
       ...this.modelFitArgs,
 
       batchSize: this.modelFitArgs?.batchSize ?? 128,
-      epochs: this.modelFitArgs?.epochs ?? 60,
+      epochs: this.modelFitArgs?.epochs ?? 30,
       shuffle: this.modelFitArgs?.shuffle ?? true,
       validationData: this.modelFitArgs?.validationData ?? [testXs, testYs],
       callbacks: this.modelFitArgs?.callbacks ?? [

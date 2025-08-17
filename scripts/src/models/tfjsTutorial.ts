@@ -32,6 +32,9 @@ export class TfjsTutorial extends Model {
       }),
     ];
 
-    super(layers, "tfjsTutorial", data, compileArgs, modelFitArgs);
+    super(layers, "tfjsTutorial", data, compileArgs, {
+      ...modelFitArgs,
+      epochs: modelFitArgs?.epochs ?? 60,
+    });
   }
 }
