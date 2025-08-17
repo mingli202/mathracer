@@ -2,6 +2,9 @@ import type { MnistData } from "../data";
 import { Model } from "../model";
 import * as tf from "@tensorflow/tfjs-node";
 
+/**
+ * The smallest model with only ~1.4k params
+ * */
 export class Mini extends Model {
   constructor(
     data: MnistData,

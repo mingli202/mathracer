@@ -2,6 +2,9 @@ import type { MnistData } from "../data";
 import { Model } from "../model";
 import * as tf from "@tensorflow/tfjs-node";
 
+/**
+ * The model on Keras's documentation
+ * */
 export class KerasTutorial extends Model {
   constructor(
     data: MnistData,

@@ -2,6 +2,9 @@ import type { MnistData } from "../data";
 import { Model } from "../model";
 import * as tf from "@tensorflow/tfjs-node";
 
+/**
+ * The classice LeNet architecture
+ * */
 export class LeNet extends Model {
   constructor(
     data: MnistData,

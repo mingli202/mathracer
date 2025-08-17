@@ -2,6 +2,10 @@ import type { MnistData } from "../data";
 import { Model } from "../model";
 import * as tf from "@tensorflow/tfjs-node";
 
+/**
+ * The "light" model I asked chat gpt to make
+ * It's only 400k+ parameters it's so little right
+ * */
 export class ChatGpt5 extends Model {
   constructor(
     data: MnistData,

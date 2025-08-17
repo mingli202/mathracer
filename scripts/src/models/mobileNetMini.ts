@@ -2,6 +2,9 @@ import type { MnistData } from "../data";
 import { Model } from "../model";
 import * as tf from "@tensorflow/tfjs-node";
 
+/**
+ * Attempted to make a small version of the MobileNet architecture
+ * */
 export class MobileNetMini extends Model {
   constructor(
     data: MnistData,

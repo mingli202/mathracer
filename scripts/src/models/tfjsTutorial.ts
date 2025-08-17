@@ -2,6 +2,10 @@ import type { MnistData } from "../data";
 import { Model } from "../model";
 import * as tf from "@tensorflow/tfjs-node";
 
+/**
+ * Architecture on tfjs's cnn mnist tutorial.
+ * For a 5k params this gets a very high accuracy.
+ * */
 export class TfjsTutorial extends Model {
   constructor(
     data: MnistData,
