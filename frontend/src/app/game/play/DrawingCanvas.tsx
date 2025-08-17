@@ -1,19 +1,19 @@
 "use client";
 
-import { Point } from "@/types";
+import { Stroke } from "@/types";
 import { useEffect, useRef } from "react";
 
 const RECT_SIZE = 4;
 
 type Props = {
-  handleNewStoke: (points: Point[]) => void;
+  handleNewStoke: (points: Stroke | null) => void;
 };
 
 export default function DrawingCanvas({ handleNewStoke }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null!);
   const containerRef = useRef<HTMLDivElement>(null!);
   const isPressing = useRef(false);
-  const stroke = useRef<Point[]>([]);
+  const stroke = useRef<Stroke>({ points: [] });
 
   function handleDraw(clientX: number, clientY: number) {
     const canvas = canvasRef.current;
@@ -21,7 +21,7 @@ export default function DrawingCanvas({ handleNewStoke }: Props) {
     const x = clientX - left;
     const y = clientY - top;
 
-    const ctx = canvasRef.current.getContext("2d", { alpha: false });
+    const ctx = canvasRef.current.getContext("2d");
 
     if (!ctx) {
       return;
@@ -30,8 +30,11 @@ export default function DrawingCanvas({ handleNewStoke }: Props) {
     ctx.fillStyle = "#000";
     ctx.fillRect(x - RECT_SIZE / 2, y - RECT_SIZE / 2, RECT_SIZE, RECT_SIZE);
 
-    if (stroke.current.length > 0) {
-      const previousPoint = stroke.current[stroke.current.length - 1];
+    const point = { x, y };
+
+    if (stroke.current.points.length > 0) {
+      const previousPoint =
+        stroke.current.points[stroke.current.points.length - 1];
 
       ctx.beginPath();
       ctx.moveTo(previousPoint.x, previousPoint.y);
@@ -39,14 +42,28 @@ export default function DrawingCanvas({ handleNewStoke }: Props) {
       ctx.stroke();
     }
 
-    stroke.current.push({ x, y });
+    // add the point and update the rect
+    stroke.current.points.push(point);
+
+    if (!stroke.current.top || point.y < stroke.current.top.y) {
+      stroke.current.top = point;
+    }
+    if (!stroke.current.bot || point.y > stroke.current.bot.y) {
+      stroke.current.bot = point;
+    }
+    if (!stroke.current.left || point.x < stroke.current.left.x) {
+      stroke.current.left = point;
+    }
+    if (!stroke.current.right || point.x > stroke.current.right.x) {
+      stroke.current.right = point;
+    }
   }
 
   useEffect(() => {
     const resize = () => {
       const canvas = canvasRef.current;
 
-      const ctx = canvasRef.current.getContext("2d", { alpha: false });
+      const ctx = canvasRef.current.getContext("2d");
       ctx?.clearRect(0, 0, canvas.width, canvas.height);
 
       const container = containerRef.current;
@@ -54,7 +71,7 @@ export default function DrawingCanvas({ handleNewStoke }: Props) {
       const { width, height } = container.getBoundingClientRect();
       canvas.width = width;
       canvas.height = height;
-      stroke.current = [];
+      stroke.current = { points: [] };
     };
     window.addEventListener("resize", resize);
     resize();
@@ -85,7 +102,7 @@ export default function DrawingCanvas({ handleNewStoke }: Props) {
         onPointerUp={() => {
           handleNewStoke(stroke.current);
           isPressing.current = false;
-          stroke.current = [];
+          stroke.current = { points: [] };
         }}
       >
         Oops, your browser does not support HTML5 canvas:
@@ -93,14 +110,14 @@ export default function DrawingCanvas({ handleNewStoke }: Props) {
       <button
         className="hover:text-primary w-full text-center transition hover:cursor-pointer"
         onClick={() => {
-          const ctx = canvasRef.current.getContext("2d", { alpha: false });
+          const ctx = canvasRef.current.getContext("2d");
           ctx?.clearRect(
             0,
             0,
             canvasRef.current.width,
             canvasRef.current.height,
           );
-          stroke.current = [];
+          stroke.current = { points: [] };
         }}
       >
         Clear
