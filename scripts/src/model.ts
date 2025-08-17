@@ -78,14 +78,14 @@ export abstract class Model {
 
   saveModel(accuracy: tf.Scalar, loss: tf.Scalar) {
     // save model
-    if (!fs.existsSync("./artifacts")) {
-      fs.mkdirSync("./artifacts");
+    if (!fs.existsSync("../artifacts")) {
+      fs.mkdirSync("../artifacts");
     }
 
-    this.model.save(`file://./artifacts/${this.model.name}`);
+    this.model.save(`file://../artifacts/${this.model.name}`);
 
     // save metatdata
-    const filename = "./artifacts/metadata.json";
+    const filename = "../artifacts/metadata.json";
     const name = this.model.name;
     const totalParams = this.model.countParams();
 

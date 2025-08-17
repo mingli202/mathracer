@@ -71,7 +71,10 @@ export class MnistData {
       const labels = this.trainLabels.arraySync() as number[];
 
       return [
-        tf.reshape(this.trainImages, [...this.trainImages.shape, 1]),
+        tf.div(
+          tf.reshape(this.trainImages, [...this.trainImages.shape, 1]),
+          255,
+        ),
         tf.tensor(
           labels.map((y) => {
             const arr = Array(10).fill(0);
@@ -88,7 +91,7 @@ export class MnistData {
       const labels = this.testLabels.arraySync() as number[];
 
       return [
-        tf.reshape(this.testImages, [...this.testImages.shape, 1]),
+        tf.div(tf.reshape(this.testImages, [...this.testImages.shape, 1]), 255),
         tf.tensor(
           labels.map((y) => {
             const arr = Array(10).fill(0);
