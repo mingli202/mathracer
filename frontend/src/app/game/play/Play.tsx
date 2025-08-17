@@ -175,7 +175,7 @@ export default function Play() {
             <Progress value={calculateProgress()} className="h-2" />
           </div>
 
-          <div className="mb-8 flex w-full flex-grow flex-col items-center justify-center">
+          <div className="relative mb-8 flex w-full flex-grow flex-col items-center justify-center">
             {countDown > 0 && (
               <div className="absolute z-50 flex h-full w-full items-center justify-center font-extrabold">
                 <div className="border-primary bg-secondary/10 flex h-[7rem] w-[7rem] items-center justify-center rounded-full border-[4px] border-solid text-6xl backdrop-blur-xs backdrop-filter">
@@ -218,9 +218,12 @@ export default function Play() {
                   Enter
                 </Button>
               </form>
-            ) : (
-              <DigitPredictor />
-            )}
+            ) : equations[currentEquationIndex] ? (
+              <DigitPredictor
+                submitAnswer={submitAnswer}
+                rightAnswer={equations[currentEquationIndex].answer}
+              />
+            ) : null}
           </div>
           <Button
             variant="secondary"

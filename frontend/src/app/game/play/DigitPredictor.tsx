@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import DrawingCanvas from "./DrawingCanvas";
-import { Stroke } from "@/types";
+import { Point, Stroke } from "@/types";
 import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-backend-webgl";
 
@@ -17,12 +17,13 @@ export default function DigitPredictor({
 }: Props) {
   const showPostprocessing = true;
 
-  const strokes = useRef<tf.Tensor2D[]>([]);
+  const strokes = useRef<tf.Tensor[]>([]);
   const modelRef = useRef<tf.LayersModel | null>(null);
-  const nSteps = 5;
+  const nSteps = 3;
   const gridSize = 20;
 
   const [lastStroke, setLastStoke] = useState<number[][]>([]);
+  const [prediction, setPrediction] = useState<number | null>(null);
 
   useEffect(() => {
     async function loadModel() {
@@ -58,6 +59,12 @@ export default function DigitPredictor({
     if (!strokeTensor) {
       return;
     }
+    const pred = model.predict(strokeTensor);
+    if (pred instanceof tf.Tensor) {
+      const arr = (pred.arraySync() as number[][])[0];
+      console.log("arr:", arr);
+      setPrediction(arr.findIndex((v) => v === 1));
+    }
 
     strokes.current.push(strokeTensor);
     parseStrokes();
@@ -70,7 +77,7 @@ export default function DigitPredictor({
    */
   function parseStrokes() {}
 
-  function transform(stroke: Stroke): tf.Tensor2D | undefined {
+  function transform(stroke: Stroke): tf.Tensor | undefined {
     console.log("stroke:", stroke);
     if (!stroke.top || !stroke.bot || !stroke.left || !stroke.right) {
       return;
@@ -95,52 +102,31 @@ export default function DigitPredictor({
     const squareSize = rectWidth > rectHeight ? rectWidth : rectHeight;
     console.log("squareSize:", squareSize);
 
-    const strokeArray: number[][] = Array.from({ length: gridSize }, () =>
-      Array(gridSize).fill(0),
+    const strokeArray: number[][] = Array.from({ length: 28 }, () =>
+      Array(28).fill(0),
     );
     console.log("strokeArray:", strokeArray);
 
     for (let i = 0; i < stroke.points.length; i++) {
       const point = stroke.points[i];
-      console.log("point:", point);
-      // get index
-      const x = Math.min(
-        Math.floor(((point.x - offsetX) * gridSize) / squareSize),
-        gridSize - 1,
-      );
-      console.log("x:", x);
-      const y = Math.min(
-        Math.floor(((point.y - offsetY) * gridSize) / squareSize),
-        gridSize - 1,
-      );
-      console.log("y:", y);
-      strokeArray[y][x] = 1;
+
+      drawPoint(strokeArray, point, offsetX, offsetY, squareSize);
 
       // connect previous point
-      if (i === -1) {
+      if (i !== 0) {
         const previousPoint = stroke.points[i - 1];
-        const previousX = Math.min(
-          Math.floor(((previousPoint.x - offsetX) * gridSize) / squareSize),
-          gridSize - 1,
-        );
-        const previousY = Math.min(
-          Math.floor(((previousPoint.y - offsetY) * gridSize) / squareSize),
-          gridSize - 1,
-        );
-
-        const deltaX = x - previousX;
-        const deltaY = y - previousY;
-        const length =
-          Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2)) / nSteps;
-
-        const dx = deltaX / length;
-        const dy = deltaY / length;
 
         for (const i of Array(nSteps).keys()) {
-          const stepX = Math.floor(previousX + dx * i);
-          const stepY = Math.floor(previousY + dy * i);
+          const inBetweenPoint = {
+            x:
+              ((i + 1) * (point.x - previousPoint.x)) / nSteps +
+              previousPoint.x,
+            y:
+              ((i + 1) * (point.y - previousPoint.y)) / nSteps +
+              previousPoint.y,
+          };
 
-          strokeArray[stepY][stepX] = 1;
+          drawPoint(strokeArray, inBetweenPoint, offsetX, offsetY, squareSize);
         }
       }
     }
@@ -148,27 +134,76 @@ export default function DigitPredictor({
     console.log("strokeArray:", strokeArray);
     setLastStoke(strokeArray);
 
-    return tf.tensor2d(strokeArray);
+    return tf.tidy(() => tf.reshape(tf.tensor2d(strokeArray), [1, 28, 28, 1]));
+  }
+
+  function drawPoint(
+    strokeArray: number[][],
+    point: Point,
+    offsetX: number,
+    offsetY: number,
+    squareSize: number,
+  ) {
+    // get index
+    const x =
+      Math.min(
+        Math.floor(((point.x - offsetX) * gridSize) / squareSize),
+        gridSize - 1,
+      ) +
+      (28 - gridSize) / 2;
+    const y =
+      Math.min(
+        Math.floor(((point.y - offsetY) * gridSize) / squareSize),
+        gridSize - 1,
+      ) +
+      (28 - gridSize) / 2;
+
+    strokeArray[y][x] = 255;
+
+    strokeArray[y - 1][x] = Math.min(strokeArray[y - 1][x] + 255 / 4, 255);
+    strokeArray[y + 1][x] = Math.min(strokeArray[y + 1][x] + 255 / 4, 255);
+    strokeArray[y][x - 1] = Math.min(strokeArray[y][x - 1] + 255 / 4, 255);
+    strokeArray[y][x + 1] = Math.min(strokeArray[y][x + 1] + 255 / 4, 255);
+    strokeArray[y - 1][x - 1] = Math.min(
+      strokeArray[y - 1][x - 1] + 255 / 8,
+      255,
+    );
+    strokeArray[y + 1][x + 1] = Math.min(
+      strokeArray[y + 1][x + 1] + 255 / 8,
+      255,
+    );
+    strokeArray[y + 1][x - 1] = Math.min(
+      strokeArray[y + 1][x - 1] + 255 / 8,
+      255,
+    );
+    strokeArray[y - 1][x + 1] = Math.min(
+      strokeArray[y - 1][x + 1] + 255 / 8,
+      255,
+    );
   }
 
   return (
     <>
       {showPostprocessing ? (
-        <div className="border-secondary absolute bottom-0 left-full grid h-56 w-56 max-w-md grid-cols-[repeat(28,minmax(0,28fr))] grid-rows-[repeat(28,minmax(0,28fr))] border-2 border-solid">
-          {lastStroke.map((rows, row) =>
-            rows.map((col, i) =>
-              col === 1 ? (
-                <div
-                  key={"" + i + ":" + row}
-                  style={{
-                    gridColumn: i + 1 + (28 - gridSize) / 2,
-                    gridRow: row + 1 + (28 - gridSize) / 2,
-                  }}
-                  className="bg-primary"
-                />
-              ) : null,
-            ),
-          )}
+        <div className="absolute bottom-0 left-full">
+          <div className="border-secondary grid h-56 w-56 max-w-md grid-cols-[repeat(28,minmax(0,28fr))] grid-rows-[repeat(28,minmax(0,28fr))] border-2 border-solid">
+            {lastStroke.map((rows, row) =>
+              rows.map((col, i) =>
+                col !== 0 ? (
+                  <div
+                    key={"" + i + ":" + row}
+                    style={{
+                      gridColumn: i + 1,
+                      gridRow: row + 1,
+                      opacity: col / 255,
+                    }}
+                    className="bg-primary"
+                  />
+                ) : null,
+              ),
+            )}
+          </div>
+          <p>Prediction: {prediction ?? "nothing"}</p>
         </div>
       ) : null}
       <DrawingCanvas handleNewStoke={handleNewStoke} />
