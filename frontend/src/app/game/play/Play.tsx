@@ -1,25 +1,31 @@
 "use client";
 
 import EquationStack from "@/components/EquationStack";
-import PlayerList from "@/components/PlayerList";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
-import { GameStateContext, updatePlayerState } from "@/gameState";
+import { GameStateAction, updatePlayerState } from "@/gameState";
 import { withConnection } from "@/utils/connection";
 import { useRouter } from "next/navigation";
 import {
-  use,
+  ActionDispatch,
+  RefObject,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
 import DigitPredictor from "./DigitPredictor";
+import Leaderboard from "./Leaderboard";
+import ProgressBar from "./ProgressBar";
+import { GameState } from "@/types";
+import * as tf from "@tensorflow/tfjs";
 
-export default function Play() {
-  const { gameState, dispatch } = use(GameStateContext);
+type Props = {
+  gameState: GameState;
+  dispatch: ActionDispatch<[action: GameStateAction]>;
+  modelRef: RefObject<tf.LayersModel | null>;
+};
+export default function Play({ gameState, dispatch, modelRef }: Props) {
   const { lobby, currentPlayer } = gameState;
   const connection = gameState.connection;
   const { players, equations, gameMode, lobbyId } = lobby;
@@ -38,12 +44,6 @@ export default function Play() {
   const router = useRouter();
 
   const [isHandwritingMode, setIsHandwritingMode] = useState(false);
-
-  useLayoutEffect(() => {
-    if (lobbyId === "") {
-      router.push("/game");
-    }
-  }, []);
 
   useEffect(() => {
     connection.on("CountDown", (count: number) => {
@@ -137,119 +137,84 @@ export default function Play() {
     }
   }
 
-  // Calculate progress based on game mode
-  const calculateProgress = () => {
-    if (gameMode.type === "equations") {
-      return (currentEquationIndex / gameMode.count) * 100;
-    } else if (gameMode.type === "time" && timeElapsed !== undefined) {
-      return (timeElapsed / gameMode.count) * 100;
-    }
-    return 0;
-  };
-
-  // Format progress text based on game mode
-  const getProgressText = () => {
-    if (gameMode.type === "equations") {
-      return `Equation ${currentEquationIndex + 1} of ${gameMode.count}`;
-    } else {
-      return timeElapsed !== undefined
-        ? `${gameMode.count - timeElapsed} seconds remaining`
-        : "";
-    }
-  };
-
   return (
-    <>
-      <div className="animate-fade-in mx-auto flex h-full w-full max-w-5xl flex-col gap-6 lg:flex-row">
-        {/* Main game area */}
-        <div className="flex flex-grow flex-col lg:order-1">
-          <div className="mb-6">
-            <div className="mb-2 flex items-center justify-between">
-              <h2 className="text-lg font-medium">{getProgressText()}</h2>
-              <div className="text-muted-foreground text-sm">
-                {gameMode.type === "equations"
-                  ? `First to ${gameMode.count}`
-                  : `${gameMode.count}s Challenge`}
+    <div className="animate-fade-in mx-auto flex h-full w-full max-w-5xl flex-col gap-6 lg:flex-row">
+      {/* Main game area */}
+      <div className="flex flex-grow flex-col lg:order-1">
+        <ProgressBar
+          gameMode={gameMode}
+          currentEquationIndex={currentEquationIndex}
+          timeElapsed={timeElapsed}
+        />
+
+        <div className="relative mb-8 flex w-full flex-grow flex-col items-center justify-center">
+          {countDown > 0 && (
+            <div className="absolute z-50 flex h-full w-full items-center justify-center font-extrabold">
+              <div className="border-primary bg-secondary/10 flex h-[7rem] w-[7rem] items-center justify-center rounded-full border-[4px] border-solid text-6xl backdrop-blur-xs backdrop-filter">
+                <span className="text-primary">{countDown}</span>
               </div>
             </div>
-            <Progress value={calculateProgress()} className="h-2" />
-          </div>
+          )}
 
-          <div className="relative mb-8 flex w-full flex-grow flex-col items-center justify-center">
-            {countDown > 0 && (
-              <div className="absolute z-50 flex h-full w-full items-center justify-center font-extrabold">
-                <div className="border-primary bg-secondary/10 flex h-[7rem] w-[7rem] items-center justify-center rounded-full border-[4px] border-solid text-6xl backdrop-blur-xs backdrop-filter">
-                  <span className="text-primary">{countDown}</span>
-                </div>
-              </div>
-            )}
-
-            <div
-              className={`mb-6 flex w-full items-center justify-center ${animation}`}
-            >
-              <EquationStack
-                equations={equations}
-                currentIndex={currentEquationIndex}
-                stackSize={3}
-              />
-            </div>
-
-            {isHandwritingMode ? (
-              <form
-                onSubmit={(e: React.FormEvent) => {
-                  e.preventDefault();
-                  if (inputRef.current) {
-                    inputRef.current.value = "";
-                    submitIfCorrect(inputRef.current?.value);
-                  }
-                }}
-                className={`relative flex w-full max-w-xs flex-col items-center`}
-              >
-                <Input
-                  ref={inputRef}
-                  type="text"
-                  onChange={(e) => submitIfCorrect(e.target.value)}
-                  placeholder="Type your answer"
-                  className={`mb-4 h-14 text-center text-xl ${formStyle}`}
-                  autoComplete="off"
-                  disabled={countDown > 0}
-                />
-                <Button type="submit" className={`w-full ${boxStyle}`}>
-                  Enter
-                </Button>
-              </form>
-            ) : equations[currentEquationIndex] ? (
-              <DigitPredictor
-                submitAnswer={submitAnswer}
-                rightAnswer={equations[currentEquationIndex].answer}
-              />
-            ) : null}
-          </div>
-          <Button
-            variant="secondary"
-            size="sm"
-            className="z-100"
-            onClick={() => setIsHandwritingMode(!isHandwritingMode)}
+          <div
+            className={`mb-6 flex w-full items-center justify-center ${animation}`}
           >
-            {isHandwritingMode
-              ? "Switch to typing mode"
-              : "Switch to handwriting mode"}
-          </Button>
-        </div>
-
-        {/* Leaderboard sidebar */}
-        <div className="lg:order-2 lg:w-64">
-          <div className="sticky">
-            <h3 className="mb-3 text-lg font-semibold">Leaderboard</h3>
-            <PlayerList
-              players={players}
-              showScores
-              currentPlayerId={currentPlayer.playerId}
-              gameMode={gameMode}
+            <EquationStack
+              equations={equations}
+              currentIndex={currentEquationIndex}
+              stackSize={3}
             />
           </div>
+
+          {isHandwritingMode ? (
+            <form
+              onSubmit={(e: React.FormEvent) => {
+                e.preventDefault();
+                if (inputRef.current) {
+                  inputRef.current.value = "";
+                  submitIfCorrect(inputRef.current?.value);
+                }
+              }}
+              className={`relative flex w-full max-w-xs flex-col items-center`}
+            >
+              <Input
+                ref={inputRef}
+                type="text"
+                onChange={(e) => submitIfCorrect(e.target.value)}
+                placeholder="Type your answer"
+                className={`mb-4 h-14 text-center text-xl ${formStyle}`}
+                autoComplete="off"
+                disabled={countDown > 0}
+              />
+              <Button type="submit" className={`w-full ${boxStyle}`}>
+                Enter
+              </Button>
+            </form>
+          ) : equations[currentEquationIndex] ? (
+            <DigitPredictor
+              submitAnswer={submitAnswer}
+              rightAnswer={equations[currentEquationIndex].answer}
+              modelRef={modelRef}
+            />
+          ) : null}
         </div>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="z-100"
+          onClick={() => setIsHandwritingMode(!isHandwritingMode)}
+        >
+          {isHandwritingMode
+            ? "Switch to typing mode"
+            : "Switch to handwriting mode"}
+        </Button>
       </div>
-    </>
+
+      <Leaderboard
+        players={players}
+        currentPlayerId={currentPlayer.playerId}
+        gameMode={gameMode}
+      />
+    </div>
   );
 }

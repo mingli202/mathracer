@@ -1,5 +1,46 @@
-import Play from "./Play";
+"use client";
 
-export default async function PlayPage() {
-  return <Play />;
+import { use, useEffect, useRef } from "react";
+import Play from "./Play";
+import { GameStateContext } from "@/gameState";
+import { useRouter } from "next/navigation";
+import * as tf from "@tensorflow/tfjs";
+import "@tensorflow/tfjs-backend-webgl";
+
+export default function PlayPage() {
+  const router = useRouter();
+
+  const { gameState, dispatch } = use(GameStateContext);
+  const { lobby } = gameState;
+
+  const modelRef = useRef<tf.LayersModel | null>(null);
+
+  useEffect(() => {
+    async function loadModel() {
+      try {
+        await tf.setBackend("webgl");
+      } catch {
+        await tf.setBackend("cpu");
+      }
+      await tf.ready();
+      modelRef.current = await tf.loadLayersModel(
+        "https://raw.githubusercontent.com/mingli202/mathracer/refs/heads/digit-recognition/artifacts/tfjsTutorial/model.json",
+      );
+      // warm up the model
+      modelRef.current.predict(tf.randomUniform([1, 28, 28, 1]));
+    }
+    loadModel();
+
+    return () => {
+      modelRef.current?.dispose();
+    };
+  }, []);
+
+  if (lobby.lobbyId === "") {
+    router.push("/game");
+  }
+
+  return lobby.lobbyId !== "" ? (
+    <Play gameState={gameState} dispatch={dispatch} modelRef={modelRef} />
+  ) : null;
 }

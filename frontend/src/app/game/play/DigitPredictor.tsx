@@ -1,21 +1,24 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { RefObject, useRef, useState } from "react";
 import DrawingCanvas from "./DrawingCanvas";
 import { Point, Stroke } from "@/types";
 import * as tf from "@tensorflow/tfjs";
-import "@tensorflow/tfjs-backend-webgl";
 
 type Props = {
   submitAnswer: () => Promise<void>;
   rightAnswer: number;
+  modelRef: RefObject<tf.LayersModel | null>;
 };
 
-export default function DigitPredictor({ submitAnswer, rightAnswer }: Props) {
+export default function DigitPredictor({
+  submitAnswer,
+  rightAnswer,
+  modelRef,
+}: Props) {
   const testInput = false;
 
   const strokes = useRef<tf.Tensor[]>([]);
-  const modelRef = useRef<tf.LayersModel | null>(null);
   const nSteps = 3;
   const gridSize = 20;
 
@@ -23,27 +26,6 @@ export default function DigitPredictor({ submitAnswer, rightAnswer }: Props) {
   const [prediction, setPrediction] = useState<number | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement>(null!);
-
-  useEffect(() => {
-    async function loadModel() {
-      try {
-        await tf.setBackend("webgl");
-      } catch {
-        await tf.setBackend("cpu");
-      }
-      await tf.ready();
-      modelRef.current = await tf.loadLayersModel(
-        "https://raw.githubusercontent.com/mingli202/mathracer/refs/heads/digit-recognition/artifacts/tfjsTutorial/model.json",
-      );
-      // warm up the model
-      modelRef.current.predict(tf.randomUniform([1, 28, 28, 1]));
-    }
-    loadModel();
-
-    return () => {
-      modelRef.current?.dispose();
-    };
-  }, []);
 
   function handleNewStoke(stroke: Stroke | null) {
     if (!stroke) {
