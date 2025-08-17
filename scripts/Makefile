@@ -1,11 +1,11 @@
 all: batch1 batch2
 
 batch1:
-	python train.py --model leNet
-	python train.py --model tsjs_tutorial
-	python train.py --model mini_mobilenet
+	bun run index.ts --model LeNet,
+	bun run index.ts --model TfjsTutorial,
+	bun run index.ts --model MobileNetMini,
 
 batch2:
-	python train.py --model mini --batch-size 64
-	python train.py --model keras_tutorial
-	python train.py --model chat_gpt5
+	bun run index.ts --model Mini,
+	bun run index.ts --model KerasTutorial,
+	bun run index.ts --model ChatGpt5,
