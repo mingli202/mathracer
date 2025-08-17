@@ -49,8 +49,8 @@ async function main(args: string[]) {
 
   const [loss, accuracy] = model.evaluate();
 
-  console.log("accuracy:", accuracy);
-  console.log("loss:", loss);
+  console.log("accuracy:", accuracy.arraySync());
+  console.log("loss:", loss.arraySync());
 
   model.saveModel(accuracy, loss);
 }

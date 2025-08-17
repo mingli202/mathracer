@@ -1,7 +1,7 @@
 import * as tf from "@tensorflow/tfjs-node";
 import type { MnistData } from "./data";
 import type { UnresolvedLogs } from "@tensorflow/tfjs-layers/dist/logs";
-import fs from "fs";
+import fs from "node:fs";
 
 class BestWeightCallback extends tf.Callback {
   #bestLoss = Number.MAX_VALUE;
@@ -65,7 +65,7 @@ export abstract class Model {
         new BestWeightCallback(),
         tf.callbacks.earlyStopping({
           monitor: "loss",
-          patience: 5,
+          patience: 7,
         }),
       ],
     });
@@ -78,6 +78,10 @@ export abstract class Model {
 
   saveModel(accuracy: tf.Scalar, loss: tf.Scalar) {
     // save model
+    if (!fs.existsSync("./artifacts")) {
+      fs.mkdirSync("./artifacts");
+    }
+
     this.model.save(`file://./artifacts/${this.model.name}`);
 
     // save metatdata
