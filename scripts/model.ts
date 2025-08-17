@@ -75,6 +75,10 @@ export abstract class Model {
   }
 
   saveModel(accuracy: tf.Scalar, loss: tf.Scalar) {
+    // save model
+    this.model.save("file://./artifacts");
+
+    // save metatdata
     const filename = "./artifacts/metadata.json";
     const name = this.model.name;
     const totalParams = this.model.countParams();
