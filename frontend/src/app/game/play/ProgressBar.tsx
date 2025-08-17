@@ -1,5 +1,5 @@
+import { Progress } from "@/components/ui/progress";
 import { GameMode } from "@/types";
-import { Progress } from "@radix-ui/react-progress";
 
 type Props = {
   gameMode: GameMode;

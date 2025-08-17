@@ -16,6 +16,10 @@ export default function PlayPage() {
   const modelRef = useRef<tf.LayersModel | null>(null);
 
   useEffect(() => {
+    if (lobby.lobbyId === "") {
+      router.push("/game");
+    }
+
     async function loadModel() {
       try {
         await tf.setBackend("webgl");
@@ -35,10 +39,6 @@ export default function PlayPage() {
       modelRef.current?.dispose();
     };
   }, []);
-
-  if (lobby.lobbyId === "") {
-    router.push("/game");
-  }
 
   return lobby.lobbyId !== "" ? (
     <Play gameState={gameState} dispatch={dispatch} modelRef={modelRef} />

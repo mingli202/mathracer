@@ -166,7 +166,13 @@ export default function Play({ gameState, dispatch, modelRef }: Props) {
             />
           </div>
 
-          {isHandwritingMode ? (
+          {isHandwritingMode && equations[currentEquationIndex] ? (
+            <DigitPredictor
+              submitAnswer={submitAnswer}
+              rightAnswer={equations[currentEquationIndex].answer}
+              modelRef={modelRef}
+            />
+          ) : (
             <form
               onSubmit={(e: React.FormEvent) => {
                 e.preventDefault();
@@ -190,13 +196,7 @@ export default function Play({ gameState, dispatch, modelRef }: Props) {
                 Enter
               </Button>
             </form>
-          ) : equations[currentEquationIndex] ? (
-            <DigitPredictor
-              submitAnswer={submitAnswer}
-              rightAnswer={equations[currentEquationIndex].answer}
-              modelRef={modelRef}
-            />
-          ) : null}
+          )}
         </div>
         <Button
           variant="secondary"
