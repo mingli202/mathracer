@@ -19,4 +19,6 @@ self.onmessage = async (event: MessageEvent) => {
 
     model.saveModel(accuracy, loss);
   }
+
+  self.postMessage("COMPLETED");
 };
