@@ -15,7 +15,7 @@ export default function DigitPredictor({
   submitIfCorrect,
   rightAnswer,
 }: Props) {
-  const showPostprocessing = true;
+  const testInput = process.env.NODE_ENV === "development";
 
   const strokes = useRef<tf.Tensor[]>([]);
   const modelRef = useRef<tf.LayersModel | null>(null);
@@ -34,7 +34,7 @@ export default function DigitPredictor({
       }
       await tf.ready();
       modelRef.current = await tf.loadLayersModel(
-        "https://raw.githubusercontent.com/mingli202/mathracer/refs/heads/digit-recognition/artifacts/mini/model.json",
+        "https://raw.githubusercontent.com/mingli202/mathracer/refs/heads/digit-recognition/artifacts/leNet/model.json",
       );
     }
     loadModel();
@@ -59,11 +59,14 @@ export default function DigitPredictor({
     if (!strokeTensor) {
       return;
     }
-    const pred = model.predict(strokeTensor);
-    if (pred instanceof tf.Tensor) {
-      const arr = (pred.arraySync() as number[][])[0];
-      console.log("arr:", arr);
-      setPrediction(arr.findIndex((v) => v === 1));
+
+    if (testInput) {
+      const pred = model.predict(strokeTensor);
+
+      if (pred instanceof tf.Tensor) {
+        const i = tf.argMax(pred, 1).arraySync() as number[];
+        setPrediction(i[0]);
+      }
     }
 
     strokes.current.push(strokeTensor);
@@ -78,20 +81,15 @@ export default function DigitPredictor({
   function parseStrokes() {}
 
   function transform(stroke: Stroke): tf.Tensor | undefined {
-    console.log("stroke:", stroke);
     if (!stroke.top || !stroke.bot || !stroke.left || !stroke.right) {
       return;
     }
 
     let offsetX = stroke.left.x;
-    console.log("offsetX:", offsetX);
     let offsetY = stroke.top.y;
-    console.log("offsetY:", offsetY);
 
     const rectWidth = stroke.right.x - offsetX;
-    console.log("rectWidth:", rectWidth);
     const rectHeight = stroke.bot.y - offsetY;
-    console.log("rectHeight:", rectHeight);
 
     if (rectHeight > rectWidth) {
       offsetX -= (rectHeight - rectWidth) / 2;
@@ -100,12 +98,10 @@ export default function DigitPredictor({
     }
 
     const squareSize = rectWidth > rectHeight ? rectWidth : rectHeight;
-    console.log("squareSize:", squareSize);
 
     const strokeArray: number[][] = Array.from({ length: 28 }, () =>
       Array(28).fill(0),
     );
-    console.log("strokeArray:", strokeArray);
 
     for (let i = 0; i < stroke.points.length; i++) {
       const point = stroke.points[i];
@@ -131,7 +127,6 @@ export default function DigitPredictor({
       }
     }
 
-    console.log("strokeArray:", strokeArray);
     setLastStoke(strokeArray);
 
     return tf.tidy(() => tf.reshape(tf.tensor2d(strokeArray), [1, 28, 28, 1]));
@@ -160,31 +155,35 @@ export default function DigitPredictor({
 
     strokeArray[y][x] = 255;
 
-    strokeArray[y - 1][x] = Math.min(strokeArray[y - 1][x] + 255 / 4, 255);
-    strokeArray[y + 1][x] = Math.min(strokeArray[y + 1][x] + 255 / 4, 255);
-    strokeArray[y][x - 1] = Math.min(strokeArray[y][x - 1] + 255 / 4, 255);
-    strokeArray[y][x + 1] = Math.min(strokeArray[y][x + 1] + 255 / 4, 255);
+    const crossOpacity = 255 / 2; // top bot left right
+    const edgeOpacity = 255 / 4; // tl tr bl br
+
+    strokeArray[y - 1][x] = Math.min(strokeArray[y - 1][x] + crossOpacity, 255);
+    strokeArray[y + 1][x] = Math.min(strokeArray[y + 1][x] + crossOpacity, 255);
+    strokeArray[y][x - 1] = Math.min(strokeArray[y][x - 1] + crossOpacity, 255);
+    strokeArray[y][x + 1] = Math.min(strokeArray[y][x + 1] + crossOpacity, 255);
     strokeArray[y - 1][x - 1] = Math.min(
-      strokeArray[y - 1][x - 1] + 255 / 8,
+      strokeArray[y - 1][x - 1] + edgeOpacity,
       255,
     );
     strokeArray[y + 1][x + 1] = Math.min(
-      strokeArray[y + 1][x + 1] + 255 / 8,
+      strokeArray[y + 1][x + 1] + edgeOpacity,
       255,
     );
     strokeArray[y + 1][x - 1] = Math.min(
-      strokeArray[y + 1][x - 1] + 255 / 8,
+      strokeArray[y + 1][x - 1] + edgeOpacity,
       255,
     );
     strokeArray[y - 1][x + 1] = Math.min(
-      strokeArray[y - 1][x + 1] + 255 / 8,
+      strokeArray[y - 1][x + 1] + edgeOpacity,
       255,
     );
   }
 
   return (
     <>
-      {showPostprocessing ? (
+      {/* Canvas to show input. Hide when not testing. */}
+      {testInput ? (
         <div className="absolute bottom-0 left-full">
           <div className="border-secondary grid h-56 w-56 max-w-md grid-cols-[repeat(28,minmax(0,28fr))] grid-rows-[repeat(28,minmax(0,28fr))] border-2 border-solid">
             {lastStroke.map((rows, row) =>
