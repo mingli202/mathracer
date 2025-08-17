@@ -30,7 +30,7 @@ export class Mini extends Model {
 
     super(layers, "mini", data, compileArgs, {
       ...modelFitArgs,
-      // batchSize: modelFitArgs?.batchSize ?? 64,
+      batchSize: modelFitArgs?.batchSize ?? 64,
       epochs: modelFitArgs?.epochs ?? 60,
     });
   }
