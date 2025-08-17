@@ -39,6 +39,7 @@ export abstract class Model {
     private modelFitArgs?: tf.ModelFitArgs,
   ) {
     this.model = tf.sequential({ name, layers });
+    console.log("Model: ", this.model.name);
     this.model.summary();
     this.model.compile({
       optimizer: "adam",

@@ -17,9 +17,9 @@ async function main(args: string[]) {
     const maxEpochsArg = argsStr.match(/ --max-epochs (\d+) /);
 
     if (modelArg) {
-      const modelArgStr = modelArg[0];
+      const modelArgStr = modelArg[1];
 
-      if (!(modelArgStr in Models)) {
+      if (!modelArgStr || !(modelArgStr in Models)) {
         printHelp();
         process.exit(1);
       }
@@ -28,8 +28,8 @@ async function main(args: string[]) {
     }
 
     if (batchSizeArg) {
-      if (typeof batchSizeArg[0] === "number") {
-        batchSize = batchSizeArg[0];
+      if (typeof batchSizeArg[1] === "number") {
+        batchSize = batchSizeArg[1];
       } else {
         printHelp();
         process.exit(1);
@@ -37,8 +37,8 @@ async function main(args: string[]) {
     }
 
     if (maxEpochsArg) {
-      if (typeof maxEpochsArg[0] === "number") {
-        maxEpochs = maxEpochsArg[0];
+      if (typeof maxEpochsArg[1] === "number") {
+        maxEpochs = maxEpochsArg[1];
       } else {
         printHelp();
         process.exit(1);
@@ -50,6 +50,10 @@ async function main(args: string[]) {
   await model.fit();
 
   const [loss, accuracy] = model.evaluate();
+
+  console.log("accuracy:", accuracy);
+  console.log("loss:", loss);
+
   model.saveModel(accuracy, loss);
 }
 
