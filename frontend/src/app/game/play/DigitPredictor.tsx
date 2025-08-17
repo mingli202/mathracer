@@ -33,7 +33,7 @@ export default function DigitPredictor({ submitAnswer, rightAnswer }: Props) {
       }
       await tf.ready();
       modelRef.current = await tf.loadLayersModel(
-        "https://raw.githubusercontent.com/mingli202/mathracer/refs/heads/digit-recognition/artifacts/leNet/model.json",
+        "https://raw.githubusercontent.com/mingli202/mathracer/refs/heads/digit-recognition/artifacts/tfjsTutorial/model.json",
       );
       // warm up the model
       modelRef.current.predict(tf.randomUniform([1, 28, 28, 1]));
