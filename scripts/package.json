@@ -4,7 +4,10 @@
   "type": "module",
   "private": true,
   "devDependencies": {
-    "@types/bun": "latest"
+    "@eslint/js": "^9.33.0",
+    "@types/bun": "latest",
+    "eslint": "^9.33.0",
+    "typescript-eslint": "^8.39.1"
   },
   "peerDependencies": {
     "typescript": "^5"
