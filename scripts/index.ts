@@ -1,6 +1,6 @@
 import { Args } from "./args";
 import { MnistData } from "./data";
-import type { Models } from "./models";
+import { Models } from "./models";
 
 async function main(argsArr: string[]) {
   const args = new Args(argsArr);
@@ -20,25 +20,31 @@ async function main(argsArr: string[]) {
 
     model.saveModel(accuracy, loss);
   } else {
-    const modelsBatch = [
-      ["LeNet", "Mini", "TfjsTutorial"],
-      ["ChatGpt5", "MobileNetMini", "KerasTutorial"],
+    // only 2 threads or my cpu will become the sun
+    // if only mac had an actual gpu frfr
+    const modelsBatch: (keyof typeof Models)[][] = [
+      [
+        "ChatGpt5",
+        // "Mini",
+        "TfjsTutorial",
+      ],
+      ["LeNet", "MobileNetMini", "KerasTutorial"],
     ] as const;
 
     const nWorkers = modelsBatch.length;
     const workers: Promise<Worker>[] = [];
 
     for (const i of Array(nWorkers).keys()) {
-      console.log("Spawned worker ", i);
-
       workers.push(
         new Promise((resolve) => {
+          console.log("Spawned worker ", i);
           const worker = new Worker("./train.ts", {
             preload: ["./data.ts", "./models/index.ts"],
           });
           worker.postMessage(modelsBatch[i]);
           worker.onmessage = (event: MessageEvent) => {
             if (event.data === "COMPLETED") {
+              console.log("Completed Worker ", i);
               resolve(worker);
             }
           };
