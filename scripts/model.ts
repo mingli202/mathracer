@@ -28,7 +28,7 @@ class BestWeightCallback extends tf.Callback {
   }
 }
 
-abstract class Model {
+export abstract class Model {
   public model: tf.Sequential;
 
   constructor(
@@ -102,31 +102,3 @@ abstract class Model {
     fs.writeFileSync(filename, JSON.stringify(json, null, 2));
   }
 }
-
-class Mini extends Model {
-  constructor(data: MnistData) {
-    const layers = [
-      tf.layers.conv2d({
-        inputShape: [28, 28, 1],
-        filters: 8,
-        kernelSize: 3,
-        activation: "relu",
-        padding: "same",
-      }),
-      tf.layers.maxPooling2d({ poolSize: 2 }),
-      tf.layers.conv2d({
-        filters: 16,
-        kernelSize: 3,
-        activation: "relu",
-        padding: "same",
-      }),
-      tf.layers.maxPooling2d({ poolSize: 2 }),
-      tf.layers.globalAveragePooling2d({}),
-      tf.layers.dense({ units: 10, activation: "softmax" }),
-    ];
-
-    super(layers, "mini", data, undefined, { batchSize: 64 });
-  }
-}
-
-export { Mini };
