@@ -2,7 +2,7 @@ all: batch1 batch2
 
 batch1:
 	bun run src/index.ts --model LeNet
-	bun run src/index.ts --model TfjsTutorial,
+	bun run src/index.ts --model TfjsTutorial
 	bun run src/index.ts --model MobileNetMini
 
 batch2:
