@@ -6,9 +6,10 @@ import fs from "node:fs";
 class BestWeightCallback extends tf.Callback {
   #bestLoss = Number.MAX_VALUE;
   #bestWeights?: tf.Tensor[];
+  #bestEpoch?: number;
 
   override async onEpochEnd(
-    _epoch: number,
+    epoch: number,
     logs?: UnresolvedLogs,
   ): Promise<void> {
     if (logs && "loss" in logs) {
@@ -17,12 +18,14 @@ class BestWeightCallback extends tf.Callback {
       if (loss < this.#bestLoss) {
         this.#bestLoss = loss;
         this.#bestWeights = this.model.getWeights();
+        this.#bestEpoch = epoch;
       }
     }
   }
 
   override async onTrainEnd(_logs?: UnresolvedLogs): Promise<void> {
     if (this.#bestWeights) {
+      console.log("Restored best weights from epoch ", this.#bestEpoch);
       this.model.setWeights(this.#bestWeights);
     }
   }
