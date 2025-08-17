@@ -3,7 +3,11 @@ import { Model } from "../model";
 import * as tf from "@tensorflow/tfjs-node";
 
 export class LeNet extends Model {
-  constructor(data: MnistData) {
+  constructor(
+    data: MnistData,
+    compileArgs?: tf.ModelCompileArgs,
+    modelFitArgs?: tf.ModelFitArgs,
+  ) {
     const layers = [
       tf.layers.inputLayer({ inputShape: [28, 28, 1] }),
       tf.layers.zeroPadding2d({ padding: 2 }),
@@ -17,6 +21,6 @@ export class LeNet extends Model {
       tf.layers.dense({ units: 10, activation: "softmax" }),
     ];
 
-    super(layers, "leNet", data);
+    super(layers, "leNet", data, compileArgs, modelFitArgs);
   }
 }

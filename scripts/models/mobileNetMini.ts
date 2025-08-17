@@ -3,7 +3,11 @@ import { Model } from "../model";
 import * as tf from "@tensorflow/tfjs-node";
 
 export class MobileNetMini extends Model {
-  constructor(data: MnistData) {
+  constructor(
+    data: MnistData,
+    compileArgs?: tf.ModelCompileArgs,
+    modelFitArgs?: tf.ModelFitArgs,
+  ) {
     const layers = [
       tf.layers.inputLayer({ inputShape: [28, 28, 1] }),
       tf.layers.zeroPadding2d({ padding: 2 }),
@@ -51,6 +55,6 @@ export class MobileNetMini extends Model {
       tf.layers.dense({ units: 10, activation: "softmax" }),
     ];
 
-    super(layers, "mobileNetMini", data);
+    super(layers, "mobileNetMini", data, compileArgs, modelFitArgs);
   }
 }

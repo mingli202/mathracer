@@ -3,7 +3,11 @@ import { Model } from "../model";
 import * as tf from "@tensorflow/tfjs-node";
 
 export class TfjsTutorial extends Model {
-  constructor(data: MnistData) {
+  constructor(
+    data: MnistData,
+    compileArgs?: tf.ModelCompileArgs,
+    modelFitArgs?: tf.ModelFitArgs,
+  ) {
     const layers = [
       tf.layers.inputLayer({ inputShape: [28, 28, 1] }),
       tf.layers.conv2d({
@@ -28,6 +32,6 @@ export class TfjsTutorial extends Model {
       }),
     ];
 
-    super(layers, "tfjsTutorial", data);
+    super(layers, "tfjsTutorial", data, compileArgs, modelFitArgs);
   }
 }

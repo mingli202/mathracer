@@ -3,7 +3,11 @@ import { Model } from "../model";
 import * as tf from "@tensorflow/tfjs-node";
 
 export class ChatGpt5 extends Model {
-  constructor(data: MnistData) {
+  constructor(
+    data: MnistData,
+    compileArgs?: tf.ModelCompileArgs,
+    modelFitArgs?: tf.ModelFitArgs,
+  ) {
     const layers = [
       tf.layers.inputLayer({ inputShape: [28, 28, 1] }),
       tf.layers.conv2d({
@@ -42,6 +46,6 @@ export class ChatGpt5 extends Model {
       tf.layers.dense({ units: 10, activation: "softmax" }),
     ];
 
-    super(layers, "chatGpt5", data);
+    super(layers, "chatGpt5", data, compileArgs, modelFitArgs);
   }
 }

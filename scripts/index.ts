@@ -1,13 +1,72 @@
 import { MnistData } from "./data";
 import { Models } from "./models";
 
-async function main() {
+async function main(args: string[]) {
   const data = new MnistData();
 
-  const mini = new Models.Mini(data);
+  // to not call the constructor
+  let Model = Models.Mini;
+  let batchSize: number;
+  let maxEpochs: number;
 
-  const [loss, accuracy] = mini.evaluate();
-  mini.saveModel(accuracy, loss);
+  if (args.length > 0) {
+    const argsStr = ` ${args.join(" ")} `;
+
+    const modelArg = argsStr.match(/ --model (\w+) /);
+    const batchSizeArg = argsStr.match(/ --batch-size (\d+) /);
+    const maxEpochsArg = argsStr.match(/ --max-epochs (\d+) /);
+
+    if (modelArg) {
+      const modelArgStr = modelArg[0];
+
+      if (!(modelArgStr in Models)) {
+        printHelp();
+        process.exit(1);
+      }
+
+      Model = Models[modelArgStr as keyof typeof Models];
+    }
+
+    if (batchSizeArg) {
+      if (typeof batchSizeArg[0] === "number") {
+        batchSize = batchSizeArg[0];
+      } else {
+        printHelp();
+        process.exit(1);
+      }
+    }
+
+    if (maxEpochsArg) {
+      if (typeof maxEpochsArg[0] === "number") {
+        maxEpochs = maxEpochsArg[0];
+      } else {
+        printHelp();
+        process.exit(1);
+      }
+    }
+  }
+
+  const model = new Model(data);
+  await model.fit();
+
+  const [loss, accuracy] = model.evaluate();
+  model.saveModel(accuracy, loss);
 }
 
-main();
+function printHelp() {
+  const lines: string[] = [
+    "Usage: bun index.ts [--model <model>] [--max-epochs <epochs>] [--batch-size <size>]",
+    "\nOptions:",
+    "    --model <model>",
+    "        Model to train, defaults to Mini. Avaible models: ",
+    `        ${Object.keys(Models).join(", ")}`,
+    "    --max-epochs <epochs>",
+    "        Train for at most <epochs>. Defaults to 60.",
+    "    --batch-size <size>",
+    "        Training batch size. Default varies depending on the model.",
+  ];
+
+  console.log(lines.join("\n"));
+}
+
+main(process.argv.slice(1));

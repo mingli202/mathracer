@@ -3,7 +3,11 @@ import { Model } from "../model";
 import * as tf from "@tensorflow/tfjs-node";
 
 export class Mini extends Model {
-  constructor(data: MnistData) {
+  constructor(
+    data: MnistData,
+    compileArgs?: tf.ModelCompileArgs,
+    modelFitArgs?: tf.ModelFitArgs,
+  ) {
     const layers = [
       tf.layers.inputLayer({ inputShape: [28, 28, 1] }),
       tf.layers.conv2d({
@@ -24,6 +28,9 @@ export class Mini extends Model {
       tf.layers.dense({ units: 10, activation: "softmax" }),
     ];
 
-    super(layers, "mini", data, undefined, { batchSize: 64 });
+    super(layers, "mini", data, compileArgs, {
+      batchSize: 64,
+      ...modelFitArgs,
+    });
   }
 }

@@ -3,7 +3,11 @@ import { Model } from "../model";
 import * as tf from "@tensorflow/tfjs-node";
 
 export class KerasTutorial extends Model {
-  constructor(data: MnistData) {
+  constructor(
+    data: MnistData,
+    compileArgs?: tf.ModelCompileArgs,
+    modelFitArgs?: tf.ModelFitArgs,
+  ) {
     const layers = [
       tf.layers.inputLayer({ inputShape: [28, 28, 1] }),
       tf.layers.conv2d({ filters: 32, kernelSize: 3, activation: "relu" }),
@@ -15,6 +19,6 @@ export class KerasTutorial extends Model {
       tf.layers.dense({ units: 10, activation: "softmax" }),
     ];
 
-    super(layers, "kerasTutorial", data);
+    super(layers, "kerasTutorial", data, compileArgs, modelFitArgs);
   }
 }
