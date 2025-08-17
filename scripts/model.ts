@@ -42,10 +42,11 @@ export abstract class Model {
     console.log("Model: ", this.model.name);
     this.model.summary();
     this.model.compile({
-      optimizer: "adam",
-      loss: "categoricalCrossentropy",
-      metrics: ["accuracy"],
       ...compileArgs,
+
+      optimizer: compileArgs?.optimizer ?? "adam",
+      loss: compileArgs?.loss ?? "categoricalCrossentropy",
+      metrics: compileArgs?.metrics ?? ["accuracy"],
     });
   }
 
@@ -54,19 +55,19 @@ export abstract class Model {
     const [testXs, testYs] = this.data.testData();
 
     return await this.model.fit(trainXs, trainYs, {
-      batchSize: 128,
-      epochs: 60,
-      shuffle: true,
-      validationData: [testXs, testYs],
-      callbacks: [
+      ...this.modelFitArgs,
+
+      batchSize: this.modelFitArgs?.batchSize ?? 128,
+      epochs: this.modelFitArgs?.epochs ?? 60,
+      shuffle: this.modelFitArgs?.shuffle ?? true,
+      validationData: this.modelFitArgs?.validationData ?? [testXs, testYs],
+      callbacks: this.modelFitArgs?.callbacks ?? [
         new BestWeightCallback(),
         tf.callbacks.earlyStopping({
           monitor: "loss",
           patience: 5,
         }),
       ],
-
-      ...this.modelFitArgs,
     });
   }
 

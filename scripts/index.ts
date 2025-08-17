@@ -6,10 +6,15 @@ async function main(args: string[]) {
 
   // to not call the constructor
   let Model = Models.Mini;
-  let batchSize: number;
-  let maxEpochs: number;
+  let batchSize: number | undefined;
+  let maxEpochs: number | undefined;
 
   if (args.length > 0) {
+    if (args.includes("--help")) {
+      printHelp();
+      process.exit(1);
+    }
+
     const argsStr = ` ${args.join(" ")} `;
 
     const modelArg = argsStr.match(/ --model (\w+) /);
@@ -28,25 +33,18 @@ async function main(args: string[]) {
     }
 
     if (batchSizeArg) {
-      if (typeof batchSizeArg[1] === "number") {
-        batchSize = batchSizeArg[1];
-      } else {
-        printHelp();
-        process.exit(1);
-      }
+      batchSize = Number(batchSizeArg[1]);
     }
 
     if (maxEpochsArg) {
-      if (typeof maxEpochsArg[1] === "number") {
-        maxEpochs = maxEpochsArg[1];
-      } else {
-        printHelp();
-        process.exit(1);
-      }
+      maxEpochs = Number(maxEpochsArg[1]);
     }
   }
 
-  const model = new Model(data);
+  const model = new Model(data, undefined, {
+    batchSize,
+    epochs: maxEpochs,
+  });
   await model.fit();
 
   const [loss, accuracy] = model.evaluate();
