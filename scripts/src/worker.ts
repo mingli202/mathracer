@@ -1,7 +1,7 @@
 import { MnistData } from "./data";
 import { Models } from "./models";
 
-declare var self: Worker;
+declare const self: Worker;
 
 self.onmessage = async (event: MessageEvent) => {
   const models: (keyof typeof Models)[] = event.data;

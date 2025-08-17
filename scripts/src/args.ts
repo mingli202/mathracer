@@ -51,9 +51,9 @@ export class Args {
       "        Model to train, defaults to Mini. Avaible models: ",
       `        ${Object.keys(Models).join(", ")}`,
       "    --max-epochs <epochs>",
-      "        Train for at most <epochs>. Defaults to 60.",
+      "        Train for at most <epochs>. Default depends on the model.",
       "    --batch-size <size>",
-      "        Training batch size. Default varies depending on the model.",
+      "        Training batch size. Default depends on the model.",
     ];
 
     console.log(lines.join("\n"));

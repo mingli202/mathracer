@@ -18,15 +18,16 @@ class BestWeightCallback extends tf.Callback {
       if (loss < this.#bestLoss) {
         this.#bestLoss = loss;
         this.#bestWeights = this.model.getWeights();
-        this.#bestEpoch = epoch;
+        this.#bestEpoch = epoch + 1;
+        console.log("Saved weights from epoch ", epoch + 1);
       }
     }
   }
 
   override async onTrainEnd(_logs?: UnresolvedLogs): Promise<void> {
     if (this.#bestWeights) {
-      console.log("Restored best weights from epoch ", this.#bestEpoch);
       this.model.setWeights(this.#bestWeights);
+      console.log("Restored best weights from epoch ", this.#bestEpoch);
     }
   }
 }

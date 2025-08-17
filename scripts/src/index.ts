@@ -23,12 +23,8 @@ async function main(argsArr: string[]) {
     // only 2 threads or my cpu will become the sun
     // if only mac had an actual gpu frfr
     const modelsBatch: (keyof typeof Models)[][] = [
-      [
-        "ChatGpt5",
-        // "Mini",
-        "TfjsTutorial",
-      ],
-      ["LeNet", "MobileNetMini", "KerasTutorial"],
+      ["ChatGpt5", "TfjsTutorial", "Mini"],
+      ["KerasTutorial", "MobileNetMini", "LeNet"],
     ] as const;
 
     const nWorkers = modelsBatch.length;
@@ -38,8 +34,9 @@ async function main(argsArr: string[]) {
       workers.push(
         new Promise((resolve) => {
           console.log("Spawned worker ", i);
-          const worker = new Worker("./train.ts", {
-            preload: ["./data.ts", "./models/index.ts"],
+          const worker = new Worker("./worker.ts", {
+            // these paths are relative to the directory you run the script from
+            preload: ["./src/data.ts", "./src/models/index.ts"],
           });
           worker.postMessage(modelsBatch[i]);
           worker.onmessage = (event: MessageEvent) => {
