@@ -3,8 +3,6 @@
 import { Stroke } from "@/types";
 import { RefObject, useCallback, useEffect, useRef } from "react";
 
-const RECT_SIZE = 4;
-
 type Props = {
   handleNewStoke: (points: Stroke | null) => void;
   clear: () => void;
