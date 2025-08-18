@@ -37,18 +37,17 @@ export default function DrawingCanvas({
       return;
     }
 
-    ctx.fillStyle = "#000";
-    ctx.fillRect(x - RECT_SIZE / 2, y - RECT_SIZE / 2, RECT_SIZE, RECT_SIZE);
-
     const point = { x, y };
 
     if (stroke.current.points.length > 0) {
       const previousPoint =
         stroke.current.points[stroke.current.points.length - 1];
 
+      ctx.fillStyle = "#000";
       ctx.beginPath();
       ctx.moveTo(previousPoint.x, previousPoint.y);
       ctx.lineTo(x, y);
+      ctx.lineWidth = 3;
       ctx.stroke();
     }
 
