@@ -1,6 +1,6 @@
 "use client";
 
-import { Equation, GameMode, GameState, Lobby, Player } from "@/types";
+import { Equation, GameMode, GameState, Lobby, Model, Player } from "@/types";
 import { HubConnection, HubConnectionState } from "@microsoft/signalr";
 import { useRouter } from "next/navigation";
 import { ActionDispatch, createContext, useEffect, useReducer } from "react";
@@ -24,6 +24,7 @@ const defaultState = {
     score: 0,
   },
   connection: null!,
+  modelName: Model.KerasTutorial,
 } satisfies GameState;
 
 export const GameStateContext = createContext<{
@@ -124,6 +125,10 @@ export type GameStateAction =
   | {
       type: "setCurrentPlayerState";
       state: Player["state"];
+    }
+  | {
+      type: "selectModel";
+      modelName: Model;
     };
 
 export function gameStateReducer(
@@ -221,6 +226,12 @@ export function gameStateReducer(
           ...currentPlayer,
           state: action.state,
         },
+      };
+
+    case "selectModel":
+      return {
+        ...state,
+        modelName: action.modelName,
       };
   }
 }

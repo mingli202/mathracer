@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { HubConnection } from "@microsoft/signalr";
 
+export type RecordValues<T extends Record<string | number | symbol, unknown>> =
+  T[keyof T];
+
 export const Player = z.object({
   playerId: z.string(),
   name: z.string(),
@@ -49,10 +52,22 @@ export type PublicLobbies = z.infer<typeof PublicLobbies>;
 export type Credentials = z.infer<typeof Credentials>;
 export type LoginResponse = z.infer<typeof LoginResponse>;
 
+export const Model = {
+  Mini: "mini",
+  ChatGpt5: "chatGpt5",
+  KerasTutorial: "kerasTutorial",
+  LeNet: "leNet",
+  MobileNetMini: "mobileNetMini",
+  TfjsTutorial: "tfjsTutorial",
+} as const;
+
+export type Model = RecordValues<typeof Model>;
+
 export type GameState = {
   lobby: Lobby;
   currentPlayer: Player;
   connection: HubConnection;
+  modelName: Model;
 };
 
 export const LogSeverity = {
@@ -60,7 +75,7 @@ export const LogSeverity = {
   Debug: "Debug",
   Error: "Error",
 } as const;
-export type LogSeverity = (typeof LogSeverity)[keyof typeof LogSeverity];
+export type LogSeverity = RecordValues<typeof LogSeverity>;
 
 export const Log = z.object({
   timestamp: z.string(),

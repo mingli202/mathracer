@@ -11,7 +11,7 @@ export default function PlayPage() {
   const router = useRouter();
 
   const { gameState, dispatch } = use(GameStateContext);
-  const { lobby } = gameState;
+  const { lobby, modelName: model } = gameState;
 
   const modelRef = useRef<tf.LayersModel | null>(null);
 
@@ -28,7 +28,7 @@ export default function PlayPage() {
       }
       await tf.ready();
       modelRef.current = await tf.loadLayersModel(
-        "https://raw.githubusercontent.com/mingli202/mathracer/refs/heads/digit-recognition/artifacts/tfjsTutorial/model.json",
+        `https://raw.githubusercontent.com/mingli202/mathracer/refs/heads/main/artifacts/${model}/model.json`,
       );
       // warm up the model
       modelRef.current.predict(tf.randomUniform([1, 28, 28, 1]));

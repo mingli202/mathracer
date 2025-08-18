@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Timer, Trophy, User, Users } from "lucide-react";
+import { PlusCircle, Settings, Timer, Trophy, User, Users } from "lucide-react";
 import GameModeCard from "@/components/GameModeCard";
 import Link from "next/link";
 import { GameMode } from "@/types";
@@ -112,6 +112,10 @@ export default function Page() {
           />
         </div>
       </div>
+
+      <Link href="/game/settings">
+        <Settings />
+      </Link>
     </div>
   );
 }
