@@ -26,32 +26,30 @@ export default function Setting({ metadata }: Props) {
         </Link>
         <b>Settings</b>
       </h1>
-      <div className="border-secondary flex flex-col gap-4 rounded-xl border-2 border-solid p-4">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Sparkle />
-            <p>Mnist Model (for handwritten mode)</p>
-          </div>
-          <div
-            className="relative flex shrink-0 items-center gap-2 hover:cursor-pointer"
-            onClick={() => setShowDropdown(!showDropdown)}
-          >
-            <p>{modelName}</p>
-            {showDropdown ? (
-              <>
-                <ChevronDown className="rotate-180" />
-                <ModelDropdown dispatch={dispatch} metadata={metadata} />
-              </>
-            ) : (
-              <ChevronDown />
-            )}
-          </div>
+      <div className="border-secondary flex flex-col justify-between gap-4 rounded-xl border-2 border-solid p-4 md:flex-wrap">
+        <div className="flex min-w-0 items-center gap-2">
+          <Sparkle />
+          <p>Mnist Model (for handwritten mode)</p>
         </div>
-        <p>
+        <p className="">
           It is recommended to use smaller models on smaller devices and
-          browsers that don{"'"}t support WebGL. However, smaller models have
-          less accuracy.
+          browsers that don{"'"}t support WebGL. However, smaller models are
+          less accurate.
         </p>
+        <div
+          className="relative flex items-center gap-2 hover:cursor-pointer"
+          onClick={() => setShowDropdown(!showDropdown)}
+        >
+          <p>{modelName}</p>
+          {showDropdown ? (
+            <>
+              <ChevronDown className="rotate-180" />
+              <ModelDropdown dispatch={dispatch} metadata={metadata} />
+            </>
+          ) : (
+            <ChevronDown />
+          )}
+        </div>
       </div>
     </div>
   );
@@ -78,7 +76,7 @@ function ModelDropdown({
   };
 
   return (
-    <div className="bg-background absolute top-full right-0 w-fit rounded-lg p-2 shadow shadow-black/50">
+    <div className="bg-background absolute top-full left-0 w-fit rounded-lg p-2 shadow shadow-black/50">
       <div className="flex flex-col">
         {Object.entries(metadata)
           .sort(([_a, mA], [_b, mB]) => mA.totalParams - mB.totalParams)
