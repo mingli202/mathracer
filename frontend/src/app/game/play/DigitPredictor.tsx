@@ -179,10 +179,14 @@ export default function DigitPredictor({
       ) +
       (28 - gridSize) / 2;
 
+    if (y < 0 || y >= 28 || x < 0 || x >= 28) {
+      return;
+    }
+
     strokeArray[y][x] = 255;
 
-    const crossOpacity = 255 / 3; // top bot left right
-    const edgeOpacity = 255 / 3; // tl tr bl br
+    const crossOpacity = 255 / 2; // top bot left right
+    const edgeOpacity = 255 / 2; // tl tr bl br
 
     strokeArray[y - 1][x] = Math.min(strokeArray[y - 1][x] + crossOpacity, 255);
     strokeArray[y + 1][x] = Math.min(strokeArray[y + 1][x] + crossOpacity, 255);
