@@ -24,7 +24,7 @@ const defaultState = {
     score: 0,
   },
   connection: null!,
-  modelName: Model.KerasTutorial,
+  modelName: Model.LeNet,
 } satisfies GameState;
 
 export const GameStateContext = createContext<{
