@@ -151,8 +151,8 @@ export default function LobbyPage() {
                 variant="ghost"
                 size="sm"
                 className="mb-4 flex items-center gap-2"
-                onClick={() =>
-                  exitLobby(
+                onClick={async () =>
+                  await exitLobby(
                     gameState.connection,
                     lobbyId,
                     currentPlayer.playerId,
