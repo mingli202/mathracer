@@ -289,11 +289,10 @@ export async function exitLobby(
   playerId: string,
   dispatch: ActionDispatch<[action: GameStateAction]>,
 ) {
-  dispatch({ type: "exitLobby" });
-
   if (connection.state === "Connected") {
     await connection.send("ExitLobby", lobbyId, playerId);
   }
+  dispatch({ type: "exitLobby" });
 }
 
 export async function updatePlayerState(
@@ -303,8 +302,8 @@ export async function updatePlayerState(
   state: Player["state"],
   dispatch: ActionDispatch<[action: GameStateAction]>,
 ) {
-  dispatch({ type: "setCurrentPlayerState", state });
   await connection.send("UpdatePlayerState", lobbyId, playerId, state);
+  dispatch({ type: "setCurrentPlayerState", state });
 }
 
 export async function changeLobbyPublic(
