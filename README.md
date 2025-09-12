@@ -23,12 +23,12 @@ A competitive math game that helps you sharpen your mental math skills — all w
 ### Frontend
 - **Next.js**
 - **Tailwind CSS**
-- **Deployed on Google Cloud Run**
+- **Deployed on Vercel**
 
 ### Backend
 - **C#**, **ASP.NET**, **SignalR**
 - **RESTful API**
-- **Deployed on Google Cloud Run**
+- **Deployed on Google Cloud**
 
 ## 🎥 Demo
 [![Demo](https://img.youtube.com/vi/xfg4ZZ54hCs/0.jpg)](https://youtu.be/xfg4ZZ54hCs)
