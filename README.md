@@ -30,5 +30,13 @@ A competitive math game that helps you sharpen your mental math skills — all w
 - **RESTful API**
 - **Deployed on Google Cloud**
 
+## 🧩 How to contribute
+We welcome ideas, bug reports, and contributions!
+
+In the meantime:
+
+Feedback: Open an issue or email us.
+Want to help build? DM us through discord! Reach us through @nanoscience or @bagetteam
+
 ## 🎥 Demo
 [![Demo](https://img.youtube.com/vi/xfg4ZZ54hCs/0.jpg)](https://youtu.be/xfg4ZZ54hCs)
